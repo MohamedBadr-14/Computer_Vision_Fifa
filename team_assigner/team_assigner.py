@@ -1,4 +1,6 @@
 from sklearn.cluster import KMeans
+import numpy as np
+
 
 class TeamAssigner:
     def __init__(self):
@@ -10,7 +12,7 @@ class TeamAssigner:
         image_2d = image.reshape(-1,3)
 
         # Preform K-means with 2 clusters
-        kmeans = KMeans(n_clusters=2, init="k-means++",n_init=1)
+        kmeans = KMeans(n_clusters=3, init="k-means++",n_init=1)
         kmeans.fit(image_2d)
 
         return kmeans
@@ -32,8 +34,12 @@ class TeamAssigner:
         # Get the player cluster
         corner_clusters = [clustered_image[0,0],clustered_image[0,-1],clustered_image[-1,0],clustered_image[-1,-1]]
         non_player_cluster = max(set(corner_clusters),key=corner_clusters.count)
-        player_cluster = 1 - non_player_cluster
-
+        # player_cluster = 1-non_player_cluster
+        # print(player_cluster)
+        # Find the cluster with the maximum number of assignees that is not the non_player_cluster
+        assignees_count = np.bincount(labels)
+        assignees_count[non_player_cluster] = -1  # Exclude the non_player_cluster
+        player_cluster = np.argmax(assignees_count)
         player_color = kmeans.cluster_centers_[player_cluster]
 
         return player_color
@@ -54,7 +60,8 @@ class TeamAssigner:
 
         self.team_colors[1] = kmeans.cluster_centers_[0]
         self.team_colors[2] = kmeans.cluster_centers_[1]
-
+        print("Team 1 color: ",self.team_colors[1])
+        print("Team 2 color: ",self.team_colors[2])
 
     def get_player_team(self,frame,player_bbox,player_id):
         if player_id in self.player_team_dict:
