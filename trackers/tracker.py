@@ -19,7 +19,7 @@ class Tracker:
             for frame_num, track in enumerate(object_tracks):
                 for track_id, track_info in track.items():
                     bbox = track_info['bbox']
-                    if object == 'ball':
+                    if object == 'Ball':
                         position= get_center_of_bbox(bbox)
                     else:
                         position = get_foot_position(bbox)
@@ -55,9 +55,10 @@ class Tracker:
         detections = self.detect_frames(frames)
 
         tracks={
-            "players":[],
-            "referees":[],
-            "ball":[]
+            "Player Home":[],
+            "Player Away":[],
+            "Ref":[],
+            "Ball":[]
         }
 
         for frame_num, detection in enumerate(detections):
@@ -75,27 +76,32 @@ class Tracker:
             # Track Objects
             detection_with_tracks = self.tracker.update_with_detections(detection_supervision)
 
-            tracks["players"].append({}) #TODO
-            tracks["referees"].append({})
-            tracks["ball"].append({})
+            tracks["Player Home"].append({}) #TODO
+            tracks["Player Away"].append({}) #TODO
+            tracks["Ref"].append({}) #TODO
+            tracks["Ball"].append({}) #TODO
+            # tracks["referees"].append({})
+            # tracks["ball"].append({})
 
             for frame_detection in detection_with_tracks:
                 bbox = frame_detection[0].tolist()
                 cls_id = frame_detection[3]
                 track_id = frame_detection[4]
 
-                if cls_id == cls_names_inv['player']:
-                    tracks["players"][frame_num][track_id] = {"bbox":bbox}
+                if cls_id == cls_names_inv['Player Home']:
+                    tracks["Player Home"][frame_num][track_id] = {"bbox":bbox}
+                elif cls_id == cls_names_inv['Player Away']:
+                    tracks["Player Away"][frame_num][track_id] = {"bbox":bbox}
                 
-                if cls_id == cls_names_inv['referee']:
-                    tracks["referees"][frame_num][track_id] = {"bbox":bbox}
+                if cls_id == cls_names_inv['Ref']:
+                    tracks["Ref"][frame_num][track_id] = {"bbox":bbox}
             
             for frame_detection in detection_supervision:
                 bbox = frame_detection[0].tolist()
                 cls_id = frame_detection[3]
 
-                if cls_id == cls_names_inv['ball']:
-                    tracks["ball"][frame_num][1] = {"bbox":bbox}
+                if cls_id == cls_names_inv['Ball']:
+                    tracks["Ball"][frame_num][1] = {"bbox":bbox}
 
         if stub_path is not None:
             with open(stub_path,'wb') as f:
@@ -188,9 +194,9 @@ class Tracker:
         for frame_num, frame in enumerate(video_frames):
             # frame = frame.copy()
 
-            player_dict = tracks["players"][frame_num]
-            ball_dict = tracks["ball"][frame_num]
-            referee_dict = tracks["referees"][frame_num]
+            player_dict = tracks["Player Home"][frame_num] | tracks["Player Away"][frame_num]
+            ball_dict = tracks["Ball"][frame_num]
+            referee_dict = tracks["Ref"][frame_num]
 
             # Draw Players
             for track_id, player in player_dict.items():

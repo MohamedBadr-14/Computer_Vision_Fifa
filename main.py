@@ -18,11 +18,11 @@ def main():
     print("Video Read", video_read)    
 
     # Initialize Tracker
-    tracker = Tracker('models/best_initial.pt')
+    tracker = Tracker('models/best_e7na.pt')
 
     tracks = tracker.get_object_tracks(video_frames,
-                                       read_from_stub=False,
-                                       stub_path='stubs/track_stubs_test.pkl')
+                                       read_from_stub=True,
+                                       stub_path='stubs/track_stubs_badr_1_e7na.pkl')
     # Get object positions 
     tracker.add_position_to_tracks(tracks)
     tracks_time = time.time()
@@ -31,8 +31,8 @@ def main():
     # camera movement estimator
     camera_movement_estimator = CameraMovementEstimator(video_frames[0])
     camera_movement_per_frame = camera_movement_estimator.get_camera_movement(video_frames,
-                                                                                read_from_stub=False,
-                                                                                stub_path='stubs/camera_movement_stub_test.pkl')
+                                                                                read_from_stub=True,
+                                                                                stub_path='stubs/camera_movement_stub_badr_1_e7na.pkl')
     camera_movement_estimator.add_adjust_positions_to_tracks(tracks,camera_movement_per_frame)
     camera_movement_time = time.time() 
     print("Camera Movement" , camera_movement_time - tracks_time)
@@ -42,7 +42,7 @@ def main():
     view_transformer.add_transformed_position_to_tracks(tracks)
 
     # Interpolate Ball Positions
-    tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
+    tracks["Ball"] = tracker.interpolate_ball_positions(tracks["Ball"])
     ball_interpolated = time.time() 
 
     print("Ball Interpolated" , ball_interpolated - camera_movement_time)
@@ -56,26 +56,37 @@ def main():
     # speed_and_distance_estimator.add_speed_and_distance_to_tracks(tracks)
 
     # Assign Player Teams
-    team_assigner = TeamAssigner()
-    team_assigner.assign_team_color(video_frames[0], 
-                                    tracks['players'][0])
+    # team_assigner = TeamAssigner()
+    # team_assigner.assign_team_color(video_frames[0], 
+                                    # tracks['players'][0])
     
     count = 0
 
-    for frame_num, player_track in enumerate(tracks['players']):
+    for frame_num, player_track in enumerate(tracks['Player Home']):
         for player_id, track in player_track.items():
             # print(tracks['players'][frame_num][player_id].keys())
             # team_conf = tracks['players'][frame_num][player_id]['team_confidence'] if "team_confidence" in tracks['players'][frame_num][player_id].keys() else None
-            team = team_assigner.get_player_team(video_frames[frame_num],   
-                                                 track['bbox'],
-                                                 player_id
-                                                 )
+            # team = team_assigner.get_player_team(video_frames[frame_num],   
+            #                                      track['bbox'],
+            #                                      player_id
+            #                                      )
             # print(conf)
-            tracks['players'][frame_num][player_id]['team'] = team
-            tracks['players'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
-            # if count < 10:
-            #     print(track)
-            #     count+=1
+            team = 0
+            tracks['Player Home'][frame_num][player_id]['team'] = team
+            tracks['Player Home'][frame_num][player_id]['team_color'] = [255,255,255]
+
+    for frame_num, player_track in enumerate(tracks['Player Away']):
+        for player_id, track in player_track.items():
+            # print(tracks['players'][frame_num][player_id].keys())
+            # team_conf = tracks['players'][frame_num][player_id]['team_confidence'] if "team_confidence" in tracks['players'][frame_num][player_id].keys() else None
+            # team = team_assigner.get_player_team(video_frames[frame_num],   
+            #                                      track['bbox'],
+            #                                      player_id
+            #                                      )
+            # print(conf)
+            team = 1
+            tracks['Player Away'][frame_num][player_id]['team'] = team
+            tracks['Player Away'][frame_num][player_id]['team_color'] = [128,128,128]
 
     team_assigned = time.time() 
     print("Team Assigned:" , team_assigned - ball_interpolated)
@@ -83,16 +94,21 @@ def main():
     # Assign Ball Aquisition
     player_assigner =PlayerBallAssigner()
     team_ball_control= []
-    for frame_num, player_track in enumerate(tracks['players']):
-        # print("BADR" , player_track)
-        ball_bbox = tracks['ball'][frame_num][1]['bbox']
-        assigned_player = player_assigner.assign_ball_to_player(player_track, ball_bbox)
+    # player_tracks_all = tracks['Player Home'] + tracks['Player Away']
+    print(len(tracks['Ball']) , print(tracks.keys()))
+    for frame_num, player_track in enumerate(tracks['Player Home']):
+        ball_bbox = tracks['Ball'][frame_num][1]['bbox']
+        assigned_player , team_num = player_assigner.assign_ball_to_player(player_track, tracks["Player Away"][frame_num] , ball_bbox)
 
         if assigned_player != -1:
-            tracks['players'][frame_num][assigned_player]['has_ball'] = True
-            team_ball_control.append(tracks['players'][frame_num][assigned_player]['team'])
+            # player_tracks_all[frame_num][assigned_player]['has_ball'] = True
+            if team_num == 0:
+                tracks['Player Home'][frame_num][assigned_player]['has_ball'] = True
+            else:
+                tracks['Player Away'][frame_num][assigned_player]['has_ball'] = True
+            team_ball_control.append(team_num)
         else:
-            team_ball_control.append(team_ball_control[-1])
+            team_ball_control.append(team_ball_control[-1] if len(team_ball_control) > 0 else 0)
     team_ball_control= np.array(team_ball_control)
 
     ball_assigned = time.time()
@@ -110,7 +126,7 @@ def main():
     # speed_and_distance_estimator.draw_speed_and_distance(video_frames,tracks)
 
     # Save video
-    save_video(output_video_frames, 'output_videos/output_video.avi')
+    save_video(output_video_frames, 'output_videos/output_video_badr_1_e7na.avi')
 
 if __name__ == '__main__':
     main()
