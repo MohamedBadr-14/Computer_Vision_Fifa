@@ -6,6 +6,7 @@ class TeamAssigner:
     def __init__(self):
         self.team_colors = {}
         self.player_team_dict = {}
+        self.player_team_confidence = {}
     
     def get_clustering_model(self,image):
         # Reshape the image to 2D array
@@ -60,21 +61,46 @@ class TeamAssigner:
 
         self.team_colors[1] = kmeans.cluster_centers_[0]
         self.team_colors[2] = kmeans.cluster_centers_[1]
-        print("Team 1 color: ",self.team_colors[1])
-        print("Team 2 color: ",self.team_colors[2])
+        # print("Team 1 color: ",self.team_colors[1])
+        # print("Team 2 color: ",self.team_colors[2])
 
     def get_player_team(self,frame,player_bbox,player_id):
-        if player_id in self.player_team_dict:
+        # print("conffffff" , team_confidence , team_confidence and team_confidence > 0.7)
+        if player_id in self.player_team_dict and self.player_team_confidence[player_id] and self.player_team_confidence[player_id] > 0.85:
+            # print("dakhal" )
             return self.player_team_dict[player_id]
 
         player_color = self.get_player_color(frame,player_bbox)
 
-        team_id = self.kmeans.predict(player_color.reshape(1,-1))[0]
-        team_id+=1
+        
+        distances = self.kmeans.transform(player_color.reshape(1, -1))  # Distance to all centroids
+        team_id = self.kmeans.predict(player_color.reshape(1, -1))[0]  # Predicted cluster
 
-        if player_id ==91:
+        # Normalize confidence score
+        max_distance = np.max(distances)
+        normalized_confidence = 1 - (distances[0, team_id] / max_distance)
+        # team_id = self.kmeans.predict(player_color.reshape(1,-1))[0]
+        team_id+=1
+        # if player_id in self.player_team_dict and self.player_team_confidence[player_id] and self.player_team_confidence[player_id] < 0.83:
+        #     print("confidence" , normalized_confidence , player_id)
+
+        #get average color of given bounding box using np.mean()
+        # image = frame[int(player_bbox[1]):int(player_bbox[3]),int(player_bbox[0]):int(player_bbox[2])]
+        # player_color_rgb = np.mean(image, axis=(0,1))
+        # player_avg = np.mean(player_color_rgb)
+        # if player_id == 12:
+        #     print(player_avg)
+        # if player_avg < 100:
+        #     team_id = 1
+        # else:
+        #     team_id = 2
+
+
+
+        if player_id == 91:
             team_id=1
 
         self.player_team_dict[player_id] = team_id
+        self.player_team_confidence[player_id] = normalized_confidence
 
         return team_id

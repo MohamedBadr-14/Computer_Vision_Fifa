@@ -135,8 +135,8 @@ class Tracker:
                           cv2.FILLED)
             
             x1_text = x1_rect+12
-            if track_id > 99:
-                x1_text -=10
+            # if track_id > 99:
+            #     x1_text -=10
             
             cv2.putText(
                 frame,
@@ -186,7 +186,7 @@ class Tracker:
     def draw_annotations(self,video_frames, tracks,team_ball_control):
         output_video_frames= []
         for frame_num, frame in enumerate(video_frames):
-            frame = frame.copy()
+            # frame = frame.copy()
 
             player_dict = tracks["players"][frame_num]
             ball_dict = tracks["ball"][frame_num]
@@ -195,7 +195,9 @@ class Tracker:
             # Draw Players
             for track_id, player in player_dict.items():
                 color = player.get("team_color",(0,0,255))
-                frame = self.draw_ellipse(frame, player["bbox"],color, track_id)
+                # print(player["position_transformed"])
+                id_position = str(track_id) + " " + str(int(player["position_transformed"][0]) if player["position_transformed"] is not None else 0) + " " + str(int(player["position_transformed"][1]) if player["position_transformed"] is not None else 0)
+                frame = self.draw_ellipse(frame, player["bbox"],color, id_position)
 
                 if player.get('has_ball',False):
                     frame = self.draw_traingle(frame, player["bbox"],(0,0,255))
@@ -210,7 +212,7 @@ class Tracker:
 
 
             # Draw Team Ball Control
-            frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)
+            # frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)
 
             output_video_frames.append(frame)
 

@@ -40,42 +40,74 @@ class CameraMovementEstimator():
                     
 
 
-    def get_camera_movement(self,frames,read_from_stub=False, stub_path=None):
-        # Read the stub 
+    def get_camera_movement(self, frames, read_from_stub=False, stub_path=None):
+        # Read from stub if available
         if read_from_stub and stub_path is not None and os.path.exists(stub_path):
-            with open(stub_path,'rb') as f:
+            with open(stub_path, 'rb') as f:
                 return pickle.load(f)
 
-        camera_movement = [[0,0]]*len(frames)
+        camera_movement = [[0, 0]] * len(frames)
 
-        old_gray = cv2.cvtColor(frames[0],cv2.COLOR_BGR2GRAY)
-        old_features = cv2.goodFeaturesToTrack(old_gray,**self.features)
+        # Convert first frame to grayscale
+        if frames[0] is None:
+            raise ValueError("First frame is empty or None.")
+        old_gray = cv2.cvtColor(frames[0], cv2.COLOR_BGR2GRAY)
 
-        for frame_num in range(1,len(frames)):
-            frame_gray = cv2.cvtColor(frames[frame_num],cv2.COLOR_BGR2GRAY)
-            new_features, _,_ = cv2.calcOpticalFlowPyrLK(old_gray,frame_gray,old_features,None,**self.lk_params)
+        # Detect initial features
+        old_features = cv2.goodFeaturesToTrack(old_gray, **self.features)
+        if old_features is None or len(old_features) == 0:
+            print("No features found in the first frame.")
+            return camera_movement
+
+        # Ensure correct format
+        old_features = np.array(old_features, dtype=np.float32).reshape(-1, 1, 2)
+
+        for frame_num in range(1, len(frames)):
+            if frames[frame_num] is None:
+                print(f"Skipping frame {frame_num} as it is empty.")
+                continue
+
+            frame_gray = cv2.cvtColor(frames[frame_num], cv2.COLOR_BGR2GRAY)
+
+            # Compute optical flow
+            new_features, status, _ = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, old_features, None, **self.lk_params)
+
+            if new_features is None or status is None:
+                print(f"Optical flow failed at frame {frame_num}.")
+                continue
+
+            # Filter only good points
+            good_old = old_features[status.flatten() == 1]
+            good_new = new_features[status.flatten() == 1]
+
+            if len(good_old) == 0 or len(good_new) == 0:
+                print(f"No good features to track at frame {frame_num}.")
+                continue
 
             max_distance = 0
-            camera_movement_x, camera_movement_y = 0,0
+            camera_movement_x, camera_movement_y = 0, 0
 
-            for i, (new,old) in enumerate(zip(new_features,old_features)):
+            for new, old in zip(good_new, good_old):
                 new_features_point = new.ravel()
                 old_features_point = old.ravel()
 
-                distance = measure_distance(new_features_point,old_features_point)
-                if distance>max_distance:
+                distance = measure_distance(new_features_point, old_features_point)
+                if distance > max_distance:
                     max_distance = distance
-                    camera_movement_x,camera_movement_y = measure_xy_distance(old_features_point, new_features_point ) 
-            
+                    camera_movement_x, camera_movement_y = measure_xy_distance(old_features_point, new_features_point)
+
             if max_distance > self.minimum_distance:
-                camera_movement[frame_num] = [camera_movement_x,camera_movement_y]
-                old_features = cv2.goodFeaturesToTrack(frame_gray,**self.features)
+                camera_movement[frame_num] = [camera_movement_x, camera_movement_y]
+                new_detected_features = cv2.goodFeaturesToTrack(frame_gray, **self.features)
+                if new_detected_features is not None:
+                    old_features = np.array(new_detected_features, dtype=np.float32).reshape(-1, 1, 2)
 
             old_gray = frame_gray.copy()
-        
+
+        # Save to stub if required
         if stub_path is not None:
-            with open(stub_path,'wb') as f:
-                pickle.dump(camera_movement,f)
+            with open(stub_path, 'wb') as f:
+                pickle.dump(camera_movement, f)
 
         return camera_movement
     
