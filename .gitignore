@@ -3,4 +3,5 @@ input_videos/
 output_videos/
 stubs/
 #ignore pychache
+runs/
 __pycache__/

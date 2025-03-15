@@ -11,6 +11,7 @@ class PlayerBallAssigner():
 
         miniumum_distance = 99999
         assigned_player=-1
+        team_num = -1
 
         for player_id, player in players.items():
             player_bbox = player['bbox']
@@ -23,5 +24,6 @@ class PlayerBallAssigner():
                 if distance < miniumum_distance:
                     miniumum_distance = distance
                     assigned_player = player_id
+                    team_num = player['team']
 
-        return assigned_player
+        return assigned_player,team_num

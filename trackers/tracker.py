@@ -19,7 +19,7 @@ class Tracker:
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
                 bbox = track_info['bbox']
-                if object_type == 'ball':
+                if object_type == 'Ball':
                     position = get_center_of_bbox(bbox)  
                 else:
                     position = get_foot_position(bbox) 
@@ -62,11 +62,11 @@ class Tracker:
 
         # Initialize tracks for the current frame
         frame_tracks = {
-            "players": {},
-            "referees": {},
-            "ball": {}
+            "Player Home": {},
+            "Player Away": {},
+            "Ref": {},
+            "Ball": {}
         }
-        print("detection", len(detection))
 
         cls_names = detection[0].names
         cls_names_inv = {v: k for k, v in cls_names.items()}
@@ -82,18 +82,21 @@ class Tracker:
             cls_id = frame_detection[3]
             track_id = frame_detection[4]
 
-            if cls_id == cls_names_inv['player']:
-                frame_tracks["players"][track_id] = {"bbox": bbox}
+            if cls_id == cls_names_inv['Player Home']:
+                frame_tracks["Player Home"][track_id] = {"bbox": bbox}
 
-            if cls_id == cls_names_inv['referee']:
-                frame_tracks["referees"][track_id] = {"bbox": bbox}
+            if cls_id == cls_names_inv['Player Away']:
+                frame_tracks["Player Away"][track_id] = {"bbox": bbox}
+
+            if cls_id == cls_names_inv['Ref']:
+                frame_tracks["Ref"][track_id] = {"bbox": bbox}
 
         for frame_detection in detection_supervision:
             bbox = frame_detection[0].tolist()
             cls_id = frame_detection[3]
 
-            if cls_id == cls_names_inv['ball']:
-                frame_tracks["ball"][1] = {"bbox": bbox}
+            if cls_id == cls_names_inv['Ball']:
+                frame_tracks["Ball"][1] = {"bbox": bbox}
 
         return frame_tracks
     
@@ -179,14 +182,14 @@ class Tracker:
 
     def draw_annotations(self,video_frames, tracks,team_ball_control):
         output_video_frames= []
-        print("len(video_frames)", len(video_frames))
-        print("len(tracks['players'])", len(tracks['players']))
+        # print("len(video_frames)", len(video_frames))
+        # print("len(tracks['players'])", len(tracks['players']))
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()
 
-            player_dict = tracks["players"][frame_num]
-            ball_dict = tracks["ball"][frame_num]
-            referee_dict = tracks["referees"][frame_num]
+            player_dict = tracks["Player Home"][frame_num] | tracks["Player Away"][frame_num]
+            ball_dict = tracks["Ball"][frame_num]
+            referee_dict = tracks["Ref"][frame_num]
 
             # Draw Players
             for track_id, player in player_dict.items():
