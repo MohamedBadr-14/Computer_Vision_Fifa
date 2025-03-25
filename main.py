@@ -12,7 +12,7 @@ import time
 
 def main():
     # Read Video
-    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/badr_1_min.mp4')
+    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/test_sogh.mp4')
 
     video_read = time.time()
     print("Video Read", video_read)    
@@ -101,6 +101,7 @@ def main():
 
     # Draw output 
     ## Draw object Tracks
+    np.save('tracks.npy', tracks)
     output_video_frames = tracker.draw_annotations(video_frames, tracks,team_ball_control)
 
     ## Draw Camera movement
