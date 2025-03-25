@@ -5,11 +5,12 @@ from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator import CameraMovementEstimator
 from view_transformer import ViewTransformer
+import json
 
 
 def main():
     # Read Video
-    video_frames = read_video('C:/Users/moham/Downloads/testat/test_frames.mp4')
+    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/test_sogh.mp4')
     # np.save("full_video.npy", video_frames)
     all_tracks = { 
         "players": [],
@@ -30,7 +31,8 @@ def main():
     # frame = np.load("frame.npy") to load frames here
 
 
-    while(test<67): #just for testing
+    while(test<32): #just for testing
+        print(len(video_frames))
         frame = video_frames[test]
         test+=1 #test
         frame_tracks = tracker.get_object_track(frame)
@@ -89,10 +91,12 @@ def main():
 
     team_ball_control= np.array(team_ball_control)
     # Draw output 
-    output_video_frames = tracker.draw_annotations(video_frames, all_tracks,team_ball_control)
+    # output_video_frames = tracker.draw_annotations(video_frames, all_tracks,team_ball_control)
+    new_tracks = np.array(all_tracks)
+    np.save("tracks.npy", new_tracks)
 
     # Save video
-    save_video(output_video_frames, 'output_videos/output_video.avi')
+    
 
 if __name__ == '__main__':
     main()
