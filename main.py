@@ -12,16 +12,17 @@ import time
 
 def main():
     # Read Video
-    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/test_sogh.mp4')
+    start_time = time.time()
+    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/general_training.mp4')
 
-    video_read = time.time()
+    video_read = time.time() - start_time
     print("Video Read", video_read)    
 
     # Initialize Tracker
     tracker = Tracker('models/best_initial.pt')
 
     tracks = tracker.get_object_tracks(video_frames,
-                                       read_from_stub=False,
+                                       read_from_stub=True,
                                        stub_path='stubs/track_stubs_test.pkl')
     # Get object positions 
     tracker.add_position_to_tracks(tracks)
@@ -31,7 +32,7 @@ def main():
     # camera movement estimator
     camera_movement_estimator = CameraMovementEstimator(video_frames[0])
     camera_movement_per_frame = camera_movement_estimator.get_camera_movement(video_frames,
-                                                                                read_from_stub=False,
+                                                                                read_from_stub=True,
                                                                                 stub_path='stubs/camera_movement_stub_test.pkl')
     camera_movement_estimator.add_adjust_positions_to_tracks(tracks,camera_movement_per_frame)
     camera_movement_time = time.time() 
@@ -41,8 +42,12 @@ def main():
     view_transformer = ViewTransformer()
     view_transformer.add_transformed_position_to_tracks(tracks)
 
+    tracks["ball"] = tracker.replace_outliers_based_on_distance(tracks["ball"] , 10)
+
+
     # Interpolate Ball Positions
     tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
+    
     ball_interpolated = time.time() 
 
     print("Ball Interpolated" , ball_interpolated - camera_movement_time)
@@ -92,7 +97,11 @@ def main():
             tracks['players'][frame_num][assigned_player]['has_ball'] = True
             team_ball_control.append(tracks['players'][frame_num][assigned_player]['team'])
         else:
-            team_ball_control.append(team_ball_control[-1])
+            if len(team_ball_control) == 0:
+                team_ball_control.append(0)
+            else:
+                team_ball_control.append(team_ball_control[-1])
+
     team_ball_control= np.array(team_ball_control)
 
     ball_assigned = time.time()
@@ -101,7 +110,7 @@ def main():
 
     # Draw output 
     ## Draw object Tracks
-    np.save('tracks.npy', tracks)
+    # np.save('tracks.npy', tracks)
     output_video_frames = tracker.draw_annotations(video_frames, tracks,team_ball_control)
 
     ## Draw Camera movement
@@ -111,7 +120,7 @@ def main():
     # speed_and_distance_estimator.draw_speed_and_distance(video_frames,tracks)
 
     # Save video
-    save_video(output_video_frames, 'output_videos/output_video.avi')
+    save_video(output_video_frames, 'output_videos/output_video_with_func.avi')
 
 if __name__ == '__main__':
     main()

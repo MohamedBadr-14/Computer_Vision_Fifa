@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import cv2
 import sys 
+from typing import List, Union
 sys.path.append('../')
 from utils import get_center_of_bbox, get_bbox_width, get_foot_position
 
@@ -54,15 +55,18 @@ class Tracker:
 
         detections = self.detect_frames(frames)
 
+
         tracks={
             "players":[],
             "referees":[],
-            "ball":[]
+            "ball":[],
+            "goalpost": [],
         }
 
         for frame_num, detection in enumerate(detections):
             cls_names = detection.names
             cls_names_inv = {v:k for k,v in cls_names.items()}
+            
 
             # Covert to supervision Detection format
             detection_supervision = sv.Detections.from_ultralytics(detection)
@@ -78,6 +82,7 @@ class Tracker:
             tracks["players"].append({}) #TODO
             tracks["referees"].append({})
             tracks["ball"].append({})
+            tracks["goalpost"].append({})
 
             for frame_detection in detection_with_tracks:
                 bbox = frame_detection[0].tolist()
@@ -96,6 +101,8 @@ class Tracker:
 
                 if cls_id == cls_names_inv['ball']:
                     tracks["ball"][frame_num][1] = {"bbox":bbox}
+                if cls_id == cls_names_inv['goalpost']:
+                    tracks["goalpost"][frame_num][1] = {"bbox":bbox}
 
         if stub_path is not None:
             with open(stub_path,'wb') as f:
@@ -182,6 +189,40 @@ class Tracker:
         cv2.putText(frame, f"Team 2 Ball Control: {team_2*100:.2f}%",(1400,950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 3)
 
         return frame
+    
+
+
+    def replace_outliers_based_on_distance(
+        self,
+        ball_tracks,
+        distance_threshold: float
+    ):
+        last_valid_position =  None
+        cleaned_tracks = []
+
+        for track in ball_tracks:
+            position = track.get(1,{}).get('position_transformed',[])
+            if not track:
+                # If the current position is already empty, just add it to the cleaned positions
+                cleaned_tracks.append(track)
+            else:
+                if last_valid_position is None:
+                    # If there's no valid last position, accept the first valid one
+                    cleaned_tracks.append(track)
+                    last_valid_position = position
+                else:
+                    # Calculate the distance from the last valid position
+
+                    distance = np.linalg.norm(np.array(position) - np.array(last_valid_position))
+                    if distance > distance_threshold:
+                        # Replace with empty array if the distance exceeds the threshold
+                        print("Replaced balll" , distance)
+                        cleaned_tracks.append({})
+                    else:
+                        cleaned_tracks.append(track)
+                        last_valid_position = position
+
+        return cleaned_tracks
 
     def draw_annotations(self,video_frames, tracks,team_ball_control):
         output_video_frames= []
@@ -189,6 +230,7 @@ class Tracker:
             # frame = frame.copy()
 
             player_dict = tracks["players"][frame_num]
+            # goal_post_dict = tracks["goalpost"][frame_num]
             ball_dict = tracks["ball"][frame_num]
             referee_dict = tracks["referees"][frame_num]
 
@@ -209,6 +251,9 @@ class Tracker:
             # Draw ball 
             for track_id, ball in ball_dict.items():
                 frame = self.draw_traingle(frame, ball["bbox"],(0,255,0))
+            
+            # for _, goal_post in goal_post_dict.items():
+            #     frame = self.draw_ellipse(frame, goal_post["bbox"],(255,0,0))
 
 
             # Draw Team Ball Control
