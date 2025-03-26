@@ -42,9 +42,9 @@ class Tracker:
         interpolated_bbox = df_ball_positions.iloc[-1].tolist()
 
         # Format the result
-        interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
+        # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
 
-        return interpolated_ball_position
+        return interpolated_bbox
 
     def detect_frame(self, frame):
         # Process a single frame
@@ -96,6 +96,39 @@ class Tracker:
                 frame_tracks["ball"][1] = {"bbox": bbox}
 
         return frame_tracks
+    
+    def replace_outliers_based_on_distance(
+        self,
+        ball_tracks,
+        distance_threshold: float
+    ):
+        last_valid_position =  None
+        cleaned_tracks = []
+
+        for track in ball_tracks:
+            position = track.get(1,{}).get('position_transformed',[])
+            if not position:
+                # If the current position is already empty, just add it to the cleaned positions
+                cleaned_tracks.append(track)
+            else:
+                if last_valid_position is None:
+                    # If there's no valid last position, accept the first valid one
+                    cleaned_tracks.append(track)
+                    last_valid_position = position
+                else:
+                    # Calculate the distance from the last valid position
+                    # print("position", position)
+                    # print("last_valid_position", last_valid_position)
+                    distance = np.linalg.norm(np.array(position) - np.array(last_valid_position))
+                    if distance > distance_threshold:
+                        # Replace with empty array if the distance exceeds the threshold
+                        print("Replaced balll" , distance)
+                        cleaned_tracks.append({})
+                    else:
+                        cleaned_tracks.append(track)
+                        last_valid_position = position
+
+        return cleaned_tracks
     
     def draw_ellipse(self,frame,bbox,color,track_id=None): 
         y2 = int(bbox[3])
