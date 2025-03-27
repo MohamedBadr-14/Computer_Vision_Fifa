@@ -10,7 +10,7 @@ import json
 
 def main():
     # Read Video
-    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/general_training.mp4')
+    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/training_2.mp4')
     # np.save("full_video.npy", video_frames)
     all_tracks = { 
         "players": [],
@@ -37,12 +37,24 @@ def main():
         frame_tracks = tracker.get_object_track(frame)
 
 
-        if frame_tracks['ball']:
-            frame_tracks['ball'][1]['bbox'] = tracker.interpolate_ball_positions(frame_tracks['ball'])
-            
-        else:
-            frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
-            # all_tracks['ball'][-1] = {1: {'bbox': tracker.interpolate_ball_positions(all_tracks['ball'][-1])}}
+
+        if all_tracks['ball'] and all_tracks['ball'][-1]:
+            if frame_tracks['ball']:
+                frame_tracks['ball'][1]['bbox'] = tracker.interpolate_ball_positions(frame_tracks['ball'])
+                
+            else:
+                frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
+                # all_tracks['ball'][-1] = {1: {'bbox': tracker.interpolate_ball_positions(all_tracks['ball'][-1])}}
+        
+            # Replace Outliers
+            # if frame_tracks['ball']:
+            #     frame_tracks['ball'] = tracker.replace_outliers_based_on_distance(frame_tracks['ball'], 190)
+
+            # #interpolate again
+            # if frame_tracks['ball']:
+            #     frame_tracks['ball'][1]['bbox'] = tracker.interpolate_ball_positions(frame_tracks['ball'])
+            # else: 
+            #     frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
 
         # Get object positions 
         tracker.add_position_to_tracks(frame_tracks)
@@ -52,27 +64,12 @@ def main():
             camera_movement_estimator = CameraMovementEstimator(frame)
         
         camera_movement_per_frame = camera_movement_estimator.get_camera_movement(frame,
-                                                                                    read_from_stub=False,
+                                                                                    read_from_stub=True,
                                                                                     stub_path='stubs/camera_movement_stub.pkl')
         camera_movement_estimator.add_adjust_positions_to_tracks(frame_tracks,camera_movement_per_frame)
 
         # # View Trasnformer
         view_transformer.add_transformed_position_to_tracks(frame_tracks)
-
-        
-
-        all_tracks['ball'].append(frame_tracks['ball'])
-        all_tracks['ball'] = tracker.replace_outliers_based_on_distance(all_tracks['ball'], 10)
-        
-        if all_tracks['ball'][-1]:
-            all_tracks['ball'][-1][1]['bbox'] = tracker.interpolate_ball_positions(all_tracks['ball'][-1])
-        else:
-            print("BIZOOO SA7777")
-            frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
-
-        # print("ball",frame_tracks['ball'] )
-        # print("all tracks of ball" , all_tracks['ball'])
-        # Interpolate Ball Positions
 
 
         # Assign Player Teams
@@ -90,13 +87,14 @@ def main():
             frame_tracks['players'][player_id]['team_color'] = team_assigner.team_colors[team]
 
         # Assign Ball to Player
-        if all_tracks['ball'][-1]: 
-            print("ball",all_tracks['ball'][-1]) 
-            ball_bbox = all_tracks['ball'][-1][1]['bbox']  
+        if frame_tracks['ball']: 
+            print("ball", frame_tracks['ball']) 
+            ball_bbox = frame_tracks['ball'][1]['bbox']  
             assigned_player = player_assigner.assign_ball_to_player(frame_tracks['players'], ball_bbox)
 
             if assigned_player != -1:
                 frame_tracks['players'][assigned_player]['has_ball'] = True
+                print("assigned_player", assigned_player , test)
                 team_ball_control.append(frame_tracks['players'][assigned_player]['team'])
             else:
                 team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
@@ -106,7 +104,7 @@ def main():
 
         all_tracks["players"].append(frame_tracks["players"])
         all_tracks["referees"].append(frame_tracks["referees"])
-        # all_tracks["ball"].append(frame_tracks["ball"])
+        all_tracks["ball"].append(frame_tracks["ball"])
 
     team_ball_control= np.array(team_ball_control)
     # Draw output 

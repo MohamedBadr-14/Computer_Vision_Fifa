@@ -14,12 +14,15 @@ class Tracker:
         self.model = YOLO(model_path) 
         self.tracker = sv.ByteTrack()
         self.ball_positions_history = []
+        self.last_valid_position = None
+        self.frame_num = 0
 
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
                 bbox = track_info['bbox']
-                if object_type == 'ball':
+                if object_type == 'ball': 
+                    print("bbox", bbox)
                     position = get_center_of_bbox(bbox)  
                 else:
                     position = get_foot_position(bbox) 
@@ -99,37 +102,34 @@ class Tracker:
     
     def replace_outliers_based_on_distance(
         self,
-        ball_tracks,
+        ball_track,
         distance_threshold: float
     ):
-        last_valid_position =  None
-        cleaned_tracks = []
-
-        for track in ball_tracks:
-            position = track.get(1,{}).get('position_transformed',[])
-            if not position:
-                # If the current position is already empty, just add it to the cleaned positions
-                cleaned_tracks.append(track)
+        position = ball_track.get(1,{}).get('bbox',[])
+        if not position:
+            # If the current position is already empty, just add it to the cleaned positions
+            print("Empty ball")
+            return {}
+        else:
+            if self.last_valid_position is None:
+                # If there's no valid last position, accept the first valid one
+                self.last_valid_position = position[0:2]
+                return ball_track
             else:
-                if last_valid_position is None:
-                    # If there's no valid last position, accept the first valid one
-                    cleaned_tracks.append(track)
-                    last_valid_position = position
+                # Calculate the distance from the last valid position
+                # print("position", position)
+                # print("last_valid_position", last_valid_position)
+                distance = np.linalg.norm(np.array(position[0:2]) - np.array(self.last_valid_position))
+                print("distance", distance)
+                if distance > distance_threshold:
+                    # Replace with empty array if the distance exceeds the threshold
+                    print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
+                    return {}
                 else:
-                    # Calculate the distance from the last valid position
-                    # print("position", position)
-                    # print("last_valid_position", last_valid_position)
-                    distance = np.linalg.norm(np.array(position) - np.array(last_valid_position))
-                    if distance > distance_threshold:
-                        # Replace with empty array if the distance exceeds the threshold
-                        print("Replaced balll" , distance)
-                        cleaned_tracks.append({})
-                    else:
-                        cleaned_tracks.append(track)
-                        last_valid_position = position
+                    self.last_valid_position = position[0:2]
+                    return ball_track
 
-        return cleaned_tracks
-    
+
     def draw_ellipse(self,frame,bbox,color,track_id=None): 
         y2 = int(bbox[3])
         x_center, _ = get_center_of_bbox(bbox)
@@ -214,11 +214,12 @@ class Tracker:
         output_video_frames= []
         print("len(video_frames)", len(video_frames))
         print("len(tracks['players'])", len(tracks['players']))
+        print("len(tracks['ball'])", len(tracks['ball']))
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()
 
             player_dict = tracks["players"][frame_num]
-            ball_dict = tracks["ball"][frame_num]
+            ball_dict = tracks["ball"][frame_num] if frame_num < len(tracks["ball"]) else {}
             referee_dict = tracks["referees"][frame_num]
 
             # Draw Players

@@ -2,5 +2,6 @@ models/
 input_videos/
 output_videos/
 stubs/
+runs/
 #ignore pychache
 __pycache__/
