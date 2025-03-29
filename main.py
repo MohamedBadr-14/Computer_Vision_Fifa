@@ -43,6 +43,7 @@ def frame_processor(queue, stop_event, capture_event, response_queue):
             time.sleep(2)
             
             
+            
             response_queue.put("Processing complete. Capture next frame.") # raga3 ay haga hena
 
             
@@ -90,17 +91,14 @@ def global_key_listener(stop_event, capture_event):
         time.sleep(0.1)  # Small delay to avoid busy-waiting
 
 if __name__ == "__main__":
-    # Create a queue to share frames between processes
     queue = multiprocessing.Queue(maxsize=10)  # Adjust maxsize as needed
 
-    # Create a queue to send responses from the processor to the screen recorder
     response_queue = multiprocessing.Queue(maxsize=10)
 
     # Create events to signal stopping and capturing
     stop_event = multiprocessing.Event()
     capture_event = multiprocessing.Event()
 
-    # Create and start the screen recorder process
     recorder_process = multiprocessing.Process(
         target=screen_recorder,
         args=(queue, stop_event, capture_event, response_queue)
