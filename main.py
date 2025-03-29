@@ -7,6 +7,7 @@ import keyboard
 from ultralytics import YOLO
 import os
 
+
 def frame_processor(queue, stop_event, capture_event, response_queue):
     """
     Processes frames from the queue, waits 2 seconds, and sends a response back to the screen recorder.
@@ -53,23 +54,50 @@ def frame_processor(queue, stop_event, capture_event, response_queue):
 
 def screen_recorder(queue, stop_event, capture_event, response_queue):
 
-    monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}  # Adjust monitor dimensions as needed
+    # monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}  # Adjust monitor dimensions as needed
+    lock = True
+    monitor = {"top": 0, "left": 0, "width": 2560, "height": 1600}  # Adjust monitor dimensions as needed
 
     # Initialize mss
     with mss() as sct:
+        # lock=True
+        capture_event.wait()
         while not stop_event.is_set():
-            capture_event.wait()
-            time.sleep(2)
+            # time.sleep(2)
 
-            frame = np.array(sct.grab(monitor))
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-
-            if not queue.full():
+            if not queue.full() and lock:
+                
+                # pause
+                # press esc to pause
+                lock=False
+                print("Setting lock to False")
+                frame = np.array(sct.grab(monitor))
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
                 queue.put(frame)
+                
+                print("Queue size: ", queue.qsize())
+                # keyboard.press_and_release('esc') 
+                keyboard.press('esc')
+                time.sleep(0.1)
+                keyboard.release('esc')
+                time.sleep(2)
+                # time.sleep(0.5)  
+                
+                
                 print("Frame captured and sent to processor.")
 
             if not response_queue.empty():
+                lock=True
+                print("Setting lock to True")
                 response = response_queue.get()
+                # unpause and do action 
+                # keyboard.press_and_release('esc') 
+                keyboard.press('esc')
+                time.sleep(0.1)
+                keyboard.release('esc')
+                time.sleep(1)
+                
+
                 print(f"Response from processor: {response}")
 
             capture_event.clear()
