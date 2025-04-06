@@ -1,73 +1,97 @@
 from sklearn.cluster import KMeans
+import numpy as np
+import cv2
+
+
 
 class TeamAssigner:
     def __init__(self):
         self.team_colors = {}
         self.player_team_dict = {}
-    
-    def get_clustering_model(self,image):
-        # Reshape the image to 2D array
-        image_2d = image.reshape(-1,3)
+        self.player_team_confidence = {}
+        
 
-        # Preform K-means with 2 clusters
-        kmeans = KMeans(n_clusters=2, init="k-means++",n_init=1)
-        kmeans.fit(image_2d)
-
+    def get_clustering_model(self, hue_2d):
+        # Ensure dtype is float32 for sklearn
+        hue_2d = hue_2d.astype(np.float32)
+        
+        kmeans = KMeans(n_clusters=2, init="k-means++", n_init=1)
+        kmeans.fit(hue_2d)
         return kmeans
 
-    def get_player_color(self,frame,bbox):
-        image = frame[int(bbox[1]):int(bbox[3]),int(bbox[0]):int(bbox[2])]
+    def get_player_color(self, frame, bbox):
+        # Crop image to bbox
+        image = frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
+        
+        # Take only the top half of the player box
+        top_half_image = image[:image.shape[0] // 2, :]
+        image_hsv = cv2.cvtColor(top_half_image, cv2.COLOR_BGR2HSV)
 
-        top_half_image = image[0:int(image.shape[0]/2),:]
+        hue_channel = image_hsv[:, :, 0]  # Get Hue only
+        hue_2d = hue_channel.reshape(-1, 1)  # Flatten to 2D array
+        
+        # Fit KMeans on hue only
+        kmeans = self.get_clustering_model(hue_2d)
 
-        # Get Clustering model
-        kmeans = self.get_clustering_model(top_half_image)
-
-        # Get the cluster labels forr each pixel
+        # Predict cluster labels
         labels = kmeans.labels_
+        clustered_image = labels.reshape(hue_channel.shape)  # Reshape back to image shape
 
-        # Reshape the labels to the image shape
-        clustered_image = labels.reshape(top_half_image.shape[0],top_half_image.shape[1])
+        # Determine non-player cluster based on corners
+        corner_clusters = [
+            clustered_image[0, 0],
+            clustered_image[0, -1],
+            clustered_image[-1, 0],
+            clustered_image[-1, -1]
+        ]
+        non_player_cluster = max(set(corner_clusters), key=corner_clusters.count)
 
-        # Get the player cluster
-        corner_clusters = [clustered_image[0,0],clustered_image[0,-1],clustered_image[-1,0],clustered_image[-1,-1]]
-        non_player_cluster = max(set(corner_clusters),key=corner_clusters.count)
-        player_cluster = 1 - non_player_cluster
+        # Choose player cluster
+        assignees_count = np.bincount(labels)
+        assignees_count[non_player_cluster] = -1
+        player_cluster = np.argmax(assignees_count)
+        player_hue = kmeans.cluster_centers_[player_cluster][0]  # Get hue value
 
-        player_color = kmeans.cluster_centers_[player_cluster]
+        return player_hue
 
-        return player_color
+    def assign_team_color(self, frame, player_detections):
+        player_hues = []
+        for _, detection in player_detections.items():
+            bbox = detection["bbox"]
+            hue = self.get_player_color(frame, bbox)
+            player_hues.append([hue])  # Wrap as list for KMeans shape
 
-
-    def assign_team_color(self,frame, player_detections):
-        
-        player_colors = []
-        for _, player_detection in player_detections.items():
-            bbox = player_detection["bbox"]
-            player_color =  self.get_player_color(frame,bbox)
-            player_colors.append(player_color)
-        
-        kmeans = KMeans(n_clusters=2, init="k-means++",n_init=10)
-        kmeans.fit(player_colors)
-
+        kmeans = KMeans(n_clusters=2, init="k-means++", n_init=10)
+        kmeans.fit(np.array(player_hues, dtype=np.float32))
         self.kmeans = kmeans
 
-        self.team_colors[1] = kmeans.cluster_centers_[0]
-        self.team_colors[2] = kmeans.cluster_centers_[1]
+        self.team_colors[1] = kmeans.cluster_centers_[0][0]
+        self.team_colors[2] = kmeans.cluster_centers_[1][0]
+        print("Team 1 color (hue):", self.team_colors[1])
+        print("Team 2 color (hue):", self.team_colors[2])
 
 
-    def get_player_team(self,frame,player_bbox,player_id):
-        if player_id in self.player_team_dict:
+    def get_player_team(self, frame, player_bbox, player_id):
+        if player_id in self.player_team_dict and self.player_team_confidence.get(player_id, 0) > 0.7:
+            print("DKHAL:", player_id , "Team ID:", self.player_team_dict[player_id])
             return self.player_team_dict[player_id]
+        print("Player ID:", player_id , "Team ID:", self.player_team_dict.get(player_id, None))
 
-        player_color = self.get_player_color(frame,player_bbox)
+        hue = self.get_player_color(frame, player_bbox)
+        hue_input = np.array([[hue]], dtype=np.float32)  # Correct shape and dtype
 
-        team_id = self.kmeans.predict(player_color.reshape(1,-1))[0]
-        team_id+=1
+        distances = self.kmeans.transform(hue_input)
+        team_id = self.kmeans.predict(hue_input)[0]
 
-        if player_id ==91:
-            team_id=1
+        max_distance = np.max(distances)
+        normalized_confidence = 1 - (distances[0, team_id] / max_distance)
+
+        team_id += 1  # Team IDs are 1-based
 
         self.player_team_dict[player_id] = team_id
+        self.player_team_confidence[player_id] = normalized_confidence
 
         return team_id
+
+
+    

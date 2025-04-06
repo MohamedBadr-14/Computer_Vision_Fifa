@@ -5,12 +5,20 @@ from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator import CameraMovementEstimator
 from view_transformer import ViewTransformer
-import json
+import cv2
+import time
 
+def get_kmeans(frame , model , team_assigner):
+    tracks = model.get_object_track(frame)
+    testing = time.time()
+    team_assigner.assign_team_color(frame, 
+                                tracks['players'])
+    print("time team color" , time.time()-testing)
 
 def main():
     # Read Video
     video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/training_2.mp4')
+    k_means = cv2.imread('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/kmeans.png')
     # np.save("full_video.npy", video_frames)
     all_tracks = { 
         "players": [],
@@ -19,13 +27,16 @@ def main():
     }
     
     # Initialize Tracker
-    tracker = Tracker('models/best_initial.pt')
+    tracker = Tracker('models/best_new.pt')
+    kmeans_track = Tracker('models/best_new.pt')
     counter = 0 
     test=0
     team_ball_control= []
     view_transformer = ViewTransformer()
     team_assigner = TeamAssigner()
     player_assigner =PlayerBallAssigner()
+    get_kmeans(frame=k_means, model = kmeans_track, team_assigner=team_assigner)
+    
 
     
     # frame = np.load("frame.npy") to load frames here
@@ -39,22 +50,19 @@ def main():
 
 
         if all_tracks['ball'] and all_tracks['ball'][-1]:
-            if frame_tracks['ball']:
-                frame_tracks['ball'][1]['bbox'] = tracker.interpolate_ball_positions(frame_tracks['ball'])
-                
-            else:
-                frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
-                # all_tracks['ball'][-1] = {1: {'bbox': tracker.interpolate_ball_positions(all_tracks['ball'][-1])}}
         
             # Replace Outliers
-            # if frame_tracks['ball']:
-            #     frame_tracks['ball'] = tracker.replace_outliers_based_on_distance(frame_tracks['ball'], 190)
+            if frame_tracks['ball'] and frame_tracks['ball'][1]['conf'] < 0.2:    
+                frame_tracks['ball'] = tracker.replace_outliers_based_on_distance(frame_tracks['ball'], 120)
+        
 
-            # #interpolate again
-            # if frame_tracks['ball']:
-            #     frame_tracks['ball'][1]['bbox'] = tracker.interpolate_ball_positions(frame_tracks['ball'])
-            # else: 
-            #     frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
+            #interpolate again
+            
+            if frame_tracks['ball']:
+                frame_tracks['ball'][1]['bbox'] = tracker.interpolate_ball_positions(frame_tracks['ball'])
+            else: 
+                frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
+       
 
         # Get object positions 
         tracker.add_position_to_tracks(frame_tracks)
@@ -64,7 +72,7 @@ def main():
             camera_movement_estimator = CameraMovementEstimator(frame)
         
         camera_movement_per_frame = camera_movement_estimator.get_camera_movement(frame,
-                                                                                    read_from_stub=True,
+                                                                                    read_from_stub=False,
                                                                                     stub_path='stubs/camera_movement_stub.pkl')
         camera_movement_estimator.add_adjust_positions_to_tracks(frame_tracks,camera_movement_per_frame)
 
@@ -74,8 +82,8 @@ def main():
 
         # Assign Player Teams
         if counter == 0:
-            team_assigner.assign_team_color(frame, 
-                                        frame_tracks['players'])
+            # team_assigner.assign_team_color(frame, 
+            #                             frame_tracks['players'])
             counter += 1
 
         for player_id, track in frame_tracks['players'].items():
@@ -84,17 +92,16 @@ def main():
 
             # Add team and team color information to the player's track
             frame_tracks['players'][player_id]['team'] = team
-            frame_tracks['players'][player_id]['team_color'] = team_assigner.team_colors[team]
+            frame_tracks['players'][player_id]['team_color'] = [100,100,100] if team == 1 else [255,255,255]
 
         # Assign Ball to Player
         if frame_tracks['ball']: 
-            print("ball", frame_tracks['ball']) 
             ball_bbox = frame_tracks['ball'][1]['bbox']  
             assigned_player = player_assigner.assign_ball_to_player(frame_tracks['players'], ball_bbox)
 
             if assigned_player != -1:
                 frame_tracks['players'][assigned_player]['has_ball'] = True
-                print("assigned_player", assigned_player , test)
+                # print("assigned_player", assigned_player , test)
                 team_ball_control.append(frame_tracks['players'][assigned_player]['team'])
             else:
                 team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
@@ -112,7 +119,7 @@ def main():
 
 
     # Save video
-    save_video(output_video_frames , 'output_videos/general_training_output.mp4')
+    save_video(output_video_frames , 'output_videos/yarabb.mp4')
     
 
 if __name__ == '__main__':

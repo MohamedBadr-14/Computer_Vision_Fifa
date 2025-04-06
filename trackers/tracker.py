@@ -22,7 +22,7 @@ class Tracker:
             for track_id, track_info in object_tracks.items():
                 bbox = track_info['bbox']
                 if object_type == 'ball': 
-                    print("bbox", bbox)
+                    # print("bbox", bbox)
                     position = get_center_of_bbox(bbox)  
                 else:
                     position = get_foot_position(bbox) 
@@ -46,6 +46,7 @@ class Tracker:
 
         # Format the result
         # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
+        self.last_valid_position = interpolated_bbox[0:2]
 
         return interpolated_bbox
 
@@ -62,6 +63,7 @@ class Tracker:
 
         # Detect objects in the current frame
         detection = self.detect_frame(frame)
+        ball_count = 0
 
         # Initialize tracks for the current frame
         frame_tracks = {
@@ -69,7 +71,7 @@ class Tracker:
             "referees": {},
             "ball": {}
         }
-        print("detection", len(detection))
+        # print("detection", len(detection))
 
         cls_names = detection[0].names
         cls_names_inv = {v: k for k, v in cls_names.items()}
@@ -96,7 +98,13 @@ class Tracker:
             cls_id = frame_detection[3]
 
             if cls_id == cls_names_inv['ball']:
-                frame_tracks["ball"][1] = {"bbox": bbox}
+                if ball_count > 0 and frame_detection[2] < frame_tracks["ball"][1]["conf"]:
+                    # If the ball is already detected, skip adding it again
+                    print("Ball already detected, skipping..." , frame_detection[2] , frame_tracks["ball"][1]["conf"])
+                    continue
+                frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
+                print("BALLLL CONFFF" , frame_detection[2])
+                ball_count += 1
 
         return frame_tracks
     
@@ -120,10 +128,10 @@ class Tracker:
                 # print("position", position)
                 # print("last_valid_position", last_valid_position)
                 distance = np.linalg.norm(np.array(position[0:2]) - np.array(self.last_valid_position))
-                print("distance", distance)
+                # print("distance", distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
-                    print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
+                    # print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
                     return {}
                 else:
                     self.last_valid_position = position[0:2]
@@ -212,7 +220,7 @@ class Tracker:
 
     def draw_annotations(self,video_frames, tracks,team_ball_control):
         output_video_frames= []
-        print("len(video_frames)", len(video_frames))
+        # print("len(video_frames)", len(video_frames))
         print("len(tracks['players'])", len(tracks['players']))
         print("len(tracks['ball'])", len(tracks['ball']))
         for frame_num, frame in enumerate(video_frames):
