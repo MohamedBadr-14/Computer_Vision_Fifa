@@ -106,7 +106,7 @@ class Tracker:
                 print("BALLLL CONFFF" , frame_detection[2])
                 ball_count += 1
 
-        return frame_tracks
+        return frame_tracks , detection_supervision
     
     def replace_outliers_based_on_distance(
         self,

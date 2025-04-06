@@ -17,8 +17,8 @@ def get_kmeans(frame , model , team_assigner):
 
 def main():
     # Read Video
-    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/training_2.mp4')
-    k_means = cv2.imread('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/kmeans.png')
+    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/general_small.mp4')
+    # k_means = cv2.imread('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/kmeans.png')
     # np.save("full_video.npy", video_frames)
     all_tracks = { 
         "players": [],
@@ -28,24 +28,24 @@ def main():
     
     # Initialize Tracker
     tracker = Tracker('models/best_new.pt')
-    kmeans_track = Tracker('models/best_new.pt')
     counter = 0 
     test=0
+    fit_transformed = True
     team_ball_control= []
     view_transformer = ViewTransformer()
+    team_assign_time = time.time()
     team_assigner = TeamAssigner()
+    after_team_assign  = time.time()
+    print("team assign time", after_team_assign - team_assign_time)
     player_assigner =PlayerBallAssigner()
-    get_kmeans(frame=k_means, model = kmeans_track, team_assigner=team_assigner)
+    # get_kmeans(frame=k_means, model = kmeans_track, team_assigner=team_assigner)
     
-
-    
-    # frame = np.load("frame.npy") to load frames here
 
     print("video_frames",len(video_frames))
     while(test<len(video_frames)): #just for testing
         frame = video_frames[test]
         test+=1 #test
-        frame_tracks = tracker.get_object_track(frame)
+        frame_tracks , detection_supervision = tracker.get_object_track(frame)
 
 
 
@@ -81,18 +81,30 @@ def main():
 
 
         # Assign Player Teams
-        if counter == 0:
-            # team_assigner.assign_team_color(frame, 
-            #                             frame_tracks['players'])
-            counter += 1
+        # if counter == 0:
+        #     # team_assigner.assign_team_color(frame, 
+        #     #                             frame_tracks['players'])
+        #     counter += 1
+
+        time_bef_assign = time.time()
+        crops = team_assigner.extract_crops(frame, detection_supervision)
+        embedings = team_assigner.extract_embeddings(crops)
+        clusters = team_assigner.predict_kmeans(embedings , fit_transformed)
+        fit_transformed = True
+        print("time assign" , time.time()-time_bef_assign)
+        print("clusters", clusters)
+        
+
+        players_count = 0
 
         for player_id, track in frame_tracks['players'].items():
             # Assign team to the player
-            team = team_assigner.get_player_team(frame, track['bbox'], player_id)
+            # team = team_assigner.get_player_team(frame, track['bbox'], player_id)
 
             # Add team and team color information to the player's track
-            frame_tracks['players'][player_id]['team'] = team
-            frame_tracks['players'][player_id]['team_color'] = [100,100,100] if team == 1 else [255,255,255]
+            frame_tracks['players'][player_id]['team'] = clusters[players_count]
+            frame_tracks['players'][player_id]['team_color'] = [100,100,100] if clusters[players_count] == 1 else [255,255,255]
+            players_count += 1
 
         # Assign Ball to Player
         if frame_tracks['ball']: 
@@ -114,11 +126,11 @@ def main():
         all_tracks["ball"].append(frame_tracks["ball"])
 
     team_ball_control= np.array(team_ball_control)
-    # Draw output 
+    # # Draw output 
     output_video_frames = tracker.draw_annotations(video_frames, all_tracks,team_ball_control)
 
 
-    # Save video
+    # # Save video
     save_video(output_video_frames , 'output_videos/yarabb.mp4')
     
 
