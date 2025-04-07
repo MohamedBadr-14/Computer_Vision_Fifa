@@ -23,6 +23,132 @@ class SoccerFeatureExtractor:
         dx = x2 - x1
         dy = y2 - y1
         return math.degrees(math.atan2(dy, dx))
+    
+
+    ################################################################### features
+
+    @staticmethod
+
+    def get_opponent_and_pass_data(agent_x, agent_y, teammates, opponents):
+        max_dist = math.sqrt(FIELD_WIDTH**2 + FIELD_HEIGHT**2)
+        
+        # Initialize closest opponent variables
+        closest_opp_dist = 1.0
+        closest_opp_angle = 0.0
+        no_opponent_in_front = True
+        
+        # Initialize 8-direction tracking (will only store opponents)
+        directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+        dir_data = {d: {'dist': float('inf'), 'pos': None} for d in directions}
+        
+        # Temporary storage for teammate positions and distances
+        team_data = {d: {'dist': float('inf'), 'pos': None} for d in directions}
+        pass_directions = {d: 0 for d in directions}  # 1 if teammate is closest, 0 otherwise
+
+        # Process teammates first (store temporarily)
+        for mate_x, mate_y in teammates:
+            dx = mate_x - agent_x
+            dy = mate_y - agent_y
+            dist = math.hypot(dx, dy)
+            angle = math.degrees(math.atan2(dy, dx))
+            
+            # Classify direction
+            if -22.5 <= angle < 22.5:
+                direction = 'N'
+            elif 22.5 <= angle < 67.5:
+                direction = 'NE'
+            elif 67.5 <= angle < 112.5:
+                direction = 'E'
+            elif 112.5 <= angle < 157.5:
+                direction = 'SE'
+            elif angle >= 157.5 or angle < -157.5:
+                direction = 'S'
+            elif -157.5 <= angle < -112.5:
+                direction = 'SW'
+            elif -112.5 <= angle < -67.5:
+                direction = 'W'
+            elif -67.5 <= angle < -22.5:
+                direction = 'NW'
+            
+            # Update team data if this is the closest teammate in this direction
+            if dist < team_data[direction]['dist']:
+                team_data[direction] = {'dist': dist, 'pos': (mate_x, mate_y)}
+
+        # Process opponents (store in dir_data)
+        if opponents:
+            min_dist = float('inf')
+            closest_opp = None
+            all_opp_behind = True
+            
+            for opp_x, opp_y in opponents:
+                # Check if opponent is in front
+                if agent_x <= opp_x:
+                    all_opp_behind = False
+                
+                dist = math.hypot(opp_x - agent_x, opp_y - agent_y)
+                
+                # Track closest opponent overall
+                if dist < min_dist:
+                    min_dist = dist
+                    closest_opp = (opp_x, opp_y)
+                
+                # Classify direction
+                dx = opp_x - agent_x
+                dy = opp_y - agent_y
+                angle = math.degrees(math.atan2(dy, dx))
+                
+                if -22.5 <= angle < 22.5:
+                    direction = 'N'
+                elif 22.5 <= angle < 67.5:
+                    direction = 'NE'
+                elif 67.5 <= angle < 112.5:
+                    direction = 'E'
+                elif 112.5 <= angle < 157.5:
+                    direction = 'SE'
+                elif angle >= 157.5 or angle < -157.5:
+                    direction = 'S'
+                elif -157.5 <= angle < -112.5:
+                    direction = 'SW'
+                elif -112.5 <= angle < -67.5:
+                    direction = 'W'
+                elif -67.5 <= angle < -22.5:
+                    direction = 'NW'
+                
+                # Update opponent data if this is the closest opponent in this direction
+                if dist < dir_data[direction]['dist']:
+                    dir_data[direction] = {'dist': dist, 'pos': (opp_x, opp_y)}
+            
+            # Set opponent metrics
+            closest_opp_dist = min_dist / max_dist
+            closest_opp_angle = math.degrees(math.atan2(
+                closest_opp[1] - agent_y, closest_opp[0] - agent_x)) / 180.0
+            no_opponent_in_front = all_opp_behind
+        
+        # Determine pass directions by comparing team_data and dir_data
+
+        ### checck here for offside rule ba3dennnnnnnnnn mesh ma3mola
+        for direction in directions:
+            team_dist = team_data[direction]['dist']
+            opp_dist = dir_data[direction]['dist']
+            
+            # If there's a teammate and either no opponent or teammate is closer
+            if team_dist != float('inf') and (opp_dist == float('inf') or team_dist < opp_dist):
+                pass_directions[direction] = 1
+        
+        # Prepare return values (dir_data always contains opponent positions)
+        return (
+            closest_opp_dist, 
+            closest_opp_angle, 
+            no_opponent_in_front,
+            dir_data['N']['dist'], dir_data['NE']['dist'], dir_data['E']['dist'], dir_data['SE']['dist'],
+            dir_data['S']['dist'], dir_data['SW']['dist'], dir_data['W']['dist'], dir_data['NW']['dist'],
+            pass_directions['N'], pass_directions['NE'], pass_directions['E'], pass_directions['SE'],
+            pass_directions['S'], pass_directions['SW'], pass_directions['W'], pass_directions['NW']
+        )
+        
+
+
+
 
     @staticmethod
     def extract_features(agent_x, agent_y, ball_x, ball_y, teammates, opponents):
@@ -34,19 +160,11 @@ class SoccerFeatureExtractor:
         
         # Angle to goal (normalized -1 to 1)
         angle_goal = SoccerFeatureExtractor.get_angle(agent_x, agent_y, *GOAL_POSITION) / 180.0
-        
-        # Ball possession (1 if has ball, else 0)
-        has_ball = 1.0 if SoccerFeatureExtractor.get_distance(agent_x, agent_y, ball_x, ball_y) < 2.0 else 0.0
-        
-        # Closest opponent distance and angle
-        if opponents:
-            closest_opp_dist = min(SoccerFeatureExtractor.get_distance(agent_x, agent_y, x, y) for x, y in opponents) / max_dist
-            closest_opp = min(opponents, key=lambda p: SoccerFeatureExtractor.get_distance(agent_x, agent_y, p[0], p[1]))
-            closest_opp_angle = SoccerFeatureExtractor.get_angle(agent_x, agent_y, *closest_opp) / 180.0
-        else:
-            closest_opp_dist = 1.0
-            closest_opp_angle = 0.0
-        
+
+        # Closest opponent distance and 
+        closest_opp_dist, closest_opp_angle, no_opponent_in_front, closest_N, closest_NE, closest_E, closest_SE, closest_S, closest_SW, closest_W, closest_NW,pass_N_flag,pass_NE_flag,pass_E_flag,pass_SE_flag,pass_S_flag,pass_SW_flag,pass_W_flag,pass_NW_flag = SoccerFeatureExtractor.get_opponent_and_pass_data(agent_x, agent_y, teammates, opponents)
+
+      
         # Closest teammate distance and angle (excluding self)
         if len(teammates) > 1:
             teammates_other = [p for p in teammates if not (math.isclose(p[0], agent_x) and math.isclose(p[1], agent_y))]
@@ -64,8 +182,37 @@ class SoccerFeatureExtractor:
             closest_opp_angle,
             closest_team_dist,
             closest_team_angle,
-            has_ball
+            no_opponent_in_front,
+            closest_N,
+            closest_NE,
+            closest_E,
+            closest_SE,
+            closest_S,
+            closest_SW,
+            closest_W,
+            closest_NW,
         ], dtype=np.float32)
+
+
+
+
+######################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
