@@ -87,11 +87,11 @@ class Tracker:
             cls_id = frame_detection[3]
             track_id = frame_detection[4]
 
-            if cls_id == cls_names_inv['player']:
+            if cls_id == cls_names_inv['player'] or cls_id == cls_names_inv['referee']:
                 frame_tracks["players"][track_id] = {"bbox": bbox}
 
-            if cls_id == cls_names_inv['referee']:
-                frame_tracks["referees"][track_id] = {"bbox": bbox}
+            # if cls_id == cls_names_inv['referee']:
+            #     frame_tracks["referees"][track_id] = {"bbox": bbox}
 
         for frame_detection in detection_supervision:
             bbox = frame_detection[0].tolist()
@@ -106,7 +106,7 @@ class Tracker:
                 print("BALLLL CONFFF" , frame_detection[2])
                 ball_count += 1
 
-        return frame_tracks , detection_supervision
+        return frame_tracks 
     
     def replace_outliers_based_on_distance(
         self,

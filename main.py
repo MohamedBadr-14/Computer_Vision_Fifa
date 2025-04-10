@@ -17,7 +17,7 @@ def get_kmeans(frame , model , team_assigner):
 
 def main():
     # Read Video
-    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/general_small.mp4')
+    video_frames = read_video('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/general_training.mp4')
     # k_means = cv2.imread('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/kmeans.png')
     # np.save("full_video.npy", video_frames)
     all_tracks = { 
@@ -39,13 +39,23 @@ def main():
     print("team assign time", after_team_assign - team_assign_time)
     player_assigner =PlayerBallAssigner()
     # get_kmeans(frame=k_means, model = kmeans_track, team_assigner=team_assigner)
-    
+    team_assigner = TeamAssigner()
 
+    c=25
+    video_frames = [video_frames[23]]
     print("video_frames",len(video_frames))
     while(test<len(video_frames)): #just for testing
         frame = video_frames[test]
+        cv2.imwrite("frame.png", frame)
+
         test+=1 #test
-        frame_tracks , detection_supervision = tracker.get_object_track(frame)
+        frame_tracks  = tracker.get_object_track(frame)
+        if test == c:
+            cv2.imshow("First Frame", frame)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            c+=20
+
 
 
 
@@ -70,6 +80,7 @@ def main():
         # camera movement estimator
         if counter == 0:
             camera_movement_estimator = CameraMovementEstimator(frame)
+            counter += 1
         
         camera_movement_per_frame = camera_movement_estimator.get_camera_movement(frame,
                                                                                     read_from_stub=False,
@@ -81,30 +92,33 @@ def main():
 
 
         # Assign Player Teams
-        # if counter == 0:
-        #     # team_assigner.assign_team_color(frame, 
-        #     #                             frame_tracks['players'])
-        #     counter += 1
+        # print(tracks['players'][0],'playerss')
+        # cv2.imshow("First Frame", video_frames[0])
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        team_assigner.assign_team_color(frame, frame_tracks["players"])
 
-        time_bef_assign = time.time()
-        crops = team_assigner.extract_crops(frame, detection_supervision)
-        embedings = team_assigner.extract_embeddings(crops)
-        clusters = team_assigner.predict_kmeans(embedings , fit_transformed)
-        fit_transformed = True
-        print("time assign" , time.time()-time_bef_assign)
-        print("clusters", clusters)
-        
 
-        players_count = 0
+        for player_id, track in frame_tracks["players"].items():
+            # #print(tracks['players'][frame_num][player_id].keys())
+            # team_conf = tracks['players'][frame_num][player_id]['team_confidence'] if "team_confidence" in tracks['players'][frame_num][player_id].keys() else None
+            # team_assigner.assign_team_color(
+            #     frame, frame_tracks["players"]
+            # )
+            team = team_assigner.get_player_team(
+                frame, track["bbox"], player_id
+            )
+            # #print(conf)
+            frame_tracks["players"][player_id]["team"] = team
+            frame_tracks["players"][player_id]["team_color"] = (
+                team_assigner.team_colors[team]
+            )
+            # if count < 10:
+            #     #print(track)
+            #     count+=1
 
-        for player_id, track in frame_tracks['players'].items():
-            # Assign team to the player
-            # team = team_assigner.get_player_team(frame, track['bbox'], player_id)
 
-            # Add team and team color information to the player's track
-            frame_tracks['players'][player_id]['team'] = clusters[players_count]
-            frame_tracks['players'][player_id]['team_color'] = [100,100,100] if clusters[players_count] == 1 else [255,255,255]
-            players_count += 1
+        team_assigned = time.time()
 
         # Assign Ball to Player
         if frame_tracks['ball']: 
@@ -120,6 +134,7 @@ def main():
         else:
             team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
 
+        print(frame_tracks)
 
         all_tracks["players"].append(frame_tracks["players"])
         all_tracks["referees"].append(frame_tracks["referees"])
@@ -131,7 +146,7 @@ def main():
 
 
     # # Save video
-    save_video(output_video_frames , 'output_videos/yarabb.mp4')
+    save_video(output_video_frames , 'output_videos/final_isa.mp4')
     
 
 if __name__ == '__main__':
