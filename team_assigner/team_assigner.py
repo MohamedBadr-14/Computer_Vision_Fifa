@@ -1,5 +1,6 @@
 from sklearn.cluster import KMeans
 import numpy as np
+import cv2
 
 
 class TeamAssigner:
@@ -47,13 +48,43 @@ class TeamAssigner:
         ]
         non_player_cluster = max(set(corner_clusters), key=corner_clusters.count)
         # player_cluster = 1-non_player_cluster
-        # #print(player_cluster)
+        # ##print(player_cluster)
         # Find the cluster with the maximum number of assignees that is not the non_player_cluster
-        assignees_count = np.bincount(labels)
-        assignees_count[non_player_cluster] = -1  # Exclude the non_player_cluster
-        player_cluster = np.argmax(assignees_count)
+        yellow_color = np.array([0, 255, 255])  # Example yellow color in RGB
+        blue_color = np.array([255, 0, 0])  # Example blue color in RGB
+        # Calculate the distances to yellow and blue for all clusters except the non_player_cluster
+        remaining_clusters = [
+            i for i in range(len(kmeans.cluster_centers_)) if i != non_player_cluster
+        ]
+        distances_to_yellow = [
+            np.linalg.norm(kmeans.cluster_centers_[i] - yellow_color)
+            for i in remaining_clusters
+        ]
+        distances_to_blue = [
+            np.linalg.norm(kmeans.cluster_centers_[i] - blue_color)
+            for i in remaining_clusters
+        ]
+        # print(kmeans.cluster_centers_,'cluster centers')
+        # #print("distances_to_yellow", distances_to_yellow)
+        # #print("distances_to_blue", distances_to_blue)
+        # Find the cluster with the minimum distance to either yellow or blue
+        min_distance_cluster = remaining_clusters[
+            np.argmin(
+                [
+                    min(distances_to_yellow[i], distances_to_blue[i])
+                    for i in range(len(remaining_clusters))
+                ]
+            )
+        ]
+        # #print("min_distance_cluster", min_distance_cluster)
+        player_cluster = min_distance_cluster
         player_color = kmeans.cluster_centers_[player_cluster]
-
+        # print(player_color, 'player color')
+        # cv2.namedWindow(f'{player_color}', cv2.WINDOW_NORMAL)
+        # cv2.setWindowProperty(f'{player_color}', int(cv2.WND_PROP_FULLSCREEN/2), int(cv2.WINDOW_FULLSCREEN/2))
+        # cv2.imshow(f'{player_color}', top_half_image)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         return player_color
 
     def assign_team_color(self, frame, player_detections, color_tolerance=30):
@@ -65,6 +96,7 @@ class TeamAssigner:
                 bbox = player_detection["bbox"]
                 player_color = self.get_player_color(frame, bbox)
                 player_colors.append(player_color)
+            # #print("player_colors", player_colors)
 
             kmeans = KMeans(n_clusters=2, init="k-means++", n_init=10)
             kmeans.fit(player_colors)
@@ -102,21 +134,19 @@ class TeamAssigner:
 
             self.team_colors[1] = find_most_repeated_color(team_1_colors)
             self.team_colors[2] = find_most_repeated_color(team_2_colors)
-        
-        self.team_colors[1] = [46.477 ,34.997,28.281]
-        self.team_colors[2] = [80.469,172.11,154.09]
+
         self.counter += 1
-        # print("Team 1 color: ", self.team_colors[1])
-        # print("Team 2 color: ", self.team_colors[2])
+        # #print("Team 1 color: ", self.team_colors[1])
+        # #print("Team 2 color: ", self.team_colors[2])
 
     def get_player_team(self, frame, player_bbox, player_id):
-        # #print("conffffff" , team_confidence , team_confidence and team_confidence > 0.7)
+        # ##print("conffffff" , team_confidence , team_confidence and team_confidence > 0.7)
         if (
             player_id in self.player_team_dict
             and self.player_team_confidence[player_id]
-            and self.player_team_confidence[player_id] > 0.9
+            and self.player_team_confidence[player_id] > 0.97
         ):
-            # print("dakhal" )
+            # print("dakhal", player_id )
             return self.player_team_dict[player_id]
 
         player_color = self.get_player_color(frame, player_bbox)
@@ -129,15 +159,16 @@ class TeamAssigner:
         team_id = min(
             distances, key=distances.get
         )  # Get the team with the closest color
-
+        # print(distances,'disss')
+        # print(team_id,'team_id')
         # Normalize confidence score
         max_distance = max(distances.values())
         normalized_confidence = 1 - (distances[team_id] / max_distance)
         if player_id == 91:
             team_id = 1
-        # print("team_id", team_id)
+        # #print("team_id", team_id)
         # print('normalized_confidence', normalized_confidence)
-        # print('player_id', player_id)
+        # print('player_id', player_id, player_color, team_id)
         self.player_team_dict[player_id] = team_id
         self.player_team_confidence[player_id] = normalized_confidence
 

@@ -35,7 +35,7 @@ def main():
     
     # frame = np.load("frame.npy") to load frames here
 
-    print("video_frames",len(video_frames))
+    #print("video_frames",len(video_frames))
     while(test<len(video_frames)): #just for testing
         frame = video_frames[test]
         test+=1 #test
@@ -54,17 +54,17 @@ def main():
         
             # Replace Outliers
             if frame_tracks['ball']:
-                # print("before func", frame_tracks['ball'])
+                # #print("before func", frame_tracks['ball'])
                 frame_tracks['ball'] = tracker.replace_outliers_based_on_distance(frame_tracks['ball'], 100)
-                # print("after func", frame_tracks['ball'])
+                # #print("after func", frame_tracks['ball'])
 
             #interpolate again
-            # print("before interpolation", frame_tracks['ball'])
+            # #print("before interpolation", frame_tracks['ball'])
             if frame_tracks['ball']:
                 frame_tracks['ball'][1]['bbox'] = tracker.interpolate_ball_positions(frame_tracks['ball'])
             else: 
                 frame_tracks['ball'] = {1: {'bbox': tracker.interpolate_ball_positions(frame_tracks['ball'])}}
-            # print("after interpolation", frame_tracks['ball'])
+            # #print("after interpolation", frame_tracks['ball'])
 
         # Get object positions 
         tracker.add_position_to_tracks(frame_tracks)
@@ -87,8 +87,8 @@ def main():
             testing = time.time()
             team_assigner.assign_team_color(frame, 
                                         frame_tracks['players'])
-            # print("time team color" , time.time()-testing)
-            print("team_colors", team_assigner.team_colors)
+            # #print("time team color" , time.time()-testing)
+            #print("team_colors", team_assigner.team_colors)
             counter += 1
 
 
@@ -108,7 +108,7 @@ def main():
 
         #     if assigned_player != -1:
         #         frame_tracks['players'][assigned_player]['has_ball'] = True
-        #         # print("assigned_player", assigned_player , test)
+        #         # #print("assigned_player", assigned_player , test)
         #         team_ball_control.append(frame_tracks['players'][assigned_player]['team'])
         #     else:
         #         team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
@@ -173,7 +173,7 @@ class TeamAssigner:
         corner_clusters = [clustered_image[0,0],clustered_image[0,-1],clustered_image[-1,0],clustered_image[-1,-1]]
         non_player_cluster = max(set(corner_clusters),key=corner_clusters.count)
         # player_cluster = 1-non_player_cluster
-        # print(player_cluster)
+        # #print(player_cluster)
         # Find the cluster with the maximum number of assignees that is not the non_player_cluster
         assignees_count = np.bincount(labels)
         assignees_count[non_player_cluster] = -1  # Exclude the non_player_cluster
@@ -198,13 +198,13 @@ class TeamAssigner:
 
         self.team_colors[1] = kmeans.cluster_centers_[0]
         self.team_colors[2] = kmeans.cluster_centers_[1]
-        # print("Team 1 color: ",self.team_colors[1])
-        # print("Team 2 color: ",self.team_colors[2])
+        # #print("Team 1 color: ",self.team_colors[1])
+        # #print("Team 2 color: ",self.team_colors[2])
 
     def get_player_team(self,frame,player_bbox,player_id):
-        # print("conffffff" , team_confidence , team_confidence and team_confidence > 0.7)
+        # #print("conffffff" , team_confidence , team_confidence and team_confidence > 0.7)
         if player_id in self.player_team_dict and self.player_team_confidence[player_id] and self.player_team_confidence[player_id] > 0.85:
-            # print("dakhal" )
+            # #print("dakhal" )
             return self.player_team_dict[player_id]
 
         player_color = self.get_player_color(frame,player_bbox)
@@ -219,14 +219,14 @@ class TeamAssigner:
         # team_id = self.kmeans.predict(player_color.reshape(1,-1))[0]
         team_id+=1
         # if player_id in self.player_team_dict and self.player_team_confidence[player_id] and self.player_team_confidence[player_id] < 0.83:
-        #     print("confidence" , normalized_confidence , player_id)
+        #     #print("confidence" , normalized_confidence , player_id)
 
         #get average color of given bounding box using np.mean()
         # image = frame[int(player_bbox[1]):int(player_bbox[3]),int(player_bbox[0]):int(player_bbox[2])]
         # player_color_rgb = np.mean(image, axis=(0,1))
         # player_avg = np.mean(player_color_rgb)
         # if player_id == 12:
-        #     print(player_avg)
+        #     #print(player_avg)
         # if player_avg < 100:
         #     team_id = 1
         # else:

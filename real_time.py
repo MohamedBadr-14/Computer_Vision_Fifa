@@ -5,10 +5,11 @@ from mss import mss
 import cv2
 import keyboard  # For global key detection
 
+
 def frame_processor(queue, stop_event):
     """
     Processes frames from the queue.
-    
+
     :param queue: Multiprocessing queue to receive frames.
     :param stop_event: Event to stop processing.
     """
@@ -20,25 +21,30 @@ def frame_processor(queue, stop_event):
             # Perform your processing here
             # Example: Display the frame
             # cv2.imshow("Processed Frame", frame)
-            print('frame_processed')
-
+            # print('frame_processed')
 
             # Example: Save the frame
             # cv2.imwrite(f"frame_{int(time.time())}.png", frame)
 
-    print("Frame processing stopped.")
+    # print("Frame processing stopped.")
     cv2.destroyAllWindows()
+
 
 def screen_recorder(queue, stop_event, capture_event):
     """
     Captures the screen and sends frames to the queue when triggered by an event.
-    
+
     :param queue: Multiprocessing queue to send frames.
     :param stop_event: Event to stop the recording.
     :param capture_event: Event to trigger a screenshot.
     """
     # Define the screen region to capture (entire screen in this case)
-    monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}  # Adjust to your screen resolution
+    monitor = {
+        "top": 0,
+        "left": 0,
+        "width": 1920,
+        "height": 1080,
+    }  # Adjust to your screen resolution
 
     # Initialize mss
     with mss() as sct:
@@ -59,26 +65,28 @@ def screen_recorder(queue, stop_event, capture_event):
             # Clear the capture event for the next trigger
             capture_event.clear()
 
-    print("Screen recording stopped.")
+    # print("Screen recording stopped.")
+
 
 def global_key_listener(stop_event, capture_event):
     """
     Listens for global key presses to stop the processes or trigger a screenshot.
-    
+
     :param stop_event: Event to signal stopping.
     :param capture_event: Event to trigger a screenshot.
     """
-    print("Press 's' to take a screenshot, 'q' to stop the processes.")
+    # print("Press 's' to take a screenshot, 'q' to stop the processes.")
     while not stop_event.is_set():
-        if keyboard.is_pressed('s'):  # Trigger a screenshot
+        if keyboard.is_pressed("s"):  # Trigger a screenshot
             capture_event.set()
-            print("Screenshot triggered.")
+            # print("Screenshot triggered.")
             time.sleep(0.5)  # Debounce to avoid multiple triggers
-        elif keyboard.is_pressed('q'):  # Stop the processes
+        elif keyboard.is_pressed("q"):  # Stop the processes
             stop_event.set()
-            print("'q' pressed. Stopping processes...")
+            # print("'q' pressed. Stopping processes...")
             break
         time.sleep(0.1)  # Small delay to avoid busy-waiting
+
 
 if __name__ == "__main__":
     # Create a queue to share frames between processes
@@ -90,15 +98,13 @@ if __name__ == "__main__":
 
     # Create and start the screen recorder process
     recorder_process = multiprocessing.Process(
-        target=screen_recorder,
-        args=(queue, stop_event, capture_event)
+        target=screen_recorder, args=(queue, stop_event, capture_event)
     )
     recorder_process.start()
 
     # Create and start the frame processor process
     processor_process = multiprocessing.Process(
-        target=frame_processor,
-        args=(queue, stop_event)
+        target=frame_processor, args=(queue, stop_event)
     )
     processor_process.start()
 
@@ -109,4 +115,4 @@ if __name__ == "__main__":
     recorder_process.join()
     processor_process.join()
 
-    print("Main program exited.")
+    # print("Main program exited.")
