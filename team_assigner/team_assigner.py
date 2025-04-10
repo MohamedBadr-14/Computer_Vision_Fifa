@@ -7,6 +7,8 @@ from more_itertools import chunked
 from transformers import AutoProcessor, SiglipVisionModel
 import umap
 import joblib
+from sklearn.utils.validation import check_is_fitted
+from sklearn.exceptions import NotFittedError
 
 
 
@@ -19,10 +21,10 @@ class TeamAssigner:
         self.team_colors = {}
         self.player_team_dict = {}
         self.player_team_confidence = {}
-        self.reducer = joblib.load("models/umap_reducer.pkl")
-        self.kmeans_trained = joblib.load("models/kmeans_model.pkl")
-        self.embeddings = SiglipVisionModel.from_pretrained(SIGLIP_MODEL_PATH).to(self.device)
-        self.embeddings_processor = AutoProcessor.from_pretrained(SIGLIP_MODEL_PATH)
+        self.reducer = joblib.load("models/reducer_model_2.pkl")
+        self.kmeans_trained = joblib.load("models/kmeans_trained_2.pkl")
+        self.EMBEDDINGS_MODEL = SiglipVisionModel.from_pretrained(SIGLIP_MODEL_PATH).to(self.DEVICE)
+        self.EMBEDDINGS_PROCESSOR = AutoProcessor.from_pretrained(SIGLIP_MODEL_PATH)
         
 
     def get_clustering_model(self, hue_2d):
@@ -113,8 +115,7 @@ class TeamAssigner:
 
         return team_id
     
-
-    def extract_crops(self, frame, detections):
+    def extract_crops(self,frame, detections):
         PLAYER_ID = 4
         
         detections = detections.with_nms(threshold=0.5, class_agnostic=True)
@@ -129,7 +130,7 @@ class TeamAssigner:
 
         return crops
     
-    def extract_embeddings(self, crops):
+    def extract_embeddings(self,crops):
         # SIGLIP_MODEL_PATH = 'google/siglip-base-patch16-224'
 
         # DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -143,21 +144,29 @@ class TeamAssigner:
         data = []
         with torch.no_grad():
             for batch in batches:
-                inputs = self.embeddings_processor(images=batch, return_tensors="pt").to(self.device)
-                outputs = self.embeddings(**inputs)
+                inputs = self.EMBEDDINGS_PROCESSOR(images=batch, return_tensors="pt").to(self.DEVICE)
+                outputs = self.EMBEDDINGS_MODEL(**inputs)
                 embeddings = torch.mean(outputs.last_hidden_state, dim=1).cpu().numpy()
                 data.append(embeddings)
 
         data = np.concatenate(data)
+        print("data" , data.shape)
 
         return data
-    
-    def predict_kmeans(self, data , first_time):
-        projections = self.reducer.fit_transform(data)
-        print("projections" , projections.shape)
-        clusters = self.kmeans_trained.predict(projections)
+
+    def predict_kmeans(self,data , fit_transformed): 
+
+        try:
+            check_is_fitted(self.reducer)
+            print("fitted")
+        except NotFittedError:
+            print("The reducer is not fitted yet.")
+        # projections = self.reducer.transform(data)
+        # print("projections" , projections.shape)
+        # clusters = self.kmeans_trained.predict(projections)
+        clusters = [0,0,0,0,0,0]
+        
         
         return clusters
 
-
-    
+        

@@ -42,6 +42,7 @@ def main():
     
 
     print("video_frames",len(video_frames))
+    video_frames = [video_frames[7]]
     while(test<len(video_frames)): #just for testing
         frame = video_frames[test]
         test+=1 #test
