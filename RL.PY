@@ -5,10 +5,73 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from collections import deque
+import matplotlib.pyplot as plt
 
-# Constants
+scene={
+  "players": {
+    "1": {
+      "bbox": [1050.006103515625, 492.58447265625, 1097.567138671875, 558.914794921875],
+      "position": [1073, 558],
+      "position_adjusted": [1073, 558],
+      "position_transformed": [55.88541793823242, 17.049999237060547],
+      "team": 1,
+      "team_color": [46.477, 34.997, 28.281]
+    },
+    "2": {
+      "bbox": [618.8065795898438, 443.68743896484375, 670.1077880859375, 504.7702331542969],
+      "position": [644, 504],
+      "position_adjusted": [644, 504],
+      "position_transformed": [33.54166793823242, 15.399999618530273],
+      "team": 2,
+      "team_color": [80.469, 172.11, 154.09]
+    },
+    "3": {
+      "bbox": [696.1344604492188, 596.143798828125, 758.9864501953125, 678.9885864257812],
+      "position": [727, 678],
+      "position_adjusted": [727, 678],
+      "position_transformed": [37.86458206176758, 20.71666717529297],
+      "team": 2,
+      "team_color": [80.469, 172.11, 154.09],
+      "has_ball": True
+    },
+    "4": {
+      "bbox": [711.8679809570312, 353.0068664550781, 748.5867919921875, 408.91070556640625],
+      "position": [730, 408],
+      "position_adjusted": [730, 408],
+      "position_transformed": [38.02083206176758, 12.466666221618652],
+      "team": 2,
+      "team_color": [46.477, 34.997, 28.281]
+    },
+    "5": {
+      "bbox": [923.8346557617188, 788.353271484375, 972.9783325195312, 892.04736328125],
+      "position": [948, 892],
+      "position_adjusted": [948, 892],
+      "position_transformed": [49.375, 27.255556106567383],
+      "team": 1,
+      "team_color": [46.477, 34.997, 28.281]
+    },
+    "6": {
+      "bbox": [837.7654418945312, 441.9215087890625, 877.78662109375, 502.35601806640625],
+      "position": [857, 502],
+      "position_adjusted": [857, 502],
+      "position_transformed": [44.63541793823242, 15.338889122009277],
+      "team": 1,
+      "team_color": [46.477, 34.997, 28.281]
+    }
+  },
+  "referees": {},
+  "ball": {
+    "1": {
+      "conf": 0.35058585,
+      "bbox": [741.3411865234375, 657.851318359375, 762.0593872070312, 680.5961303710938],
+      "position": [751, 669],
+      "position_adjusted": [751, 669],
+      "position_transformed": [39.11458206176758, 20.441667556762695]
+    }
+  }
+}
 FIELD_WIDTH = 105
-FIELD_HEIGHT = 68
+FIELD_HEIGHT = 33
 GOAL_POSITION = (105, 34)  # Right side goal
 NUM_PLAYERS = 22  # 11 players per team
 NUM_ACTIONS = 22  # 8 moves + 8 dribbles + 3 shoots + 3 passes
@@ -30,7 +93,6 @@ class SoccerFeatureExtractor:
     @staticmethod
 
     def get_opponent_and_pass_data(agent_x, agent_y, teammates, opponents):
-        max_dist = math.sqrt(FIELD_WIDTH**2 + FIELD_HEIGHT**2)
         
         # Initialize closest opponent variables
         closest_opp_dist = 1.0
@@ -47,28 +109,40 @@ class SoccerFeatureExtractor:
 
         # Process teammates first (store temporarily)
         for mate_x, mate_y in teammates:
-            dx = mate_x - agent_x
-            dy = mate_y - agent_y
+            dx =mate_x-agent_x
+            dy =mate_y-agent_y  
             dist = math.hypot(dx, dy)
             angle = math.degrees(math.atan2(dy, dx))
-            
-            # Classify direction
+            plt.figure(figsize=(8, 6))
+            plt.plot([agent_x, mate_x], [agent_y, mate_y], 'b-', label=f"Distance: {dist:.2f}, Angle: {angle:.2f}°")
+            plt.scatter([agent_x, mate_x], [agent_y, mate_y], color=['red', 'green'], s=100, label=['Agent', 'Mate'])
+            plt.title(f"Agent to Mate: Distance = {dist:.2f}, Angle = {angle:.2f}°")
+            plt.xlabel("X-axis")
+            plt.ylabel("Y-axis")
+            plt.legend()
+            plt.grid(True)
+            plt.axis('equal')  # Equal scaling for x and y
+            plt.show()
+    
+             
             if -22.5 <= angle < 22.5:
-                direction = 'N'
+                direction = 'E'
             elif 22.5 <= angle < 67.5:
                 direction = 'NE'
             elif 67.5 <= angle < 112.5:
-                direction = 'E'
+                direction = 'N'
             elif 112.5 <= angle < 157.5:
-                direction = 'SE'
+                direction = 'NW'
             elif angle >= 157.5 or angle < -157.5:
-                direction = 'S'
+                direction = 'W'
             elif -157.5 <= angle < -112.5:
                 direction = 'SW'
             elif -112.5 <= angle < -67.5:
-                direction = 'W'
+                direction = 'S'
             elif -67.5 <= angle < -22.5:
-                direction = 'NW'
+                direction = 'SE'
+            
+            print(direction)    
             
             # Update team data if this is the closest teammate in this direction
             if dist < team_data[direction]['dist']:
@@ -98,30 +172,49 @@ class SoccerFeatureExtractor:
                 angle = math.degrees(math.atan2(dy, dx))
                 
                 if -22.5 <= angle < 22.5:
-                    direction = 'N'
+                    direction = 'E'
                 elif 22.5 <= angle < 67.5:
                     direction = 'NE'
                 elif 67.5 <= angle < 112.5:
-                    direction = 'E'
+                    direction = 'N'
                 elif 112.5 <= angle < 157.5:
-                    direction = 'SE'
+                    direction = 'NW'
                 elif angle >= 157.5 or angle < -157.5:
-                    direction = 'S'
+                    direction = 'W'
                 elif -157.5 <= angle < -112.5:
                     direction = 'SW'
                 elif -112.5 <= angle < -67.5:
-                    direction = 'W'
+                    direction = 'S'
                 elif -67.5 <= angle < -22.5:
-                    direction = 'NW'
+                    direction = 'SE'
                 
                 # Update opponent data if this is the closest opponent in this direction
                 if dist < dir_data[direction]['dist']:
                     dir_data[direction] = {'dist': dist, 'pos': (opp_x, opp_y)}
             
             # Set opponent metrics
-            closest_opp_dist = min_dist / max_dist
-            closest_opp_angle = math.degrees(math.atan2(
-                closest_opp[1] - agent_y, closest_opp[0] - agent_x)) / 180.0
+            closest_opp_dist = min_dist 
+            # closest_opp_angle = math.degrees(math.atan2(
+            #     agent_y-closest_opp[1] , agent_x-closest_opp[0])) 
+            dx=closest_opp[0]-agent_x  
+            dy =closest_opp[1]  -agent_y
+            closest_opp_angle = math.degrees(math.atan2(dy, dx))
+            plt.figure(figsize=(8, 6))
+            plt.plot([closest_opp[0],agent_x ], [ closest_opp[1],agent_y], 'b-', label=f"Distance: {closest_opp_dist:.2f}, Angle: {closest_opp_angle:.2f}°")
+            plt.scatter([closest_opp[0],agent_x], [ closest_opp[1],agent_y], color=['red', 'green'], s=100, label=['Agent', 'Mate'])
+            plt.xlabel("X-axis")
+            plt.ylabel("Y-axis")
+            plt.legend()
+            plt.grid(True)
+            plt.axis('equal')  # Equal scaling for x and y
+            plt.show()
+            # Classify direction
+            print("dx,dy")
+            print(agent_x,agent_y)
+            print(dx,dy)
+            print(closest_opp[0],closest_opp[1])    
+           
+            print(closest_opp_angle)
             no_opponent_in_front = all_opp_behind
         
         # Determine pass directions by comparing team_data and dir_data
@@ -151,37 +244,33 @@ class SoccerFeatureExtractor:
 
 
     @staticmethod
-    def extract_features(agent_x, agent_y, ball_x, ball_y, teammates, opponents):
+    def extract_features(agent_x, agent_y,teammates, opponents):
         # Normalized features
         max_dist = math.sqrt(FIELD_WIDTH**2 + FIELD_HEIGHT**2)
         
         # Distance to goal (normalized)
-        dist_goal = SoccerFeatureExtractor.get_distance(agent_x, agent_y, *GOAL_POSITION) / max_dist
+        # dist_goal = SoccerFeatureExtractor.get_distance(agent_x, agent_y, *GOAL_POSITION) / max_dist
         
         # Angle to goal (normalized -1 to 1)
-        angle_goal = SoccerFeatureExtractor.get_angle(agent_x, agent_y, *GOAL_POSITION) / 180.0
+        # angle_goal = SoccerFeatureExtractor.get_angle(agent_x, agent_y, *GOAL_POSITION) / 180.0
+
+        
+        # Angle to goal (in degrees) negebhommmmmmmmmmmmmmmm
+        dist_goal=0
+        angle_goal=0
 
         # Closest opponent distance and 
         closest_opp_dist, closest_opp_angle, no_opponent_in_front, closest_N, closest_NE, closest_E, closest_SE, closest_S, closest_SW, closest_W, closest_NW,pass_N_flag,pass_NE_flag,pass_E_flag,pass_SE_flag,pass_S_flag,pass_SW_flag,pass_W_flag,pass_NW_flag = SoccerFeatureExtractor.get_opponent_and_pass_data(agent_x, agent_y, teammates, opponents)
 
       
         # Closest teammate distance and angle (excluding self)
-        if len(teammates) > 1:
-            teammates_other = [p for p in teammates if not (math.isclose(p[0], agent_x) and math.isclose(p[1], agent_y))]
-            closest_team_dist = min(SoccerFeatureExtractor.get_distance(agent_x, agent_y, x, y) for x, y in teammates_other) / max_dist
-            closest_team = min(teammates_other, key=lambda p: SoccerFeatureExtractor.get_distance(agent_x, agent_y, p[0], p[1]))
-            closest_team_angle = SoccerFeatureExtractor.get_angle(agent_x, agent_y, *closest_team) / 180.0
-        else:
-            closest_team_dist = 1.0
-            closest_team_angle = 0.0
+
         
         return np.array([
             dist_goal,
             angle_goal,
             closest_opp_dist,
             closest_opp_angle,
-            closest_team_dist,
-            closest_team_angle,
             no_opponent_in_front,
             closest_N,
             closest_NE,
@@ -191,6 +280,14 @@ class SoccerFeatureExtractor:
             closest_SW,
             closest_W,
             closest_NW,
+            pass_N_flag,
+            pass_NE_flag,
+            pass_E_flag,
+            pass_SE_flag,
+            pass_S_flag,
+            pass_SW_flag,
+            pass_W_flag,
+            pass_NW_flag,
         ], dtype=np.float32)
 
 
@@ -283,30 +380,25 @@ class DQNAgent:
     def load(self, filename):
         self.model.load_state_dict(torch.load(filename))
 
-def generate_random_positions():
-    """Generate random positions for all 22 players and ball"""
-    positions = []
-    for _ in range(NUM_PLAYERS + 1):  # 22 players + ball
-        x = random.uniform(0, FIELD_WIDTH)
-        y = random.uniform(0, FIELD_HEIGHT)
-        positions.append((x, y))
-    return positions
 
-def get_state_from_positions(positions, player_idx):
+def get_state_from_positions(scene):
     """Convert raw positions to state for specific player"""
-    ball_pos = positions[-1]  # Last position is ball
-    player_pos = positions[player_idx]
-    
-    # Split into teammates and opponents
-    teammates = [positions[i] for i in range(NUM_PLAYERS) if i < NUM_PLAYERS//2]  # First 11 are teammates
-    opponents = [positions[i] for i in range(NUM_PLAYERS) if i >= NUM_PLAYERS//2]  # Last 11 are opponents
-    
-    # Remove self from teammates if present
-    if player_idx < NUM_PLAYERS//2:
-        teammates = [p for i, p in enumerate(teammates) if i != player_idx]
-    
+    teammates = []
+    opponents = []
+    player_pos = None
+    for player_id, player_data in scene['players'].items():
+        x, y = player_data['position_transformed']  
+        if player_data['team'] == 2:
+            if player_data.get('has_ball', False):
+                player_pos = (x, FIELD_HEIGHT-y)
+            else:
+                teammates.append((x, FIELD_HEIGHT-y))
+        else:
+            opponents.append((x, FIELD_HEIGHT-y))
+
+    print(player_pos)
     return SoccerFeatureExtractor.extract_features(
-        *player_pos, *ball_pos, teammates, opponents
+        player_pos[0],player_pos[1],  teammates, opponents
     )
 
 def calculate_reward(prev_state, new_state, action):
@@ -328,56 +420,59 @@ def calculate_reward(prev_state, new_state, action):
     
     return reward
 
-def simulate_random_training(agent, steps=10):
-    """Generate random positions and train on them"""
-    print("Training with random position data...")
+# def simulate_random_training(agent, steps=10):
+#     """Generate random positions and train on them"""
+#     print("Training with random position data...")
 
-# henaaaaaaaaaa
+# # henaaaaaaaaaa
     
-    for step in range(steps):
-        # Generate random positions for all players + ball
-        positions = generate_random_positions()
+#     for step in range(steps):
+#         # Generate random positions for all players + ball
+#         ## hena negeb el positions el 3adeya
+
         
-        # Pick a random player to control (first team only)
-        player_idx = random.randint(0, NUM_PLAYERS//2 - 1)
+#         # Pick a random player to control (first team only)
         
-        # Get initial state
-        state = get_state_from_positions(positions, player_idx)
+#         # Get initial state
+#         state = get_state_from_positions(positions, player_idx)
         
-        # Agent chooses action (1-22)
-        action = agent.act(state)
+#         # Agent chooses action (1-22)
+#         action = agent.act(state)
         
-        # Generate new random positions to simulate action effect
-        new_positions = generate_random_positions()
-        new_state = get_state_from_positions(new_positions, player_idx)
+#         # Generate new random positions to simulate action effect
+#         new_positions = generate_random_positions()
+#         new_state = get_state_from_positions(new_positions, player_idx)
         
-        # Calculate reward
-        reward = calculate_reward(state, new_state, action)
+#         # Calculate reward
+#         reward = calculate_reward(state, new_state, action)
         
-        # Random done flag (10% chance episode ends)
-        done = random.random() < 0.1
+#         # Random done flag (10% chance episode ends)
+#         done = random.random() < 0.1
         
-        # Remember experience
-        agent.remember(state, action, reward, new_state, done)
+#         # Remember experience
+#         agent.remember(state, action, reward, new_state, done)
         
-        # Train on batch
-        agent.replay(32)
+#         # Train on batch
+#         agent.replay(32)
         
-        print(f"Step {step+1}: Action {action}, Reward {reward:.2f}")
+#         print(f"Step {step+1}: Action {action}, Reward {reward:.2f}")
     
-    print("Training completed!")
+#     print("Training completed!")
 
 # Initialize agent
-state_size = 7  # Number of features
-action_size = NUM_ACTIONS
-agent = DQNAgent(state_size, action_size)
+# state_size = 7  # hena nehot rakamna
+# action_size = NUM_ACTIONS
+# agent = DQNAgent(state_size, action_size)
 
-# Train with random position data
-simulate_random_training(agent, steps=10)
-# save experience replay memory on text file
-with open("experience_replay.txt", "w") as f:
-    for experience in agent.memory:
-        f.write(f"{experience}\n")
+# # Train with random position data
+# simulate_random_training(agent, steps=10)
+# # save experience replay memory on text file
+# with open("experience_replay.txt", "w") as f:
+#     for experience in agent.memory:
+#         f.write(f"{experience}\n")
 
-# Save trained model
-agent.save("soccer_dqn_random_train.pth")
+# # Save trained model
+# agent.save("soccer_dqn_random_train.pth")
+
+print(get_state_from_positions(scene))
+ 
