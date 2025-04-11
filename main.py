@@ -6,71 +6,95 @@ from player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator import CameraMovementEstimator
 from view_transformer import ViewTransformer
 import cv2
+import os
+import pickle
+import sys
 import time
 
+def adjust_all_tracks(all_tracks):
+    loaded_tracks = {}
+    for key in all_tracks.keys():
+        loaded_tracks[key] = []
+        for frame_num, frame_tracks in enumerate(all_tracks[key]):
+            loaded_tracks[key].append({})
+            for track_id, track in frame_tracks.items():
+                #only load bounding box of each track
+                if key == "ball":
+                    print(track)
+                if "bbox" in track.keys():
+                    loaded_tracks[key][frame_num][track_id] = {
+                        "bbox": track["bbox"]
+                    }
+                    if "conf" in track.keys():
+                        loaded_tracks[key][frame_num][track_id]["conf"] = track["conf"]
+                else:
+                    loaded_tracks[key][frame_num][track_id] = {}
+    return loaded_tracks
 
-def get_kmeans(frame, model, team_assigner):
-    tracks = model.get_object_track(frame)
-    testing = time.time()
-    team_assigner.assign_team_color(frame, tracks["players"])
-    # print("time team color" , time.time()-testing)
 
 
-def main():
+def main(track_stubs=False):
     # Read Video
-    video_frames = read_video("C:/Users/DELL/Downloads/training_final.mp4")
-    # k_means = cv2.imread('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/input_videos/kmeans.png')
-    # np.save("full_video.npy", video_frames)
-    all_tracks = {"players": [], "referees": [], "ball": []}
+    print("Reading video..." , track_stubs)
+    video_frames = read_video("input_videos/general_small.mp4")
+    # video_frames = video_frames[:30]  # Downsample the video frames for testing
+    all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
+
+    if track_stubs and os.path.exists("stubs/tracks.pkl"):
+        with open("stubs/tracks.pkl", "rb") as f:
+            loaded_tracks = pickle.load(f)
 
     # Initialize Tracker
     tracker = Tracker("models/best_new.pt")
     counter = 0
     test = 0
-    fit_transformed = True
     team_ball_control = []
     view_transformer = ViewTransformer()
     team_assign_time = time.time()
     team_assigner = TeamAssigner()
     after_team_assign = time.time()
-    # print("team assign time", after_team_assign - team_assign_time)
+    print("team assign time", after_team_assign - team_assign_time)
     player_assigner = PlayerBallAssigner()
-    # get_kmeans(frame=k_means, model = kmeans_track, team_assigner=team_assigner)
     team_assigner = TeamAssigner()
 
-    # c=25
-    # video_frames = [video_frames[23]]
-    # print("video_frames",len(video_frames))
+    print(len(video_frames))
     while test < len(video_frames):  # just for testing
         frame = video_frames[test]
-        cv2.imwrite("frame.png", frame)
 
+        if track_stubs and os.path.exists("stubs/tracks.pkl"):
+            frame_tracks = {"players" : loaded_tracks["players"][test-1],
+                            "referees" : loaded_tracks["referees"][test-1],
+                            "ball" : loaded_tracks["ball"][test-1],
+                            "goalkeeper" : loaded_tracks["goalkeeper"][test-1],
+                            "goalpost" : loaded_tracks["goalpost"][test-1]}
+        else:
+            frame_tracks = tracker.get_object_track(frame)
         test += 1  # test
-        frame_tracks = tracker.get_object_track(frame)
-        # if test == c:
-        #     cv2.imshow("First Frame", frame)
-        #     cv2.waitKey(0)
-        #     cv2.destroyAllWindows()
-        #     c+=20
 
-        if all_tracks["ball"] and all_tracks["ball"][-1]:
+        #adjust goalkeeper detections
+        frame_tracks = tracker.adjust_goalkeeper_detection(frame_tracks , False)
 
-            # Replace Outliers
-            if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.2:
-                frame_tracks["ball"] = tracker.replace_outliers_based_on_distance(
-                    frame_tracks["ball"], 120
-                )
+        # Replace Outliers
+        if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.2 :
+            print("CONFF" , frame_tracks["ball"][1]["conf"])
+            frame_tracks["ball"] = tracker.replace_outliers_based_on_distance(
+                frame_tracks["ball"], 120
+            )
 
-            # interpolate again
+        # interpolate again
 
-            if frame_tracks["ball"]:
-                frame_tracks["ball"][1]["bbox"] = tracker.interpolate_ball_positions(
-                    frame_tracks["ball"]
-                )
-            else:
+        if frame_tracks["ball"]:
+            frame_tracks["ball"][1]["bbox"] = tracker.interpolate_ball_positions(
+                frame_tracks["ball"]
+            )
+        else:
+            print("ball not detected")
+            bbox = tracker.interpolate_ball_positions(frame_tracks["ball"])
+            if bbox:
                 frame_tracks["ball"] = {
                     1: {
-                        "bbox": tracker.interpolate_ball_positions(frame_tracks["ball"])
+                        "bbox": bbox,
+                        "conf": 0.11
                     }
                 }
 
@@ -142,16 +166,28 @@ def main():
         all_tracks["players"].append(frame_tracks["players"])
         all_tracks["referees"].append(frame_tracks["referees"])
         all_tracks["ball"].append(frame_tracks["ball"])
+        all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+        all_tracks["goalpost"].append(frame_tracks["goalpost"])
 
     team_ball_control = np.array(team_ball_control)
+    to_bo_loaded_tracks = adjust_all_tracks(all_tracks)
+    # Save all tracks to stub
+    if not os.path.exists("stubs"):
+        os.makedirs("stubs")
+    with open("stubs/tracks.pkl", "wb") as f:
+        pickle.dump(to_bo_loaded_tracks, f)
+
     # # Draw output
     output_video_frames = tracker.draw_annotations(
         video_frames, all_tracks, team_ball_control
     )
 
     # # Save video
-    save_video(output_video_frames, "output_videos/final_isa.mp4")
+    save_video(output_video_frames, "output_videos/stubs.mp4")
 
 
 if __name__ == "__main__":
-    main()
+    track_stubs = False
+    if len(sys.argv) > 1 :
+        track_stubs = sys.argv[1]
+    main(track_stubs)

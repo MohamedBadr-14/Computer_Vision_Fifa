@@ -8,7 +8,7 @@ import cv2
 import sys
 
 sys.path.append("../")
-from utils import get_center_of_bbox, get_bbox_width, get_foot_position
+from utils import get_center_of_bbox, get_bbox_width, get_foot_position,measure_distance
 
 
 class Tracker:
@@ -18,17 +18,57 @@ class Tracker:
         self.ball_positions_history = []
         self.last_valid_position = None
         self.frame_num = 0
+        self.max_player_post_distance = 400
 
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
                 bbox = track_info["bbox"]
                 if object_type == "ball":
-                    # #print("bbox", bbox)
+                    print("bbox", bbox)
                     position = get_center_of_bbox(bbox)
                 else:
                     position = get_foot_position(bbox)
                 frame_tracks[object_type][track_id]["position"] = position
+
+    def adjust_goalkeeper_detection(self, frame_tracks , test):
+        if not frame_tracks["goalkeeper"] and frame_tracks["goalpost"]:
+            print("DAKHALL HENAAA")
+            post_position = get_center_of_bbox(frame_tracks["goalpost"][1]["bbox"])
+
+            miniumum_distance = 99999
+            goalkeeper=-1
+
+            for player_id, player in frame_tracks["players"].items():
+                player_bbox = player['bbox']
+
+                distance_left = measure_distance((player_bbox[0],player_bbox[-1]),post_position)
+                distance_right = measure_distance((player_bbox[2],player_bbox[-1]),post_position)
+                distance = min(distance_left,distance_right)
+
+                if distance < self.max_player_post_distance:
+                    if distance < miniumum_distance:
+                        miniumum_distance = distance
+                        goalkeeper = player_id
+            if goalkeeper != -1:
+                frame_tracks["goalkeeper"][1] = {
+                    "bbox": frame_tracks["players"][goalkeeper]["bbox"],
+                    "conf": None, #BADRR
+                }
+                print("GOALKEEPER DETECTED", goalkeeper, frame_tracks["goalkeeper"][1])
+                del frame_tracks["players"][goalkeeper] #baheb pythonnn
+
+        elif frame_tracks["goalkeeper"] and frame_tracks["goalpost"]:
+            # get the distance between the goalkeeper and the goalpost
+            post_position = get_center_of_bbox(frame_tracks["goalpost"][1]["bbox"])
+            goalkeeper_position = get_center_of_bbox(
+                frame_tracks["goalkeeper"][1]["bbox"]
+            )
+            distance = measure_distance(goalkeeper_position, post_position)
+            # print("distance", distance)
+            print("GOAL", distance)
+        
+        return frame_tracks  
 
     def interpolate_ball_positions(self, ball_position):
         self.ball_positions_history.append(ball_position.get(1, {}).get("bbox", []))
@@ -55,7 +95,6 @@ class Tracker:
         # Format the result
         # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
         self.last_valid_position = interpolated_bbox[0:2]
-
         return interpolated_bbox
 
     def detect_frame(self, frame):
@@ -72,9 +111,11 @@ class Tracker:
         # Detect objects in the current frame
         detection = self.detect_frame(frame)
         ball_count = 0
+        keeper_count = 0
+        posts = 0
 
         # Initialize tracks for the current frame
-        frame_tracks = {"players": {}, "referees": {}, "ball": {}}
+        frame_tracks = {"players": {}, "referees": {}, "ball": {} , "goalkeeper": {} , "goalpost": {}}
         # #print("detection", len(detection))
 
         cls_names = detection[0].names
@@ -114,6 +155,24 @@ class Tracker:
                 frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
                 # print("BALLLL CONFFF" , frame_detection[2])
                 ball_count += 1
+            if cls_id == cls_names_inv["goalkeeper"]:
+                if (
+                    keeper_count > 0
+                    and frame_detection[2] < frame_tracks["goalkeeper"][1]["conf"]
+                ):
+                    # If the keeper is already detected, skip adding it again
+                    continue
+                frame_tracks["goalkeeper"][1] = {"bbox": bbox , "conf": frame_detection[2]}
+                keeper_count += 1
+            if cls_id == cls_names_inv["goalpost"]:
+                if (
+                    posts > 0
+                    and frame_detection[2] < frame_tracks["goalpost"][1]["conf"]
+                ):
+                    # If the keeper is already detected, skip adding it again
+                    continue
+                frame_tracks["goalpost"][1] = {"bbox": bbox , "conf": frame_detection[2]}
+                posts += 1
 
         return frame_tracks
 
@@ -138,7 +197,7 @@ class Tracker:
                 # #print("distance", distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
-                    # #print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
+                    print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
                     return {}
                 else:
                     self.last_valid_position = position[0:2]
@@ -261,6 +320,7 @@ class Tracker:
                 tracks["ball"][frame_num] if frame_num < len(tracks["ball"]) else {}
             )
             referee_dict = tracks["referees"][frame_num]
+            goal_keeper_dict = tracks["goalkeeper"][frame_num] if frame_num < len(tracks["goalkeeper"]) else {}
 
             # Draw Players
             for track_id, player in player_dict.items():
@@ -273,10 +333,14 @@ class Tracker:
             # Draw Referee
             for _, referee in referee_dict.items():
                 frame = self.draw_ellipse(frame, referee["bbox"], (0, 255, 255))
+            
+            for _, goalkeeper in goal_keeper_dict.items():
+                frame = self.draw_ellipse(frame, goalkeeper["bbox"], (255, 0, 255))
 
             # Draw ball
             for track_id, ball in ball_dict.items():
                 frame = self.draw_traingle(frame, ball["bbox"], (0, 255, 0))
+
 
             # Draw Team Ball Control
             # frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)
