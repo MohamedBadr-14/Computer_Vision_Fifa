@@ -18,7 +18,7 @@ class Tracker:
         self.ball_positions_history = []
         self.last_valid_position = None
         self.frame_num = 0
-        self.max_player_post_distance = 400
+        self.max_player_post_distance = 300
 
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
@@ -31,9 +31,9 @@ class Tracker:
                     position = get_foot_position(bbox)
                 frame_tracks[object_type][track_id]["position"] = position
 
-    def adjust_goalkeeper_detection(self, frame_tracks , test):
-        if not frame_tracks["goalkeeper"] and frame_tracks["goalpost"]:
-            print("DAKHALL HENAAA")
+    def adjust_goalkeeper_detection(self, frame_tracks):
+        if frame_tracks["goalpost"]:
+            
             post_position = get_center_of_bbox(frame_tracks["goalpost"][1]["bbox"])
 
             miniumum_distance = 99999
@@ -51,23 +51,15 @@ class Tracker:
                         miniumum_distance = distance
                         goalkeeper = player_id
             if goalkeeper != -1:
-                frame_tracks["goalkeeper"][1] = {
+                frame_tracks["goalkeeper"][goalkeeper] = {
                     "bbox": frame_tracks["players"][goalkeeper]["bbox"],
                     "conf": None, #BADRR
                 }
-                print("GOALKEEPER DETECTED", goalkeeper, frame_tracks["goalkeeper"][1])
+                # print("GOALKEEPER ADDED", goalkeeper, frame_tracks["goalkeeper"][goalkeeper])
+                # print("PLAYER ADDED" , goalkeeper , goalkeeper in frame_tracks["players"])
                 del frame_tracks["players"][goalkeeper] #baheb pythonnn
-
-        elif frame_tracks["goalkeeper"] and frame_tracks["goalpost"]:
-            # get the distance between the goalkeeper and the goalpost
-            post_position = get_center_of_bbox(frame_tracks["goalpost"][1]["bbox"])
-            goalkeeper_position = get_center_of_bbox(
-                frame_tracks["goalkeeper"][1]["bbox"]
-            )
-            distance = measure_distance(goalkeeper_position, post_position)
-            # print("distance", distance)
-            print("GOAL", distance)
-        
+                # print("PLAYER REMOVED" , goalkeeper , goalkeeper in frame_tracks["players"])
+        # print("FINAL KEEPER TRACKS" , frame_tracks["goalkeeper"])
         return frame_tracks  
 
     def interpolate_ball_positions(self, ball_position):
@@ -111,7 +103,7 @@ class Tracker:
         # Detect objects in the current frame
         detection = self.detect_frame(frame)
         ball_count = 0
-        keeper_count = 0
+        keeper_count = 1
         posts = 0
 
         # Initialize tracks for the current frame
@@ -132,10 +124,11 @@ class Tracker:
         for frame_detection in detection_with_tracks:
             bbox = frame_detection[0].tolist()
             cls_id = frame_detection[3]
-            track_id = frame_detection[4]
+            track_id = frame_detection[4]  
 
-            if cls_id == cls_names_inv["player"] or cls_id == cls_names_inv["referee"]:
+            if cls_id == cls_names_inv["player"] or cls_id == cls_names_inv["referee"] or cls_id == cls_names_inv["goalkeeper"]:
                 frame_tracks["players"][track_id] = {"bbox": bbox}
+
 
             # if cls_id == cls_names_inv['referee']:
             #     frame_tracks["referees"][track_id] = {"bbox": bbox}
@@ -155,15 +148,11 @@ class Tracker:
                 frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
                 # print("BALLLL CONFFF" , frame_detection[2])
                 ball_count += 1
-            if cls_id == cls_names_inv["goalkeeper"]:
-                if (
-                    keeper_count > 0
-                    and frame_detection[2] < frame_tracks["goalkeeper"][1]["conf"]
-                ):
-                    # If the keeper is already detected, skip adding it again
-                    continue
-                frame_tracks["goalkeeper"][1] = {"bbox": bbox , "conf": frame_detection[2]}
-                keeper_count += 1
+
+            # if cls_id == cls_names_inv["goalkeeper"]:
+            #     frame_tracks["goalkeeper"][keeper_count] = {"bbox": bbox , "conf": frame_detection[2]} 
+            #     keeper_count += 1
+
             if cls_id == cls_names_inv["goalpost"]:
                 if (
                     posts > 0

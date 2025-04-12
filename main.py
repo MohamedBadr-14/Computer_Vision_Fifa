@@ -19,8 +19,8 @@ def adjust_all_tracks(all_tracks):
             loaded_tracks[key].append({})
             for track_id, track in frame_tracks.items():
                 #only load bounding box of each track
-                if key == "ball":
-                    print(track)
+                # if key == "ball":
+                #     print(track)
                 if "bbox" in track.keys():
                     loaded_tracks[key][frame_num][track_id] = {
                         "bbox": track["bbox"]
@@ -36,7 +36,7 @@ def adjust_all_tracks(all_tracks):
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("input_videos/general_small.mp4")
+    video_frames = read_video("input_videos/goalkeeper.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
@@ -72,11 +72,12 @@ def main(track_stubs=False):
         test += 1  # test
 
         #adjust goalkeeper detections
-        frame_tracks = tracker.adjust_goalkeeper_detection(frame_tracks , False)
+
+        frame_tracks = tracker.adjust_goalkeeper_detection(frame_tracks)
 
         # Replace Outliers
         if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.2 :
-            print("CONFF" , frame_tracks["ball"][1]["conf"])
+            # print("CONFF" , frame_tracks["ball"][1]["conf"])
             frame_tracks["ball"] = tracker.replace_outliers_based_on_distance(
                 frame_tracks["ball"], 120
             )
