@@ -108,7 +108,9 @@ def main(track_stubs=False):
             counter += 1
 
         camera_movement_per_frame = camera_movement_estimator.get_camera_movement(
-            frame, read_from_stub=False, stub_path="stubs/camera_movement_stub.pkl"
+            frame,
+            read_from_stub=False,
+            stub_path="camera_movement_estimator/stubs/camera_movement_stub.pkl",
         )
         camera_movement_estimator.add_adjust_positions_to_tracks(
             frame_tracks, camera_movement_per_frame
@@ -141,6 +143,46 @@ def main(track_stubs=False):
             #     count+=1
 
         team_assigned = time.time()
+        # print('frame trackss before:', frame_tracks["players"].items())
+        # Merge players from the same team who are very close to each other
+        merged_players = {}
+        distance_threshold = 40  # Adjust this threshold based on your use case
+
+        for player_id, track in list(frame_tracks["players"].items()):
+            if player_id in merged_players:
+                continue  # Skip already merged players
+            # print('one track: ', track)
+            position1 = track["position"]
+            team1 = track["team"]
+            conf1 = track["conf"]  # Confidence of the first player
+
+            for other_player_id, other_track in list(frame_tracks["players"].items()):
+                if player_id == other_player_id or other_player_id in merged_players:
+                    continue
+
+                position2 = other_track["position"]
+                team2 = other_track["team"]
+                conf2 = other_track["conf"]  # Confidence of the second player
+
+                # Check if players are from the same team and very close
+                if team1 == team2:
+                    distance = np.linalg.norm(np.array(position1) - np.array(position2))
+                    if distance < distance_threshold:
+                        # Keep the player with the highest confidence
+                        if conf1 >= conf2:
+                            merged_players[other_player_id] = True
+                        else:
+                            merged_players[player_id] = True
+                            # Update the current player's data with the other player's data
+                            # frame_tracks["players"][player_id] = other_track
+                            break  # Stop checking further for this player
+
+        # Remove duplicate players
+        for player_id in merged_players:
+            del frame_tracks["players"][player_id]
+
+        # print('frame trackss after:', frame_tracks["players"].items())
+        # print('frame 222:', frame_tracks["players"][2])
 
         # Assign Ball to Player
         if frame_tracks["ball"]:
@@ -184,7 +226,7 @@ def main(track_stubs=False):
     )
 
     # # Save video
-    save_video(output_video_frames, "output_videos/stubs.mp4")
+    save_video(output_video_frames, "output_videos/testcolor.mp4")
 
 
 if __name__ == "__main__":

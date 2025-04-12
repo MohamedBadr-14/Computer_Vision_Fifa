@@ -24,8 +24,7 @@ class Tracker:
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
                 bbox = track_info["bbox"]
-                if object_type == "ball":
-                    print("bbox", bbox)
+                if object_type == "goalpost" or object_type == "ball":
                     position = get_center_of_bbox(bbox)
                 else:
                     position = get_foot_position(bbox)
@@ -103,12 +102,10 @@ class Tracker:
         # Detect objects in the current frame
         detection = self.detect_frame(frame)
         ball_count = 0
-        keeper_count = 1
-        posts = 0
+        goal_count = 0
 
         # Initialize tracks for the current frame
         frame_tracks = {"players": {}, "referees": {}, "ball": {} , "goalkeeper": {} , "goalpost": {}}
-        # #print("detection", len(detection))
 
         cls_names = detection[0].names
         cls_names_inv = {v: k for k, v in cls_names.items()}
@@ -124,14 +121,20 @@ class Tracker:
         for frame_detection in detection_with_tracks:
             bbox = frame_detection[0].tolist()
             cls_id = frame_detection[3]
-            track_id = frame_detection[4]  
+            track_id = frame_detection[4]
+            conf = frame_detection[2]
 
             if cls_id == cls_names_inv["player"] or cls_id == cls_names_inv["referee"] or cls_id == cls_names_inv["goalkeeper"]:
-                frame_tracks["players"][track_id] = {"bbox": bbox}
+                frame_tracks["players"][track_id] = {"bbox": bbox, "conf": conf}
 
-
-            # if cls_id == cls_names_inv['referee']:
-            #     frame_tracks["referees"][track_id] = {"bbox": bbox}
+            if cls_id == cls_names_inv["goalpost"]:
+                if (
+                    goal_count > 0
+                    and frame_detection[2] < frame_tracks["goalpost"][1]["conf"]
+                ):
+                    continue
+                frame_tracks["goalpost"][1] = {"conf": frame_detection[2], "bbox": bbox}
+                goal_count += 1
 
         for frame_detection in detection_supervision:
             bbox = frame_detection[0].tolist()
@@ -153,16 +156,7 @@ class Tracker:
             #     frame_tracks["goalkeeper"][keeper_count] = {"bbox": bbox , "conf": frame_detection[2]} 
             #     keeper_count += 1
 
-            if cls_id == cls_names_inv["goalpost"]:
-                if (
-                    posts > 0
-                    and frame_detection[2] < frame_tracks["goalpost"][1]["conf"]
-                ):
-                    # If the keeper is already detected, skip adding it again
-                    continue
-                frame_tracks["goalpost"][1] = {"bbox": bbox , "conf": frame_detection[2]}
-                posts += 1
-
+           
         return frame_tracks
 
     def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
@@ -310,6 +304,7 @@ class Tracker:
             )
             referee_dict = tracks["referees"][frame_num]
             goal_keeper_dict = tracks["goalkeeper"][frame_num] if frame_num < len(tracks["goalkeeper"]) else {}
+            goalpost_dict = tracks["goalpost"][frame_num]
 
             # Draw Players
             for track_id, player in player_dict.items():
@@ -330,6 +325,9 @@ class Tracker:
             for track_id, ball in ball_dict.items():
                 frame = self.draw_traingle(frame, ball["bbox"], (0, 255, 0))
 
+            # Draw Goalpost
+            for _, goalpost in goalpost_dict.items():
+                frame = self.draw_traingle(frame, goalpost["bbox"], (255, 0, 0))
 
             # Draw Team Ball Control
             # frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)

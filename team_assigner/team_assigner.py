@@ -50,8 +50,8 @@ class TeamAssigner:
         # player_cluster = 1-non_player_cluster
         # ##print(player_cluster)
         # Find the cluster with the maximum number of assignees that is not the non_player_cluster
-        yellow_color = np.array([0, 255, 255])  # Example yellow color in RGB
-        blue_color = np.array([255, 0, 0])  # Example blue color in RGB
+        yellow_color = np.array([0, 255, 255])  # Example yellow color in BGR
+        blue_color = np.array([255, 0, 0])  # Example blue color in BGR
         # Calculate the distances to yellow and blue for all clusters except the non_player_cluster
         remaining_clusters = [
             i for i in range(len(kmeans.cluster_centers_)) if i != non_player_cluster
@@ -102,21 +102,38 @@ class TeamAssigner:
             kmeans.fit(player_colors)
 
             self.kmeans = kmeans
+            # Define reference colors for teams
+            # Team 1: Yellow (BGR format)
+            # Team 2: Blue (BGR format)
+            yellow_color = np.array([0, 255, 255])  # Example yellow color in BGR
+
+            # Calculate distances to reference colors
+            distances_to_team_1 = [
+                np.linalg.norm(center - yellow_color)
+                for center in kmeans.cluster_centers_
+            ]
+
+            # Assign cluster centers to teams based on proximity to reference colors
+            if distances_to_team_1[0] < distances_to_team_1[1]:
+                self.team_colors[1] = kmeans.cluster_centers_[0]
+                self.team_colors[2] = kmeans.cluster_centers_[1]
+            else:
+                self.team_colors[1] = kmeans.cluster_centers_[1]
+                self.team_colors[2] = kmeans.cluster_centers_[0]
+
+            # Store the first 10 cluster centers
             if 1 not in self.first_ten_team_colors:
                 self.first_ten_team_colors[1] = []
             if 2 not in self.first_ten_team_colors:
                 self.first_ten_team_colors[2] = []
 
-            self.first_ten_team_colors[1].append(kmeans.cluster_centers_[0])
-            self.first_ten_team_colors[2].append(kmeans.cluster_centers_[1])
-            self.team_colors[1] = kmeans.cluster_centers_[0]
-            self.team_colors[2] = kmeans.cluster_centers_[1]
+            self.first_ten_team_colors[1].append(self.team_colors[1])
+            self.first_ten_team_colors[2].append(self.team_colors[2])
         elif self.counter == 10:
             # After the first 10 frames, calculate the most repeated center within a range
             team_1_colors = np.array(self.first_ten_team_colors[1])
             team_2_colors = np.array(self.first_ten_team_colors[2])
 
-            # Group colors within the tolerance range
             def find_most_repeated_color(colors):
                 grouped_colors = []
                 for color in colors:
@@ -128,7 +145,6 @@ class TeamAssigner:
                             break
                     if not found_group:
                         grouped_colors.append([color])
-                # Find the group with the most colors and return its average
                 most_repeated_group = max(grouped_colors, key=len)
                 return np.mean(most_repeated_group, axis=0)
 
@@ -136,15 +152,13 @@ class TeamAssigner:
             self.team_colors[2] = find_most_repeated_color(team_2_colors)
 
         self.counter += 1
-        # #print("Team 1 color: ", self.team_colors[1])
-        # #print("Team 2 color: ", self.team_colors[2])
 
     def get_player_team(self, frame, player_bbox, player_id):
         # ##print("conffffff" , team_confidence , team_confidence and team_confidence > 0.7)
         if (
             player_id in self.player_team_dict
             and self.player_team_confidence[player_id]
-            and self.player_team_confidence[player_id] > 0.97
+            and self.player_team_confidence[player_id] > 0.7
         ):
             # print("dakhal", player_id )
             return self.player_team_dict[player_id]
@@ -167,8 +181,8 @@ class TeamAssigner:
         if player_id == 91:
             team_id = 1
         # #print("team_id", team_id)
-        # print('normalized_confidence', normalized_confidence)
         # print('player_id', player_id, player_color, team_id)
+        # print('normalized_confidence', normalized_confidence)
         self.player_team_dict[player_id] = team_id
         self.player_team_confidence[player_id] = normalized_confidence
 
