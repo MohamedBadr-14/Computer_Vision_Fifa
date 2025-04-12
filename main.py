@@ -36,7 +36,7 @@ def adjust_all_tracks(all_tracks):
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("input_videos/goalkeeper.mp4")
+    video_frames = read_video("C:/Users/DELL/Downloads/testfinal.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 

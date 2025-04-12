@@ -158,7 +158,7 @@ class TeamAssigner:
         if (
             player_id in self.player_team_dict
             and self.player_team_confidence[player_id]
-            and self.player_team_confidence[player_id] > 0.7
+            and self.player_team_confidence[player_id] > 0.75
         ):
             # print("dakhal", player_id )
             return self.player_team_dict[player_id]
@@ -170,20 +170,17 @@ class TeamAssigner:
             team_id: np.linalg.norm(player_color - team_color)
             for team_id, team_color in self.team_colors.items()
         }
-        team_id = min(
-            distances, key=distances.get
-        )  # Get the team with the closest color
-        # print(distances,'disss')
-        # print(team_id,'team_id')
-        # Normalize confidence score
-        max_distance = max(distances.values())
-        normalized_confidence = 1 - (distances[team_id] / max_distance)
-        if player_id == 91:
-            team_id = 1
-        # #print("team_id", team_id)
-        # print('player_id', player_id, player_color, team_id)
-        # print('normalized_confidence', normalized_confidence)
+        team_id = min(distances, key=distances.get)
+
+        # Compute confidence
+        dist_values = list(distances.values())
+        gap = abs(dist_values[0] - dist_values[1])
+        confidence = gap / max(dist_values)
+        # print('player_id', player_id,'player_color', player_color)
+        # print("distances", distances, "confidence", confidence)
+        
+
         self.player_team_dict[player_id] = team_id
-        self.player_team_confidence[player_id] = normalized_confidence
+        self.player_team_confidence[player_id] = confidence
 
         return team_id
