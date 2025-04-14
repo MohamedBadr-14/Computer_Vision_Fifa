@@ -1,8 +1,8 @@
 from ultralytics import YOLO 
 
-model = YOLO('models/best_new.pt')
+model = YOLO('models/keypoints.pt')
 
-results = model.predict('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/ocr_extractor/test_5.png',save=True)
+results = model.predict('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/',save=True)
 #print(results[0])
 #print('=====================================')
 for box in results[0].boxes:

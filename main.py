@@ -4,7 +4,7 @@ import numpy as np
 from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator import CameraMovementEstimator
-from view_transformer import ViewTransformer
+from view_transformer import ViewTransformer, KeypointsTransformer
 from ocr_extractor import OCRExtractor
 import cv2
 import os
@@ -37,7 +37,7 @@ def adjust_all_tracks(all_tracks):
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("input_videos/goalkeeper.mp4")
+    video_frames = read_video("input_videos/general_small.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
@@ -51,7 +51,8 @@ def main(track_stubs=False):
     test = 0
     save_count = 0
     team_ball_control = []
-    view_transformer = ViewTransformer()
+    # view_transformer = ViewTransformer()
+    view_transformer = KeypointsTransformer()
     team_assign_time = time.time()
     team_assigner = TeamAssigner()
     after_team_assign = time.time()
@@ -59,6 +60,8 @@ def main(track_stubs=False):
     player_assigner = PlayerBallAssigner()
     team_assigner = TeamAssigner()
     ocr_extractor = OCRExtractor()
+
+    video_frames = [video_frames[0]] #BADR
 
     print(len(video_frames))
     while test < len(video_frames):  # just for testing
@@ -107,21 +110,25 @@ def main(track_stubs=False):
         tracker.add_position_to_tracks(frame_tracks)
 
         # camera movement estimator
-        if counter == 0:
-            camera_movement_estimator = CameraMovementEstimator(frame)
-            counter += 1
+        # if counter == 0:
+        #     camera_movement_estimator = CameraMovementEstimator(frame)
+        #     counter += 1
 
-        camera_movement_per_frame = camera_movement_estimator.get_camera_movement(
-            frame,
-            read_from_stub=False,
-            stub_path="camera_movement_estimator/stubs/camera_movement_stub.pkl",
-        )
-        camera_movement_estimator.add_adjust_positions_to_tracks(
-            frame_tracks, camera_movement_per_frame
-        )
+        # camera_movement_per_frame = camera_movement_estimator.get_camera_movement(
+        #     frame,
+        #     read_from_stub=False,
+        #     stub_path="camera_movement_estimator/stubs/camera_movement_stub.pkl",
+        # )
+        # camera_movement_estimator.add_adjust_positions_to_tracks(
+        #     frame_tracks, camera_movement_per_frame
+        # )
 
         # # View Trasnformer
+        time_before = time.time()
+        view_transformer.get_matrix_transform(frame)
         view_transformer.add_transformed_position_to_tracks(frame_tracks)
+        print("\n  timeeeee -> " , time.time() - time_before)
+        print("\nFRAMAATTTT" , frame_tracks["players"])
 
         # Assign Player Teams
         # #print(tracks['players'][0],'playerss')
@@ -258,7 +265,6 @@ def main(track_stubs=False):
         
         to_be_sent = {
             "players": frame_tracks["players"],
-            "referees": frame_tracks["referees"],
             "ball": frame_tracks["ball"],
             "goalkeeper": frame_tracks["goalkeeper"],
             "goalpost": frame_tracks["goalpost"],
@@ -294,3 +300,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 :
         track_stubs = sys.argv[1]
     main(track_stubs)
+
+
