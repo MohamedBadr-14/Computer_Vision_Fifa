@@ -70,9 +70,9 @@ class CameraMovementEstimator():
         self.old_features = cv2.goodFeaturesToTrack(current_gray, **self.features)
 
         # Save to stub (if applicable)
-        if stub_path is not None:
-            with open(stub_path, 'wb') as f:
-                pickle.dump(camera_movement, f)
+        # if stub_path is not None:
+        #     with open(stub_path, 'wb') as f:
+        #         pickle.dump(camera_movement, f)
 
         return camera_movement
     

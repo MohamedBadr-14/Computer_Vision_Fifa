@@ -5,6 +5,7 @@ from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator import CameraMovementEstimator
 from view_transformer import ViewTransformer
+from ocr_extractor import OCRExtractor
 import cv2
 import os
 import pickle
@@ -48,6 +49,7 @@ def main(track_stubs=False):
     tracker = Tracker("models/best_new.pt")
     counter = 0
     test = 0
+    save_count = 0
     team_ball_control = []
     view_transformer = ViewTransformer()
     team_assign_time = time.time()
@@ -56,10 +58,12 @@ def main(track_stubs=False):
     print("team assign time", after_team_assign - team_assign_time)
     player_assigner = PlayerBallAssigner()
     team_assigner = TeamAssigner()
+    ocr_extractor = OCRExtractor()
 
     print(len(video_frames))
     while test < len(video_frames):  # just for testing
         frame = video_frames[test]
+        
 
         if track_stubs and os.path.exists("stubs/tracks.pkl"):
             frame_tracks = {"players" : loaded_tracks["players"][test-1],
@@ -72,7 +76,7 @@ def main(track_stubs=False):
         test += 1  # test
 
         #adjust goalkeeper detections
-
+        # print("\nframe tracks before adjust: ", frame_tracks , "\n")
         frame_tracks = tracker.adjust_goalkeeper_detection(frame_tracks)
 
         # Replace Outliers
@@ -245,6 +249,22 @@ def main(track_stubs=False):
             team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
 
         # print(frame_tracks)
+        print("start attempts and points")
+        # if save_count == 0:
+        #     cv2.imwrite("frame_save.png" , frame)
+        ocr_dict = ocr_extractor.extract_points_and_attempts(frame , save=False if save_count > 0 else True)
+        save_count+=1
+        print("end attempts and points" , "Points: ", ocr_dict)
+        
+        to_be_sent = {
+            "players": frame_tracks["players"],
+            "referees": frame_tracks["referees"],
+            "ball": frame_tracks["ball"],
+            "goalkeeper": frame_tracks["goalkeeper"],
+            "goalpost": frame_tracks["goalpost"],
+            "points": ocr_dict['points'],
+            "attempts": ocr_dict['attempts'],
+            }
 
         all_tracks["players"].append(frame_tracks["players"])
         all_tracks["referees"].append(frame_tracks["referees"])
@@ -266,7 +286,7 @@ def main(track_stubs=False):
     )
 
     # # Save video
-    save_video(output_video_frames, "output_videos/testcolor.mp4")
+    save_video(output_video_frames, "output_videos/points.mp4")
 
 
 if __name__ == "__main__":
