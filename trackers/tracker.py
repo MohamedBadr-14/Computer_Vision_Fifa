@@ -32,7 +32,7 @@ class Tracker:
 
     def adjust_goalkeeper_detection(self, frame_tracks):
         if frame_tracks["goalpost"]:
-            print("DKHALT")
+            # print("DKHALT")
             
             post_position = get_center_of_bbox(frame_tracks["goalpost"][1]["bbox"])
 
@@ -50,8 +50,8 @@ class Tracker:
                     if distance < miniumum_distance:
                         miniumum_distance = distance
                         goalkeeper = player_id
-                        print("GOALKEEPER ID" , goalkeeper , "DISTANCE" , distance)
-                        print("FRAME_TRACKS" , frame_tracks["players"])
+                        # print("GOALKEEPER ID" , goalkeeper , "DISTANCE" , distance)
+                        # print("FRAME_TRACKS" , frame_tracks["players"])
             if goalkeeper != -1:
                 frame_tracks["goalkeeper"][goalkeeper] = {
                     "bbox": frame_tracks["players"][goalkeeper]["bbox"],
@@ -60,7 +60,7 @@ class Tracker:
                 # print("GOALKEEPER ADDED", goalkeeper, frame_tracks["goalkeeper"][goalkeeper])
                 # print("PLAYER ADDED" , goalkeeper , goalkeeper in frame_tracks["players"])
                 del frame_tracks["players"][goalkeeper] #baheb pythonnn
-                print("\nPLAYER REMOVED" ,  frame_tracks["players"])
+                # print("\nPLAYER REMOVED" ,  goalkeeper in frame_tracks["players"].keys())
         # print("FINAL KEEPER TRACKS" , frame_tracks["goalkeeper"])
         return frame_tracks  
 
@@ -183,7 +183,7 @@ class Tracker:
                 # #print("distance", distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
-                    print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
+                    # print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
                     return {}
                 else:
                     self.last_valid_position = position[0:2]

@@ -37,7 +37,7 @@ def adjust_all_tracks(all_tracks):
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("C:/Users/DELL/Downloads/testfinal.mp4")
+    video_frames = read_video("input_videos/goalkeeper.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
@@ -93,7 +93,7 @@ def main(track_stubs=False):
                 frame_tracks["ball"]
             )
         else:
-            print("ball not detected")
+            # print("ball not detected")
             bbox = tracker.interpolate_ball_positions(frame_tracks["ball"])
             if bbox:
                 frame_tracks["ball"] = {
@@ -249,12 +249,12 @@ def main(track_stubs=False):
             team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
 
         # print(frame_tracks)
-        print("start attempts and points")
+        # print("start attempts and points")
         # if save_count == 0:
         #     cv2.imwrite("frame_save.png" , frame)
         ocr_dict = ocr_extractor.extract_points_and_attempts(frame , save=False if save_count > 0 else True)
         save_count+=1
-        print("end attempts and points" , "Points: ", ocr_dict)
+        # print("end attempts and points" , "Points: ", ocr_dict)
         
         to_be_sent = {
             "players": frame_tracks["players"],
