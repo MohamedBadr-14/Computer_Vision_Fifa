@@ -4,7 +4,6 @@ import re
 from easyocr import Reader
 
 
-
 class OCRExtractor:
     def __init__(self):
         self.reader = Reader(['en'], gpu=True) #BADR

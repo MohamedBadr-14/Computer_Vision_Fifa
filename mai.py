@@ -6,6 +6,12 @@ import keyboard
 from ultralytics import YOLO
 import os
 from RL import *
+from ocr_extractor import OCRExtractor
+
+
+class Controller:
+    def __init__(self):
+        self.ocr_extractor = OCRExtractor()
 
 def fifa_vision():
     # Initialize model
@@ -93,4 +99,8 @@ def fifa_vision():
     print("FIFA Vision has stopped.")
 
 if __name__ == "__main__":
+
+
+
+
     fifa_vision()

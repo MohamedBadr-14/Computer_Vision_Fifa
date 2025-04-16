@@ -20,6 +20,11 @@ class Tracker:
         self.frame_num = 0
         self.max_player_post_distance = 300
 
+    def reset_tracker(self):
+        self.ball_positions_history = []
+        self.last_valid_position = None
+        self.frame_num = 0
+
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
@@ -293,7 +298,7 @@ class Tracker:
 
         return frame
 
-    def draw_annotations(self, video_frames, tracks, team_ball_control):
+    def draw_annotations(self, video_frames, tracks):
         output_video_frames = []
         # #print("len(video_frames)", len(video_frames))
         # print("len(tracks['players'])", len(tracks['players']))
