@@ -14,32 +14,39 @@ class KeypointsTransformer():
         [43.5,52.31]      # ARC_DOWN
         ], dtype=np.float32)
         self.keypoint_detector = YOLO('models/keypoints.pt')
+        self.keypoint_detector.to('cuda')
         
         self.last_valid_keypoints = np.array([
         [1991, 1013],  #PEN_DOT #BADR 
         [1486, 799],  #ARC_UP
         [1223, 1017], #ARC_CURVE
         [1587, 1324] #ARC_DOWN
-        ])
+        ],dtype=np.float32)
 
 
 
     def detect_keypoints(self, image):
         # Use the YOLO model to detect keypoints in the image
-        results = self.keypoint_detector.predict(image, conf=0.5, show=True)
+        results = self.keypoint_detector.predict(image, conf=0.5, show=False,device=0)
         keypoints = []
         
         for result in results:
             keypoints.append(result.keypoints.xy)
             
-        if len(keypoints) < 4:
+
+        if keypoints[0].shape[1] < 4:
+            print(f"Only {keypoints[0].shape[1]} keypoints detected, need 4. Keypoints:", keypoints)
             return self.last_valid_keypoints
-        self.last_valid_keypoints = keypoints
+        
+        self.last_valid_keypoints = keypoints[0].cpu().numpy()
+        keypoints = self.last_valid_keypoints
+
         return keypoints
     
     # Compute the perspective transform matrix
     def get_matrix_transform(self, frame):
         keypoints = self.detect_keypoints(frame)
+        print("Keypoints detected in mt:", keypoints)
         
         
         pixel_points = np.array(keypoints, dtype=np.float32)
@@ -71,16 +78,3 @@ class KeypointsTransformer():
                     position_trasnformed = position_trasnformed.squeeze().tolist()
                 frame_tracks[object_type][track_id]['position_transformed'] = position_trasnformed
                 
-    # Example: convert a player's pixel position
-    # player_pixel = (140, 1104)
-    # player_real_world = pixel_to_real_world(player_pixel)
-
-    # print("Real-world position:", player_real_world)
-
-    # pixel_points = np.array([
-    #     [1991, 1013],  #PEN_DOT
-    #     [1486, 799],  #ARC_UP
-    #     [1223, 1017], #ARC_CURVE
-    #     [1587, 1324] #ARC_DOWN
-        
-    # ], dtype=np.float32)
