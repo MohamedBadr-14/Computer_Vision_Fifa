@@ -1,9 +1,9 @@
 from ultralytics import YOLO 
 
-model = YOLO('models/yolov8x.pt')
+model = YOLO('models/keypoints.pt')
 
-results = model.predict('C:/Users/moham/Downloads/test.mp4',save=True)
-print(results[0])
-print('=====================================')
+results = model.predict('C:/Users/moham/Desktop/GP/Computer_Vision_Fifa/',save=True)
+#print(results[0])
+#print('=====================================')
 for box in results[0].boxes:
     print(box)

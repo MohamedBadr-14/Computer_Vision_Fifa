@@ -5,212 +5,340 @@ import os
 import numpy as np
 import pandas as pd
 import cv2
-import sys 
-sys.path.append('../')
-from utils import get_center_of_bbox, get_bbox_width, get_foot_position
+import sys
+
+sys.path.append("../")
+from utils import get_center_of_bbox, get_bbox_width, get_foot_position,measure_distance
+
 
 class Tracker:
     def __init__(self, model_path):
-        self.model = YOLO(model_path) 
+        self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
+        self.ball_positions_history = []
+        self.last_valid_position = None
+        self.frame_num = 0
+        self.max_player_post_distance = 300
 
-    def add_position_to_tracks(sekf,tracks):
-        for object, object_tracks in tracks.items():
-            for frame_num, track in enumerate(object_tracks):
-                for track_id, track_info in track.items():
-                    bbox = track_info['bbox']
-                    if object == 'ball':
-                        position= get_center_of_bbox(bbox)
-                    else:
-                        position = get_foot_position(bbox)
-                    tracks[object][frame_num][track_id]['position'] = position
+    def reset_tracker(self):
+        self.ball_positions_history = []
+        self.last_valid_position = None
+        self.frame_num = 0
 
-    def interpolate_ball_positions(self,ball_positions):
-        ball_positions = [x.get(1,{}).get('bbox',[]) for x in ball_positions]
-        df_ball_positions = pd.DataFrame(ball_positions,columns=['x1','y1','x2','y2'])
+    def add_position_to_tracks(self, frame_tracks):
+        for object_type, object_tracks in frame_tracks.items():
+            for track_id, track_info in object_tracks.items():
+                bbox = track_info["bbox"]
+                if object_type == "goalpost" or object_type == "ball":
+                    position = get_center_of_bbox(bbox)
+                else:
+                    position = get_foot_position(bbox)
+                frame_tracks[object_type][track_id]["position"] = position
+
+    def adjust_goalkeeper_detection(self, frame_tracks):
+        if frame_tracks["goalpost"]:
+            # print("DKHALT")
+            
+            post_position = get_center_of_bbox(frame_tracks["goalpost"][1]["bbox"])
+
+            miniumum_distance = 99999
+            goalkeeper=-1
+
+            for player_id, player in frame_tracks["players"].items():
+                player_bbox = player['bbox']
+
+                distance_left = measure_distance((player_bbox[0],player_bbox[-1]),post_position)
+                distance_right = measure_distance((player_bbox[2],player_bbox[-1]),post_position)
+                distance = min(distance_left,distance_right)
+
+                if distance < self.max_player_post_distance:
+                    if distance < miniumum_distance:
+                        miniumum_distance = distance
+                        goalkeeper = player_id
+                        # print("GOALKEEPER ID" , goalkeeper , "DISTANCE" , distance)
+                        # print("FRAME_TRACKS" , frame_tracks["players"])
+            if goalkeeper != -1:
+                frame_tracks["goalkeeper"][goalkeeper] = {
+                    "bbox": frame_tracks["players"][goalkeeper]["bbox"],
+                    "conf": None, #BADRR
+                }
+                # print("GOALKEEPER ADDED", goalkeeper, frame_tracks["goalkeeper"][goalkeeper])
+                # print("PLAYER ADDED" , goalkeeper , goalkeeper in frame_tracks["players"])
+                del frame_tracks["players"][goalkeeper] #baheb pythonnn
+                # print("\nPLAYER REMOVED" ,  goalkeeper in frame_tracks["players"].keys())
+        # print("FINAL KEEPER TRACKS" , frame_tracks["goalkeeper"])
+        return frame_tracks  
+
+    def interpolate_ball_positions(self, ball_position):
+        self.ball_positions_history.append(ball_position.get(1, {}).get("bbox", []))
+
+        if not self.ball_positions_history or all(
+            len(bbox) == 0 for bbox in self.ball_positions_history
+        ):
+            return ball_position
+
+        # Convert the ball positions history to a DataFrame
+        df_ball_positions = pd.DataFrame(
+            self.ball_positions_history, columns=["x1", "y1", "x2", "y2"]
+        )
 
         # Interpolate missing values
         df_ball_positions = df_ball_positions.interpolate()
-        df_ball_positions = df_ball_positions.bfill()
+        df_ball_positions = (
+            df_ball_positions.bfill()
+        )  # Backward fill for any remaining NaNs
 
-        ball_positions = [{1: {"bbox":x}} for x in df_ball_positions.to_numpy().tolist()]
+        # Get the interpolated ball position for the current frame
+        interpolated_bbox = df_ball_positions.iloc[-1].tolist()
 
-        return ball_positions
+        # Format the result
+        # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
+        self.last_valid_position = interpolated_bbox[0:2]
+        return interpolated_bbox
 
-    def detect_frames(self, frames):
-        batch_size=20 
-        detections = [] 
-        for i in range(0,len(frames),batch_size):
-            detections_batch = self.model.predict(frames[i:i+batch_size],conf=0.1 )
-            detections += detections_batch
-        return detections
+    def detect_frame(self, frame):
+        # Process a single frame
+        detection = self.model.predict(frame, conf=0.1)
+        return detection
 
-    def get_object_tracks(self, frames, read_from_stub=False, stub_path=None):
-        
-        if read_from_stub and stub_path is not None and os.path.exists(stub_path):
-            with open(stub_path,'rb') as f:
-                tracks = pickle.load(f)
-            return tracks
+    def get_object_track(self, frame):
+        # if read_from_stub and stub_path is not None and os.path.exists(stub_path):
+        #     with open(stub_path, 'rb') as f:
+        #         tracks = pickle.load(f)
+        #     return tracks
 
-        detections = self.detect_frames(frames)
+        # Detect objects in the current frame+
+        detection = self.detect_frame(frame)
+        ball_count = 0
+        goal_count = 0
 
-        tracks={
-            "players":[],
-            "referees":[],
-            "ball":[]
-        }
+        # Initialize tracks for the current frame
+        frame_tracks = {"players": {}, "referees": {}, "ball": {} , "goalkeeper": {} , "goalpost": {}}
 
-        for frame_num, detection in enumerate(detections):
-            cls_names = detection.names
-            cls_names_inv = {v:k for k,v in cls_names.items()}
+        cls_names = detection[0].names
+        cls_names_inv = {v: k for k, v in cls_names.items()}
 
-            # Covert to supervision Detection format
-            detection_supervision = sv.Detections.from_ultralytics(detection)
+        # Convert to supervision Detection format
+        detection_supervision = sv.Detections.from_ultralytics(detection[0])
 
-            # Convert GoalKeeper to player object
-            # for object_ind , class_id in enumerate(detection_supervision.class_id): 7agat malhash
-            #     if cls_names[class_id] == "goalkeeper":
-            #         detection_supervision.class_id[object_ind] = cls_names_inv["player"]
+        # Track objects in the current frame
+        detection_with_tracks = self.tracker.update_with_detections(
+            detection_supervision
+        )
 
-            # Track Objects
-            detection_with_tracks = self.tracker.update_with_detections(detection_supervision)
+        for frame_detection in detection_with_tracks:
+            bbox = frame_detection[0].tolist()
+            cls_id = frame_detection[3]
+            track_id = frame_detection[4]
+            conf = frame_detection[2]
 
-            tracks["players"].append({}) #TODO
-            tracks["referees"].append({})
-            tracks["ball"].append({})
+            if cls_id == cls_names_inv["player"] or cls_id == cls_names_inv["referee"] or cls_id == cls_names_inv["goalkeeper"]:
+                frame_tracks["players"][track_id] = {"bbox": bbox, "conf": conf}
 
-            for frame_detection in detection_with_tracks:
-                bbox = frame_detection[0].tolist()
-                cls_id = frame_detection[3]
-                track_id = frame_detection[4]
+            if cls_id == cls_names_inv["goalpost"]:
+                if (
+                    goal_count > 0
+                    and frame_detection[2] < frame_tracks["goalpost"][1]["conf"]
+                ):
+                    continue
+                frame_tracks["goalpost"][1] = {"conf": frame_detection[2], "bbox": bbox}
+                goal_count += 1
 
-                if cls_id == cls_names_inv['player']:
-                    tracks["players"][frame_num][track_id] = {"bbox":bbox}
-                
-                if cls_id == cls_names_inv['referee']:
-                    tracks["referees"][frame_num][track_id] = {"bbox":bbox}
-            
-            for frame_detection in detection_supervision:
-                bbox = frame_detection[0].tolist()
-                cls_id = frame_detection[3]
+        for frame_detection in detection_supervision:
+            bbox = frame_detection[0].tolist()
+            cls_id = frame_detection[3]
 
-                if cls_id == cls_names_inv['ball']:
-                    tracks["ball"][frame_num][1] = {"bbox":bbox}
+            if cls_id == cls_names_inv["ball"]:
+                if (
+                    ball_count > 0
+                    and frame_detection[2] < frame_tracks["ball"][1]["conf"]
+                ):
+                    # If the ball is already detected, skip adding it again
+                    # print("Ball already detected, skipping..." , frame_detection[2] , frame_tracks["ball"][1]["conf"])
+                    continue
+                frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
+                # print("BALLLL CONFFF" , frame_detection[2])
+                ball_count += 1
 
-        if stub_path is not None:
-            with open(stub_path,'wb') as f:
-                pickle.dump(tracks,f)
+            # if cls_id == cls_names_inv["goalkeeper"]:
+            #     frame_tracks["goalkeeper"][keeper_count] = {"bbox": bbox , "conf": frame_detection[2]} 
+            #     keeper_count += 1
 
-        return tracks
-    
-    def draw_ellipse(self,frame,bbox,color,track_id=None): 
+           
+        return frame_tracks
+
+    def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
+        position = ball_track.get(1, {}).get("bbox", [])
+        if not position:
+            # If the current position is already empty, just add it to the cleaned positions
+            # print("Empty ball")
+            return {}
+        else:
+            if self.last_valid_position is None:
+                # If there's no valid last position, accept the first valid one
+                self.last_valid_position = position[0:2]
+                return ball_track
+            else:
+                # Calculate the distance from the last valid position
+                # #print("position", position)
+                # #print("last_valid_position", last_valid_position)
+                distance = np.linalg.norm(
+                    np.array(position[0:2]) - np.array(self.last_valid_position)
+                )
+                # #print("distance", distance)
+                if distance > distance_threshold:
+                    # Replace with empty array if the distance exceeds the threshold
+                    # print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
+                    return {}
+                else:
+                    self.last_valid_position = position[0:2]
+                    return ball_track
+
+    def draw_ellipse(self, frame, bbox, color, track_id=None):
         y2 = int(bbox[3])
         x_center, _ = get_center_of_bbox(bbox)
         width = get_bbox_width(bbox)
 
         cv2.ellipse(
             frame,
-            center=(x_center,y2),
-            axes=(int(width), int(0.35*width)),
+            center=(x_center, y2),
+            axes=(int(width), int(0.35 * width)),
             angle=0.0,
             startAngle=-45,
             endAngle=235,
-            color = color,
+            color=color,
             thickness=2,
-            lineType=cv2.LINE_4
+            lineType=cv2.LINE_4,
         )
 
         rectangle_width = 40
-        rectangle_height=20
-        x1_rect = x_center - rectangle_width//2
-        x2_rect = x_center + rectangle_width//2
-        y1_rect = (y2- rectangle_height//2) +15
-        y2_rect = (y2+ rectangle_height//2) +15
+        rectangle_height = 20
+        x1_rect = x_center - rectangle_width // 2
+        x2_rect = x_center + rectangle_width // 2
+        y1_rect = (y2 - rectangle_height // 2) + 15
+        y2_rect = (y2 + rectangle_height // 2) + 15
 
         if track_id is not None:
-            cv2.rectangle(frame,
-                          (int(x1_rect),int(y1_rect) ),
-                          (int(x2_rect),int(y2_rect)),
-                          color,
-                          cv2.FILLED)
-            
-            x1_text = x1_rect+12
+            cv2.rectangle(
+                frame,
+                (int(x1_rect), int(y1_rect)),
+                (int(x2_rect), int(y2_rect)),
+                color,
+                cv2.FILLED,
+            )
+
+            x1_text = x1_rect + 12
             if track_id > 99:
-                x1_text -=10
-            
+                x1_text -= 10
+
             cv2.putText(
                 frame,
                 f"{track_id}",
-                (int(x1_text),int(y1_rect+15)),
+                (int(x1_text), int(y1_rect + 15)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
-                (0,0,0),
-                2
+                (0, 0, 0),
+                2,
             )
 
         return frame
 
-    def draw_traingle(self,frame,bbox,color):
-        y= int(bbox[1])
-        x,_ = get_center_of_bbox(bbox)
+    def draw_traingle(self, frame, bbox, color):
+        y = int(bbox[1])
+        x, _ = get_center_of_bbox(bbox)
 
-        triangle_points = np.array([
-            [x,y],
-            [x-10,y-20],
-            [x+10,y-20],
-        ])
-        cv2.drawContours(frame, [triangle_points],0,color, cv2.FILLED)
-        cv2.drawContours(frame, [triangle_points],0,(0,0,0), 2)
+        triangle_points = np.array(
+            [
+                [x, y],
+                [x - 10, y - 20],
+                [x + 10, y - 20],
+            ]
+        )
+        cv2.drawContours(frame, [triangle_points], 0, color, cv2.FILLED)
+        cv2.drawContours(frame, [triangle_points], 0, (0, 0, 0), 2)
 
         return frame
 
-    def draw_team_ball_control(self,frame,frame_num,team_ball_control):
-        # Draw a semi-transparent rectaggle 
+    def draw_team_ball_control(self, frame, frame_num, team_ball_control):
+        # Draw a semi-transparent rectaggle
         overlay = frame.copy()
-        cv2.rectangle(overlay, (1350, 850), (1900,970), (255,255,255), -1 )
+        cv2.rectangle(overlay, (1350, 850), (1900, 970), (255, 255, 255), -1)
         alpha = 0.4
         cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
 
-        team_ball_control_till_frame = team_ball_control[:frame_num+1]
+        team_ball_control_till_frame = team_ball_control[: frame_num + 1]
         # Get the number of time each team had ball control
-        team_1_num_frames = team_ball_control_till_frame[team_ball_control_till_frame==1].shape[0]
-        team_2_num_frames = team_ball_control_till_frame[team_ball_control_till_frame==2].shape[0]
-        team_1 = team_1_num_frames/(team_1_num_frames+team_2_num_frames)
-        team_2 = team_2_num_frames/(team_1_num_frames+team_2_num_frames)
+        team_1_num_frames = team_ball_control_till_frame[
+            team_ball_control_till_frame == 1
+        ].shape[0]
+        team_2_num_frames = team_ball_control_till_frame[
+            team_ball_control_till_frame == 2
+        ].shape[0]
+        team_1 = team_1_num_frames / (team_1_num_frames + team_2_num_frames)
+        team_2 = team_2_num_frames / (team_1_num_frames + team_2_num_frames)
 
-        cv2.putText(frame, f"Team 1 Ball Control: {team_1*100:.2f}%",(1400,900), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 3)
-        cv2.putText(frame, f"Team 2 Ball Control: {team_2*100:.2f}%",(1400,950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 3)
+        cv2.putText(
+            frame,
+            f"Team 1 Ball Control: {team_1*100:.2f}%",
+            (1400, 900),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 0, 0),
+            3,
+        )
+        cv2.putText(
+            frame,
+            f"Team 2 Ball Control: {team_2*100:.2f}%",
+            (1400, 950),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 0, 0),
+            3,
+        )
 
         return frame
 
-    def draw_annotations(self,video_frames, tracks,team_ball_control):
-        output_video_frames= []
+    def draw_annotations(self, video_frames, tracks):
+        output_video_frames = []
+        # #print("len(video_frames)", len(video_frames))
+        # print("len(tracks['players'])", len(tracks['players']))
+        # print("len(tracks['ball'])", len(tracks['ball']))
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()
 
             player_dict = tracks["players"][frame_num]
-            ball_dict = tracks["ball"][frame_num]
+            ball_dict = (
+                tracks["ball"][frame_num] if frame_num < len(tracks["ball"]) else {}
+            )
             referee_dict = tracks["referees"][frame_num]
+            goal_keeper_dict = tracks["goalkeeper"][frame_num] if frame_num < len(tracks["goalkeeper"]) else {}
+            goalpost_dict = tracks["goalpost"][frame_num]
 
             # Draw Players
             for track_id, player in player_dict.items():
-                color = player.get("team_color",(0,0,255))
-                frame = self.draw_ellipse(frame, player["bbox"],color, track_id)
+                color = player.get("team_color", (0, 0, 255))
+                frame = self.draw_ellipse(frame, player["bbox"], color, track_id)
 
-                if player.get('has_ball',False):
-                    frame = self.draw_traingle(frame, player["bbox"],(0,0,255))
+                if player.get("has_ball", False):
+                    frame = self.draw_traingle(frame, player["bbox"], (0, 0, 255))
 
             # Draw Referee
             for _, referee in referee_dict.items():
-                frame = self.draw_ellipse(frame, referee["bbox"],(0,255,255))
+                frame = self.draw_ellipse(frame, referee["bbox"], (0, 255, 255))
             
-            # Draw ball 
-            for track_id, ball in ball_dict.items():
-                frame = self.draw_traingle(frame, ball["bbox"],(0,255,0))
+            for _, goalkeeper in goal_keeper_dict.items():
+                frame = self.draw_ellipse(frame, goalkeeper["bbox"], (255, 0, 255))
 
+            # Draw ball
+            for track_id, ball in ball_dict.items():
+                frame = self.draw_traingle(frame, ball["bbox"], (0, 255, 0))
+
+            # Draw Goalpost
+            for _, goalpost in goalpost_dict.items():
+                frame = self.draw_traingle(frame, goalpost["bbox"], (255, 0, 0))
 
             # Draw Team Ball Control
-            frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)
+            # frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)
 
             output_video_frames.append(frame)
 

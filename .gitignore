@@ -1,5 +1,10 @@
 models/
 input_videos/
 output_videos/
+stubs/
+runs/
 #ignore pychache
 __pycache__/
+#ignore jupyter notebook checkpoints
+*.png
+*.jpg
