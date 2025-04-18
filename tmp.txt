@@ -1,0 +1,49 @@
+# def calculate_reward(prev_state, new_state, action):
+#     """Simple reward function"""
+
+#     """
+#     distance with goal              (+/-) * 5
+#     lw facing the goal direction    +1
+#     lw enfradah                     +10  
+#     lw mesh shaif goal w still no   -10
+#     lw makontsh shaif goal then y   +5
+#     lw shaif goal then no           -5
+#     lw shaif w then shaif           +5
+#     lw nafs el hagma time pen       -0.1
+#     lw gbt goal                     +100
+#     lw goal sad                     +10
+#     lw et2t3/offside/mispass        -100
+#     lw action kant pass fe etgah kan fel state l abliha b 0 then and has ball = 0   -1000
+#     lw action kan pass fe etgah kan fel state l abliha b 1 then and has ball = 1    +10
+#     calculate prev state el agent kan fe zahma ad eh w now zahma ad eh              +10
+#     """
+#     reward = 0
+#     #(todo) law basa mara wahda be3ed fa teb2a fe rakam ahsan
+#     if prev_state[feature_dict['dist_goal']] != 0 and new_state[feature_dict['dist_goal']] != 0:
+#         reward += (prev_state[feature_dict['dist_goal']] - new_state[feature_dict['dist_goal']]) * 5 
+    
+#     # Reward for facing goal (angle closer to 0)
+#     reward += 1 if (abs(prev_state[feature_dict['angle_goal']]) - abs(new_state[feature_dict['angle_goal']]))>0 else 0 
+#     reward += 10 if new_state[feature_dict['no_opponent_in_front']] else -1
+    
+#     if not new_state[feature_dict['goaldetected']] and not prev_state[feature_dict['goaldetected']]:
+#         reward +=-10
+#     elif new_state[feature_dict['goaldetected']] and not prev_state[feature_dict['goaldetected']]:
+#         reward += 5
+#     elif new_state[feature_dict['goaldetected']] and prev_state[feature_dict['goaldetected']]:
+#         reward += 5
+#     elif not new_state[feature_dict['goaldetected']] and prev_state[feature_dict['goaldetected']]:
+#         reward += -5
+    
+#     # Small penalty for each step
+#     if prev_state['attemps']==new_state['attemps']:
+#         reward -= 0.1
+#     if new_state['score']-prev_state['score']>700:
+#         reward += 100 # goalll
+#     elif new_state['score']-prev_state['score']>0:
+#         reward += 10    #missed    
+#     if (new_state['score']==prev_state['score']) and new_state['attemps']!=prev_state['attemps']:
+#         reward -= 100        # turnover
+
+    
+#     return reward

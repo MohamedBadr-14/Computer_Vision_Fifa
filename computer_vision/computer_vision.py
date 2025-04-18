@@ -4,7 +4,7 @@ import numpy as np
 from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator import CameraMovementEstimator
-from view_transformer import ViewTransformer, KeypointsTransformer
+from view_transformer import  KeypointsTransformer
 import cv2
 import os
 import pickle
@@ -103,8 +103,8 @@ class ComputerVision:
             time_before = time.time()
             self.view_transformer.get_matrix_transform(frame)
             self.view_transformer.add_transformed_position_to_tracks(frame_tracks)
-            print("\n  timeeeee -> " , time.time() - time_before)
-            print("\nFRAMAATTTT" , frame_tracks["players"])
+            # print("\n  timeeeee -> " , time.time() - time_before)
+            # print("\nFRAMAATTTT" , frame_tracks["players"])
 
             # Assign Player Teams
 
@@ -206,7 +206,7 @@ class ComputerVision:
                 if assigned_player != -1:
                     frame_tracks["players"][assigned_player]["has_ball"] = True
 
-            ocr_dict = self.ocr_extractor.extract_points_and_attempts(frame , save=False)
+            # ocr_dict = self.ocr_extractor.extract_points_and_attempts(frame , save=False)
             # print("end attempts and points" , "Points: ", ocr_dict)
             
             to_be_sent = {
@@ -214,8 +214,8 @@ class ComputerVision:
                 "ball": frame_tracks["ball"],
                 "goalkeeper": frame_tracks["goalkeeper"],
                 "goalpost": frame_tracks["goalpost"],
-                "points": ocr_dict['points'],
-                "attempts": ocr_dict['attempts'],
+                # "points": ocr_dict['points'],
+                # "attempts": ocr_dict['attempts'],
                 }
             
         
@@ -233,10 +233,11 @@ class ComputerVision:
         # with open("stubs/tracks.pkl", "wb") as f:
         #     pickle.dump(to_bo_loaded_tracks, f)
 
-        # # Draw output
+        # Draw output
         # output_video_frames = self.tracker.draw_annotations(
-        #     video_frames, all_tracks
+        #     video_frames, [frame_tracks]
         # )
+        # save_video(output_video_frames, "output_videos/points.mp4")
 
         # # Save video
         # save_video(output_video_frames, "output_videos/points.mp4")
