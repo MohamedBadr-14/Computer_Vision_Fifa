@@ -39,36 +39,38 @@ feature_dict = {
 
 scene={
   "players": {
-    "25": {
-      "bbox": [99.7053451538086, 358.3722839355469, 139.6361083984375, 413.9934997558594],
-      "conf": 0.8158602,
-      "position": [119, 413],
-      "position_transformed": [16.138778686523438, 13.929924964904785],
-      "team": 2,
-      "team_color": [112.48, 44.436, 32.245]
+
+
+        "42": {
+      "bbox": [712.0142822265625, 574.5263671875, 769.1848754882812, 652.4767456054688],
+      "conf": 0.7869588,
+      "position": [740, 652],
+      "position_transformed": [31.89659881591797, 37.69550132751465],
+      "team": 1,
+      "team_color": [123.16, 196.4, 188.72]
     },
-    "2": {
-      "bbox": [980.1610107421875, 533.3674926757812, 1022.2935791015625, 610.4622192382812],
-      "conf": 0.7885625,
-      "position": [1001, 610],
-      "position_transformed": [35.99492645263672, 28.56196403503418],
-      "team": 2,
-      "team_color": [112.48, 44.436, 32.245]
-    },
+
     "4": {
       "bbox": [712.0142822265625, 574.5263671875, 769.1848754882812, 652.4767456054688],
       "conf": 0.7869588,
       "position": [740, 652],
       "position_transformed": [31.89659881591797, 30.69550132751465],
       "team": 1,
-      "team_color": [123.16, 196.4, 188.72],
-      "has_ball": True
+      "team_color": [123.16, 196.4, 188.72]
     },
     "16": {
       "bbox": [972.9927978515625, 450.2742919921875, 1012.3912353515625, 510.6546936035156],
       "conf": 0.77576387,
       "position": [992, 510],
-      "position_transformed": [35.38132095336914, 22.34224510192871],
+      "position_transformed": [23.38132095336914, 30.34224510192871],
+      "team": 2,
+      "team_color": [112.48, 44.436, 32.245]
+    },
+        "162": {
+      "bbox": [972.9927978515625, 450.2742919921875, 1012.3912353515625, 510.6546936035156],
+      "conf": 0.77576387,
+      "position": [992, 510],
+      "position_transformed": [20.38132095336914, 30.34224510192871],
       "team": 2,
       "team_color": [112.48, 44.436, 32.245]
     },
@@ -76,26 +78,14 @@ scene={
       "bbox": [811.2969360351562, 372.0921936035156, 848.4050903320312, 427.7196350097656],
       "conf": 0.712132,
       "position": [829, 427],
-      "position_transformed": [31.55144691467285, 15.908668518066406],
+      "position_transformed": [21.55144691467285,35.908668518066406],
       "team": 1,
-      "team_color": [123.16, 196.4, 188.72]
+      "team_color": [123.16, 196.4, 188.72],
+        "has_ball": True
+
+
     },
-    "1": {
-      "bbox": [953.2402954101562, 718.751220703125, 1001.7147216796875, 809.2203369140625],
-      "conf": 0.6959161,
-      "position": [977, 809],
-      "position_transformed": [36.32642364501953, 37.925811767578125],
-      "team": 2,
-      "team_color": [112.48, 44.436, 32.245]
-    },
-    "6": {
-      "bbox": [736.9325561523438, 465.7122802734375, 776.6953735351562, 528.1206665039062],
-      "conf": 0.66186607,
-      "position": [756, 528],
-      "position_transformed": [31.113080978393555, 23.380260467529297],
-      "team": 1,
-      "team_color": [123.16, 196.4, 188.72]
-    }
+
   },
   "referees": {},
   "ball": {
@@ -174,6 +164,7 @@ class SoccerFeatureExtractor:
         closest_opp_dist = 1.0
         closest_opp_angle = 0.0
         no_opponent_in_front = True
+        last_opp_x=0
         
         # Initialize 8-direction tracking (will only store opponents)
         directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
@@ -230,12 +221,17 @@ class SoccerFeatureExtractor:
             
             for opp_x, opp_y in opponents:
                 # Check if opponent is in front
+                if opp_x>last_opp_x:
+                    last_opp_x=opp_x
+
+
+
                 if agent_x <= opp_x:
                     all_opp_behind = False
                 
 
                 dist = math.hypot(opp_x - agent_x, opp_y - agent_y)
-                print(opp_x, opp_y, agent_x, agent_y, dist)
+                # print(opp_x, opp_y, agent_x, agent_y, dist)
             
                 
                 # Track closest opponent overall
@@ -284,12 +280,44 @@ class SoccerFeatureExtractor:
         # Determine pass directions by comparing team_data and dir_data
 
         ### checck here for offside rule ba3dennnnnnnnnn mesh ma3mola
+
         for direction in directions:
+            angle=90
             team_dist = team_data[direction]['dist']
             opp_dist = dir_data[direction]['dist']
+            opp_x, opp_y = dir_data[direction]['pos'] if dir_data[direction]['pos'] else (0, 0)
+            mate_x, mate_y =team_data[direction]['pos'] if team_data[direction]['pos'] else (0, 0)
+            if team_dist != float('inf') and opp_dist != float('inf'):
+                dx =mate_x-agent_x
+                dy =mate_y-agent_y  
+                angle_mate = math.degrees(math.atan2(dy, dx))
+                dx =opp_x-agent_x
+                dy =opp_y-agent_y  
+                angle_opp = math.degrees(math.atan2(dy, dx))
+                angle=abs(angle_mate-angle_opp)
+                print("direction",direction)
+                print("angle",angle)
+            # plt.figure(figsize=(8, 6))
+            # plt.plot([agent_x, mate_x], [agent_y, mate_y], 'b-', label=f"Distance: {dist:.2f}, Angle: {angle:.2f}°")
+            # plt.scatter([agent_x, mate_x], [agent_y, mate_y], color=['red', 'green'], s=100, label=['Agent', 'Mate'])
+            # plt.title(f"Agent to Mate: Distance = {dist:.2f}, Angle = {angle:.2f}°")
+            # plt.xlabel("X-axis")
+            # plt.ylabel("Y-axis")
+            # plt.legend()
+            # plt.grid(True)
+            # plt.axis('equal')  # Equal scaling for x and y
+            # plt.show()
+            
+
+
+
+
+         
+       
+
             
             # If there's a teammate and either no opponent or teammate is closer
-            if team_dist != float('inf') and (opp_dist == float('inf') or team_dist < opp_dist):
+            if team_dist != float('inf')  and (mate_x<last_opp_x or (no_opponent_in_front and mate_x<agent_x ))and angle>10:
                 pass_directions[direction] = 1
         
         # Prepare return values (dir_data always contains opponent positions)
@@ -308,7 +336,7 @@ class SoccerFeatureExtractor:
 
 
     @staticmethod
-    def extract_features(agent_x, agent_y,teammates, opponents,attemps, score,goalpost):
+    def extract_features(agent_x, agent_y,teammates, opponents,attemps, score,goalpost,goalkeeper):
         # Normalized features
         top_rect=[(agent_x,65),(50,51)]
         middle_rect=[(agent_x,51),(50,39)]
@@ -432,13 +460,14 @@ def get_state_from_positions(scene):
     attemps=scene['Attemps'] if scene.get('Attemps', False) else 0
     score=scene['Score'] if scene.get('Score', False) else  0
     goalpost=None
+    goalkeeper=None
     if scene.get('goalpost', False):
         goalpost = scene['goalpost'][list(scene['goalpost'].keys())[0]]['position_transformed']
     if scene.get('goalkeeper', False):
         first_key = next(iter(scene['goalkeeper']))
         x, y = scene['goalkeeper'][first_key]['position_transformed']  
-        opponents.append((x, FIELD_HEIGHT-y))
-        print("goalkeeper",scene['goalkeeper'][first_key]['position_transformed'])
+        goalkeeper=((x, FIELD_HEIGHT-y))
+        # print("goalkeeper",scene['goalkeeper'][first_key]['position_transformed'])
     for player_id, player_data in scene['players'].items():
         x, y = player_data['position_transformed']  
         if player_data['team'] == 1:
@@ -454,7 +483,7 @@ def get_state_from_positions(scene):
     plot_pitch(teammates,opponents,player_pos)        
 
     return SoccerFeatureExtractor.extract_features(
-        player_pos[0],player_pos[1],  teammates, opponents,attemps, score,goalpost
+        player_pos[0],player_pos[1],  teammates, opponents,attemps, score,goalpost,goalkeeper
     )
 
 def calculate_reward(prev_state, new_state, action):
@@ -626,7 +655,9 @@ class DQNAgent:
 # # Save trained model
 # agent.save("soccer_dqn_random_train.pth")
 
-print(get_state_from_positions(scene).tolist())
+values=get_state_from_positions(scene).tolist()
+for key, index in feature_dict.items():
+        print(f"{key}: {values[index]}")
 
 
  
