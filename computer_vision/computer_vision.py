@@ -107,18 +107,12 @@ class ComputerVision:
             # print("\nFRAMAATTTT" , frame_tracks["players"])
 
             # Assign Player Teams
-
-            self.team_assigner.assign_team_color(frame, frame_tracks["players"])
-
-            for player_id, track in frame_tracks["players"].items():
-                
-                team = self.team_assigner.get_player_team(frame, track["bbox"], player_id)
-                # ##print(conf)
-                frame_tracks["players"][player_id]["team"] = team
-                frame_tracks["players"][player_id]["team_color"] = (
-                    self.team_assigner.team_colors[team]
-                )
-            team_assigned = time.time()
+            crops,crop_ids = self.team_assigner.extract_crops(frame_tracks["players"], frame)
+            embedings = self.team_assigner.extract_embeddings(crops)
+            
+            clusters = self.team_assigner.predict_kmeans(embedings)
+            self.team_assigner.assign_clusters_to_players(clusters, crop_ids, frame_tracks["players"])
+            
             # Merge players from the same team who are very close to each other
             merged_players = {}
             distance_threshold = 40  # Adjust this threshold based on your use case
@@ -154,44 +148,45 @@ class ComputerVision:
 
             # Remove duplicate players
             for player_id in merged_players:
+                print("REMOVED A DUPLICATE PLAYER")
                 del frame_tracks["players"][player_id]
 
-            # Merge players from the same team who are very close to each other
-            merged_players = {}
-            distance_threshold = 40  # Adjust this threshold based on your use case
+            # # Merge players from the same team who are very close to each other
+            # merged_players = {}
+            # distance_threshold = 40  # Adjust this threshold based on your use case
 
-            for player_id, track in list(frame_tracks["players"].items()):
-                if player_id in merged_players:
-                    continue  # Skip already merged players
-                # print('one track: ', track)
-                position1 = track["position"]
-                team1 = track["team"]
-                conf1 = track["conf"]  # Confidence of the first player
+            # for player_id, track in list(frame_tracks["players"].items()):
+            #     if player_id in merged_players:
+            #         continue  # Skip already merged players
+            #     # print('one track: ', track)
+            #     position1 = track["position"]
+            #     team1 = track["team"]
+            #     conf1 = track["conf"]  # Confidence of the first player
 
-                for other_player_id, other_track in list(frame_tracks["players"].items()):
-                    if player_id == other_player_id or other_player_id in merged_players:
-                        continue
+            #     for other_player_id, other_track in list(frame_tracks["players"].items()):
+            #         if player_id == other_player_id or other_player_id in merged_players:
+            #             continue
 
-                    position2 = other_track["position"]
-                    team2 = other_track["team"]
-                    conf2 = other_track["conf"]  # Confidence of the second player
+            #         position2 = other_track["position"]
+            #         team2 = other_track["team"]
+            #         conf2 = other_track["conf"]  # Confidence of the second player
 
-                    # Check if players are from the same team and very close
-                    if team1 == team2:
-                        distance = np.linalg.norm(np.array(position1) - np.array(position2))
-                        if distance < distance_threshold:
-                            # Keep the player with the highest confidence
-                            if conf1 >= conf2:
-                                merged_players[other_player_id] = True
-                            else:
-                                merged_players[player_id] = True
-                                # Update the current player's data with the other player's data
-                                # frame_tracks["players"][player_id] = other_track
-                                break  # Stop checking further for this player
+            #         # Check if players are from the same team and very close
+            #         if team1 == team2:
+            #             distance = np.linalg.norm(np.array(position1) - np.array(position2))
+            #             if distance < distance_threshold:
+            #                 # Keep the player with the highest confidence
+            #                 if conf1 >= conf2:
+            #                     merged_players[other_player_id] = True
+            #                 else:
+            #                     merged_players[player_id] = True
+            #                     # Update the current player's data with the other player's data
+            #                     # frame_tracks["players"][player_id] = other_track
+            #                     break  # Stop checking further for this player
 
-            # Remove duplicate players
-            for player_id in merged_players:
-                del frame_tracks["players"][player_id]
+            # # Remove duplicate players
+            # for player_id in merged_players:
+            #     del frame_tracks["players"][player_id]
 
             # print('frame trackss after:', frame_tracks["players"].items())
             # print('frame 222:', frame_tracks["players"][2])
@@ -209,14 +204,14 @@ class ComputerVision:
             # ocr_dict = self.ocr_extractor.extract_points_and_attempts(frame , save=False)
             # print("end attempts and points" , "Points: ", ocr_dict)
             
-            to_be_sent = {
-                "players": frame_tracks["players"],
-                "ball": frame_tracks["ball"],
-                "goalkeeper": frame_tracks["goalkeeper"],
-                "goalpost": frame_tracks["goalpost"],
-                # "points": ocr_dict['points'],
-                # "attempts": ocr_dict['attempts'],
-                }
+            # to_be_sent = {
+            #     "players": frame_tracks["players"],
+            #     "ball": frame_tracks["ball"],
+            #     "goalkeeper": frame_tracks["goalkeeper"],
+            #     "goalpost": frame_tracks["goalpost"],
+            #     # "points": ocr_dict['points'],
+            #     # "attempts": ocr_dict['attempts'],
+            #     }
             
         
 
@@ -226,13 +221,6 @@ class ComputerVision:
             # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
             # all_tracks["goalpost"].append(frame_tracks["goalpost"])
 
-        # to_bo_loaded_tracks = adjust_all_tracks(all_tracks)
-        # Save all tracks to stub
-        # if not os.path.exists("stubs"):
-        #     os.makedirs("stubs")
-        # with open("stubs/tracks.pkl", "wb") as f:
-        #     pickle.dump(to_bo_loaded_tracks, f)
-
         # Draw output
         # output_video_frames = self.tracker.draw_annotations(
         #     video_frames, [frame_tracks]
@@ -241,4 +229,4 @@ class ComputerVision:
 
         # # Save video
         # save_video(output_video_frames, "output_videos/points.mp4")
-        return to_be_sent
+        return frame_tracks
