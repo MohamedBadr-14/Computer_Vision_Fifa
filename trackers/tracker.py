@@ -115,10 +115,12 @@ class Tracker:
 
         # Convert to supervision Detection format
         detection_supervision = sv.Detections.from_ultralytics(detection[0])
+        detections_nms = detection_supervision.with_nms(threshold=0.5, class_agnostic=True)
+
 
         # Track objects in the current frame
         detection_with_tracks = self.tracker.update_with_detections(
-            detection_supervision
+            detections_nms
         )
 
         for frame_detection in detection_with_tracks:
@@ -139,7 +141,7 @@ class Tracker:
                 frame_tracks["goalpost"][1] = {"conf": frame_detection[2], "bbox": bbox}
                 goal_count += 1
 
-        for frame_detection in detection_supervision:
+        for frame_detection in detections_nms:
             bbox = frame_detection[0].tolist()
             cls_id = frame_detection[3]
 
@@ -160,7 +162,7 @@ class Tracker:
             #     keeper_count += 1
 
            
-        return frame_tracks,detection_supervision
+        return frame_tracks,detections_nms
 
     def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
         position = ball_track.get(1, {}).get("bbox", [])

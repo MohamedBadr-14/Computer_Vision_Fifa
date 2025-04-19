@@ -40,7 +40,6 @@ class TeamAssigner:
     def extract_crops(self, frame, detections):
         PLAYER_ID = 4
 
-        detections = detections.with_nms(threshold=0.5, class_agnostic=True)
         detections = detections[detections.class_id == PLAYER_ID]
         crops = []
         for xyxy in detections.xyxy:
