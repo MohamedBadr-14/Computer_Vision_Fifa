@@ -229,4 +229,6 @@ class ComputerVision:
 
         # # Save video
         # save_video(output_video_frames, "output_videos/points.mp4")
-        return frame_tracks
+                # Check if any player in team 1 has the ball
+        hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
+        return frame_tracks, hasBall
