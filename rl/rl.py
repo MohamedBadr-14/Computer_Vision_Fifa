@@ -7,6 +7,8 @@ import torch.optim as optim
 from collections import deque
 import matplotlib.pyplot as plt
 
+
+
 feature_dict = {
     'dist_goal': 0,
     'angle_goal': 1,
@@ -38,7 +40,7 @@ feature_dict = {
     'agent_box':27
 }
 
-# FIELD_WIDTH = 50 
+FIELD_WIDTH = 50 
 FIELD_HEIGHT = 90 # haytghyar
 GOAL_POSITION = (105, 34)  # lama yerga3
 NUM_PLAYERS = 22  # 11 players per team
@@ -265,8 +267,7 @@ class SoccerFeatureExtractor:
                 dy =opp_y-agent_y  
                 angle_opp = math.degrees(math.atan2(dy, dx))
                 angle=abs(angle_mate-angle_opp)
-                print("direction",direction)
-                print("angle",angle)
+   
             # plt.figure(figsize=(8, 6))
             # plt.plot([agent_x, mate_x], [agent_y, mate_y], 'b-', label=f"Distance: {dist:.2f}, Angle: {angle:.2f}°")
             # plt.scatter([agent_x, mate_x], [agent_y, mate_y], color=['red', 'green'], s=100, label=['Agent', 'Mate'])
@@ -428,7 +429,7 @@ def get_state_from_positions(scene):
     """Convert raw positions to state for specific player"""
     teammates = []
     opponents = []
-    player_pos = None
+    player_pos = (0,0)
     attemps=scene['Attemps'] if scene.get('Attemps', False) else 0
     score=scene['Score'] if scene.get('Score', False) else  0
     goalpost=None
@@ -527,6 +528,8 @@ def calculate_reward(prev_state, new_state, action):
     # Congestion change reward (assess how crowded the area around player has become)
     prev_cong_num = prev_state[feature_dict['agent_box']]
     new_cong_num = new_state[feature_dict['agent_box']]
+    print(prev_cong_num)
+    print(new_cong_num)
 
     if new_cong_num == 0:
         reward -= 1
@@ -594,7 +597,7 @@ class DQNAgent:
         return torch.argmax(act_values).item()
     
     def replay(self, batch_size):
-        if len(self.memory) < batch_size:
+        if len(self.memory) <= batch_size:
             return
         
         minibatch = random.sample(self.memory, batch_size)
@@ -616,8 +619,9 @@ class DQNAgent:
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
     
-    def save(self, filename):
-        """Save the model and training parameters."""
+    def save(self, filename, log_filename="model_log.txt"):
+        """Save the model and training parameters, and log them to a text file."""
+        # Save the model and training parameters
         torch.save({
             'model_state_dict': self.model.state_dict(),
             'target_model_state_dict': self.target_model.state_dict(),
@@ -625,7 +629,22 @@ class DQNAgent:
             'memory': list(self.memory),
             'epsilon': self.epsilon
         }, filename)
-    
+
+        # Log parameters to a text file
+        with open(log_filename, "w") as log_file:
+            log_file.write("Model Weights:\n")
+            for name, param in self.model.named_parameters():
+                log_file.write(f"{name}:\n{param.data}\n\n")
+
+            log_file.write("\nTarget Model Weights:\n")
+            for name, param in self.target_model.named_parameters():
+                log_file.write(f"{name}:\n{param.data}\n\n")
+
+            log_file.write("\nReplay Memory:\n")
+            for i, memory in enumerate(self.memory):
+                log_file.write(f"Memory {i}: {memory}\n")
+
+            log_file.write(f"\nEpsilon: {self.epsilon}\n")
     def load(self, filename):
         """Load the model and training parameters."""
         checkpoint = torch.load(filename)
@@ -657,6 +676,47 @@ class DQNAgent:
         
         # Return the corresponding action string
         return action_list[action_idx]
+    
 
 
- 
+
+
+# if __name__ == "__main__":
+#     rl_agent = DQNAgent(load_path="trained_model.pth")
+#     rl_agent.save("trained_model.pth", "model_logbefore.txt")
+
+#     first_time = True
+#     prev_action = None
+#     trainNN_counter = 0
+    
+
+    # while True:
+    #     cur_state = [random.randint(1, 3) for _ in range(28)]  # Random integers between 1 and 3
+
+    #     prev_state = rl_agent.prev_state
+    #     action_taken = None
+
+    #     if first_time:
+    #         first_time = False
+    #         action_taken = rl_agent.act(state=cur_state)
+    #         rl_agent.prev_state = cur_state
+    #         prev_action = action_taken
+    #     else:
+    #         action_taken = rl_agent.act(state=cur_state)
+    #         print("action",action_taken)
+    #         prev_action = action_taken
+    #         reward = calculate_reward(prev_state, cur_state, prev_action)
+    #         print("Reward:", reward)
+    #         rl_agent.remember(prev_state, prev_action, reward, cur_state, done=False)
+
+    #     trainNN_counter += 1
+    #     if trainNN_counter == 64:
+    #         print("Training the model...")
+    #         rl_agent.replay(50)
+    #         trainNN_counter = 0
+
+    #         # Save and log parameters
+    #         rl_agent.save("trained_model.pth", "model_logafter.txt")
+    #         break
+
+    #     prev_action = action_taken
