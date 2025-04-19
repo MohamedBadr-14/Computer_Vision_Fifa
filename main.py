@@ -37,7 +37,7 @@ def adjust_all_tracks(all_tracks):
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("input_videos/goalkeeper.mp4")
+    video_frames = read_video("input_videos/general_small.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
@@ -60,7 +60,7 @@ def main(track_stubs=False):
     team_assigner = TeamAssigner()
     # ocr_extractor = OCRExtractor()
     
-    video_frames = video_frames[:5]  
+    # video_frames = [video_frames[30]]  
 
     print(len(video_frames))
     while test < len(video_frames):  # just for testing
@@ -74,7 +74,7 @@ def main(track_stubs=False):
                             "goalkeeper" : loaded_tracks["goalkeeper"][test-1],
                             "goalpost" : loaded_tracks["goalpost"][test-1]}
         else:
-            frame_tracks,detection_cv = tracker.get_object_track(frame)
+            frame_tracks = tracker.get_object_track(frame)
         test += 1  # test
 
         #adjust goalkeeper detections
@@ -127,16 +127,17 @@ def main(track_stubs=False):
 
         # Assign Player Teams
         # detection_supervision = sv.Detections.from_ultralytics(result[0])
-        crops = team_assigner.extract_crops(frame, detection_cv)
+        crops,crop_ids = team_assigner.extract_crops(frame_tracks["players"], frame)
         embedings = team_assigner.extract_embeddings(crops)
         
         clusters = team_assigner.predict_kmeans(embedings)
-        print("clusters: ", clusters)
-        #save crops to new directory named crops
-        if not os.path.exists("crops"):
-            os.makedirs("crops")
-        for i, crop in enumerate(crops):
-            cv2.imwrite(f"crops/crop_{i}.jpg", crop)
+        team_assigner.assign_clusters_to_players(clusters, crop_ids, frame_tracks["players"])
+        # print(frame_tracks["players"])
+        # #save crops to new directory named crops
+        # if not os.path.exists("crops"):
+        #     os.makedirs("crops")
+        # for i, crop in zip(crop_ids, crops):
+        #     cv2.imwrite(f"crops/crop_{i}.jpg", crop)
         
         
         
@@ -150,24 +151,24 @@ def main(track_stubs=False):
         # print('frame 222:', frame_tracks["players"][2])
 
         # Assign Ball to Player
-        # if frame_tracks["ball"]:
-        #     ball_bbox = frame_tracks["ball"][1]["bbox"]
-        #     assigned_player = player_assigner.assign_ball_to_player(
-        #         frame_tracks["players"], ball_bbox
-        #     )
+        if frame_tracks["ball"]:
+            ball_bbox = frame_tracks["ball"][1]["bbox"]
+            assigned_player = player_assigner.assign_ball_to_player(
+                frame_tracks["players"], ball_bbox
+            )
 
-        #     if assigned_player != -1:
-        #         frame_tracks["players"][assigned_player]["has_ball"] = True
-        #         # #print("assigned_player", assigned_player , test)
-        #         team_ball_control.append(
-        #             frame_tracks["players"][assigned_player]["team"]
-        #         )
-        #     else:
-        #         team_ball_control.append(
-        #             team_ball_control[-1] if team_ball_control else 0
-        #         )
-        # else:
-        #     team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
+            if assigned_player != -1:
+                frame_tracks["players"][assigned_player]["has_ball"] = True
+                # #print("assigned_player", assigned_player , test)
+                team_ball_control.append(
+                    frame_tracks["players"][assigned_player]["team"]
+                )
+            else:
+                team_ball_control.append(
+                    team_ball_control[-1] if team_ball_control else 0
+                )
+        else:
+            team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
 
         # print(frame_tracks)
         # print("start attempts and points")
@@ -193,7 +194,7 @@ def main(track_stubs=False):
         all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
         all_tracks["goalpost"].append(frame_tracks["goalpost"])
 
-    # team_ball_control = np.array(team_ball_control)
+    team_ball_control = np.array(team_ball_control)
     # to_bo_loaded_tracks = adjust_all_tracks(all_tracks)
     # # Save all tracks to stub
     # if not os.path.exists("stubs"):
@@ -201,13 +202,13 @@ def main(track_stubs=False):
     # with open("stubs/tracks.pkl", "wb") as f:
     #     pickle.dump(to_bo_loaded_tracks, f)
 
-    # # # Draw output
-    # output_video_frames = tracker.draw_annotations(
-    #     video_frames, all_tracks, team_ball_control
-    # )
+    # # Draw output
+    output_video_frames = tracker.draw_annotations(
+        video_frames, all_tracks, team_ball_control
+    )
 
     # # # Save video
-    # save_video(output_video_frames, "output_videos/points.mp4")
+    save_video(output_video_frames, "output_videos/FINALLLLLLLLLLLLLLLL.mp4")
 
 
 if __name__ == "__main__":

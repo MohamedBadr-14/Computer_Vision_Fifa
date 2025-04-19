@@ -162,7 +162,7 @@ class Tracker:
             #     keeper_count += 1
 
            
-        return frame_tracks,detections_nms
+        return frame_tracks
 
     def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
         position = ball_track.get(1, {}).get("bbox", [])
@@ -313,7 +313,8 @@ class Tracker:
 
             # Draw Players
             for track_id, player in player_dict.items():
-                color = player.get("team_color", (0, 0, 255))
+                team = player.get("team")
+                color = (0, 255, 0) if team == 1 else (255, 0, 0)
                 frame = self.draw_ellipse(frame, player["bbox"], color, track_id)
 
                 if player.get("has_ball", False):
