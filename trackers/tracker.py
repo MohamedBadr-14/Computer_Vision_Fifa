@@ -160,7 +160,7 @@ class Tracker:
             #     keeper_count += 1
 
            
-        return frame_tracks
+        return frame_tracks,detection_supervision
 
     def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
         position = ball_track.get(1, {}).get("bbox", [])
