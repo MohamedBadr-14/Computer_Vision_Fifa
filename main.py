@@ -34,10 +34,25 @@ def adjust_all_tracks(all_tracks):
 
 
 
+def read_frames(frames_path):
+    # Read the frames from the specified path
+    frames = []
+    count = 0
+    for filename in sorted(os.listdir(frames_path)):
+        if filename.endswith(".jpg") or filename.endswith(".png"):
+            frame_path = os.path.join(frames_path, filename)
+            frame = cv2.imread(frame_path)
+            frames.append(frame)
+            if count == 10:
+                break
+            count += 1
+    return frames
+
+
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("input_videos/goalkeeper.mp4")
+    # video_frames = read_video("input_videos/goalkeeper.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
@@ -61,6 +76,9 @@ def main(track_stubs=False):
     # ocr_extractor = OCRExtractor()
     
     # video_frames = [video_frames[30]]  
+    video_frames = read_frames("./goal1/frames")
+    # video_frames = [cv2.imread("./goal1/frames/frame_0003.png")]
+    video_frames = video_frames[1:5]
 
     print(len(video_frames))
     while test < len(video_frames):  # just for testing
@@ -170,7 +188,7 @@ def main(track_stubs=False):
         # if save_count == 0:
         #     cv2.imwrite("frame_save.png" , frame)
         # ocr_dict = ocr_extractor.extract_points_and_attempts(frame , save=False if save_count > 0 else True)
-        save_count+=1
+        # save_count+=1
         # print("end attempts and points" , "Points: ", ocr_dict)
         
         to_be_sent = {
@@ -190,6 +208,7 @@ def main(track_stubs=False):
         all_tracks["goalpost"].append(frame_tracks["goalpost"])
 
     team_ball_control = np.array(team_ball_control)
+    print("\n\n" , all_tracks)
     # to_bo_loaded_tracks = adjust_all_tracks(all_tracks)
     # # Save all tracks to stub
     # if not os.path.exists("stubs"):
@@ -198,12 +217,15 @@ def main(track_stubs=False):
     #     pickle.dump(to_bo_loaded_tracks, f)
 
     # # Draw output
-    output_video_frames = tracker.draw_annotations(
-        video_frames, all_tracks, team_ball_control
-    )
+    # output_video_frames = tracker.draw_annotations(
+    #     video_frames, all_tracks, team_ball_control
+    # )
 
     # # # Save video
-    save_video(output_video_frames, "output_videos/FINALLLLLLLLLLLLLLLL.mp4")
+    # save_video(output_video_frames, "output_videos/sad.mp4")
+    # for frame in output_video_frames:
+    #     cv2.imwrite("output_videos/frame_{}.jpg".format(save_count), frame)
+    #     save_count+=1
 
 
 if __name__ == "__main__":

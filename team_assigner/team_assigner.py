@@ -18,9 +18,12 @@ class TeamAssigner:
         self.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
         # print(DEVICE)
         self.EMBEDDINGS_MODEL = SiglipVisionModel.from_pretrained(self.SIGLIP_MODEL_PATH).to(self.DEVICE)
-        self.EMBEDDINGS_PROCESSOR = AutoProcessor.from_pretrained(self.SIGLIP_MODEL_PATH)
-        self.reducer = joblib.load('models/reducer_model_final.pkl')
-        self.kmeans = joblib.load('models/kmeans_trained_final.pkl')
+        self.EMBEDDINGS_PROCESSOR = AutoProcessor.from_pretrained(
+            self.SIGLIP_MODEL_PATH, 
+            use_fast=True  # Enable fast tokenizer if available
+        )
+        self.reducer = joblib.load('models/reducer_final.pkl')
+        self.kmeans = joblib.load('models/kmeans_final.pkl')
     
     def extract_crops(self, tracks, frame):
         crops = []
