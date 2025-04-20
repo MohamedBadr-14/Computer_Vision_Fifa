@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from ultralytics import YOLO
+import logging
 
 # Define the pixel coordinates of the 4 keypoints (from the image)
 
@@ -13,8 +14,9 @@ class KeypointsTransformer():
         [39.85, 45],       # ARC_CURVE
         [43.5,52.31]      # ARC_DOWN
         ], dtype=np.float32)
-        self.keypoint_detector = YOLO('models/keypoints.pt')
+        self.keypoint_detector = YOLO('models/keypoints.pt',verbose=False)
         self.keypoint_detector.to('cuda')
+        logging.getLogger().setLevel(logging.ERROR)
         
         self.last_valid_keypoints = np.array([
         [1991, 1013],  #PEN_DOT #BADR 
@@ -46,7 +48,7 @@ class KeypointsTransformer():
     # Compute the perspective transform matrix
     def get_matrix_transform(self, frame):
         keypoints = self.detect_keypoints(frame)
-        print("Keypoints detected in mt:", keypoints)
+        # print("Keypoints detected in mt:", keypoints)
         
         
         pixel_points = np.array(keypoints, dtype=np.float32)
@@ -77,4 +79,4 @@ class KeypointsTransformer():
                 if position_trasnformed is not None:
                     position_trasnformed = position_trasnformed.squeeze().tolist()
                 frame_tracks[object_type][track_id]['position_transformed'] = position_trasnformed
-                
+

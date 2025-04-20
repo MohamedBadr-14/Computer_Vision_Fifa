@@ -6,15 +6,22 @@ import numpy as np
 import pandas as pd
 import cv2
 import sys
+import logging
 
 sys.path.append("../")
+
+
 from utils import get_center_of_bbox, get_bbox_width, get_foot_position,measure_distance
+
 
 
 class Tracker:
     def __init__(self, model_path):
-        self.model = YOLO(model_path)
+        # Suppress YOLO logs by setting verbose=False
+        self.model = YOLO(model_path, verbose=False)
         self.tracker = sv.ByteTrack()
+        # Suppress other logs
+        logging.getLogger().setLevel(logging.ERROR)
         self.ball_positions_history = []
         self.last_valid_position = None
         self.frame_num = 0
@@ -343,3 +350,36 @@ class Tracker:
             output_video_frames.append(frame)
 
         return output_video_frames
+
+    def test_draw_annotation(self, video_path, output_path):
+        video = cv2.VideoCapture(video_path)
+        fps = video.get(cv2.CAP_PROP_FPS)
+        width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fourcc = cv2.VideoWriter_fourcc(*"XVID")
+        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+        while True:
+            ret, frame = video.read()
+            if not ret:
+                break
+
+            # Perform detection and tracking
+            frame_tracks = self.get_object_track(frame)
+
+            # Draw annotations
+            annotated_frame = self.draw_annotations(frame, frame_tracks)
+
+            # Write the frame to the output video
+            out.write(annotated_frame)
+
+        video.release()
+        out.release()
+
+if __name__ == "__main__":
+    model_path = "../models/best_new.pt"
+    video_path = "../gameplay_recording_20250420_134441.mp4"
+    output_path = "output_video.avi"
+
+    tracker = Tracker(model_path)
+    tracker.test_draw_annotation(video_path, output_path)

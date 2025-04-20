@@ -1,0 +1,456 @@
+2025-04-20 16:40:36,371 [INFO] - Logging initialized: logs/controller_log_20250420_164036.log
+2025-04-20 16:40:36,371 [INFO] - Initializing Controller
+2025-04-20 16:40:47,632 [INFO] - OCR and Computer Vision modules initialized
+2025-04-20 16:40:47,633 [INFO] - Initializing DQN Agent with model path: ./soccer_dqn_trained.pth
+2025-04-20 16:40:47,651 [INFO] - Controller initialization complete
+2025-04-20 16:40:47,652 [INFO] - Video recording is enabled
+2025-04-20 16:40:47,656 [INFO] - Created output directory: captured_frames_20250420_164047
+2025-04-20 16:40:47,661 [INFO] - Video recording initialized: captured_frames_20250420_164047/gameplay_recording_20250420_164047.mp4
+2025-04-20 16:40:47,663 [INFO] - Annotated frames will be saved to: captured_frames_20250420_164047/annotated_frames/
+2025-04-20 16:40:47,663 [INFO] - Created all frames directory: captured_frames_20250420_164047/all_frames
+2025-04-20 16:40:47,665 [INFO] - Press 's' to start capturing, 'q' to quit
+2025-04-20 16:40:56,527 [INFO] - Starting capture cycle...
+2025-04-20 16:40:57,113 [DEBUG] - Frame 1 recorded to video with annotations
+2025-04-20 16:40:57,114 [DEBUG] - Skipping processing for frame 1, skip_counter: 52
+2025-04-20 16:40:57,181 [INFO] - Game is being skipped at frame 1
+2025-04-20 16:40:57,447 [DEBUG] - Frame 2 recorded to video with annotations
+2025-04-20 16:40:57,448 [DEBUG] - Skipping processing for frame 2, skip_counter: 51
+2025-04-20 16:40:57,530 [INFO] - Game is being skipped at frame 2
+2025-04-20 16:40:57,789 [DEBUG] - Frame 3 recorded to video with annotations
+2025-04-20 16:40:57,790 [DEBUG] - Skipping processing for frame 3, skip_counter: 50
+2025-04-20 16:40:57,860 [INFO] - Game is being skipped at frame 3
+2025-04-20 16:40:58,110 [DEBUG] - Frame 4 recorded to video with annotations
+2025-04-20 16:40:58,111 [DEBUG] - Skipping processing for frame 4, skip_counter: 49
+2025-04-20 16:40:58,174 [INFO] - Game is being skipped at frame 4
+2025-04-20 16:40:58,438 [DEBUG] - Frame 5 recorded to video with annotations
+2025-04-20 16:40:58,439 [DEBUG] - Skipping processing for frame 5, skip_counter: 48
+2025-04-20 16:40:58,512 [INFO] - Game is being skipped at frame 5
+2025-04-20 16:40:58,846 [DEBUG] - Frame 6 recorded to video with annotations
+2025-04-20 16:40:58,847 [DEBUG] - Skipping processing for frame 6, skip_counter: 47
+2025-04-20 16:40:58,931 [INFO] - Game is being skipped at frame 6
+2025-04-20 16:40:59,209 [DEBUG] - Frame 7 recorded to video with annotations
+2025-04-20 16:40:59,211 [DEBUG] - Skipping processing for frame 7, skip_counter: 46
+2025-04-20 16:40:59,296 [INFO] - Game is being skipped at frame 7
+2025-04-20 16:40:59,585 [DEBUG] - Frame 8 recorded to video with annotations
+2025-04-20 16:40:59,586 [DEBUG] - Skipping processing for frame 8, skip_counter: 45
+2025-04-20 16:40:59,671 [INFO] - Game is being skipped at frame 8
+2025-04-20 16:40:59,944 [DEBUG] - Frame 9 recorded to video with annotations
+2025-04-20 16:40:59,945 [DEBUG] - Skipping processing for frame 9, skip_counter: 44
+2025-04-20 16:41:00,028 [INFO] - Game is being skipped at frame 9
+2025-04-20 16:41:00,312 [DEBUG] - Frame 10 recorded to video with annotations
+2025-04-20 16:41:00,313 [DEBUG] - Skipping processing for frame 10, skip_counter: 43
+2025-04-20 16:41:00,398 [INFO] - Game is being skipped at frame 10
+2025-04-20 16:41:00,669 [DEBUG] - Frame 11 recorded to video with annotations
+2025-04-20 16:41:00,670 [DEBUG] - Skipping processing for frame 11, skip_counter: 42
+2025-04-20 16:41:00,766 [INFO] - Game is being skipped at frame 11
+2025-04-20 16:41:01,048 [DEBUG] - Frame 12 recorded to video with annotations
+2025-04-20 16:41:01,050 [DEBUG] - Skipping processing for frame 12, skip_counter: 41
+2025-04-20 16:41:01,131 [INFO] - Game is being skipped at frame 12
+2025-04-20 16:41:01,423 [DEBUG] - Frame 13 recorded to video with annotations
+2025-04-20 16:41:01,424 [DEBUG] - Skipping processing for frame 13, skip_counter: 40
+2025-04-20 16:41:01,503 [INFO] - Game is being skipped at frame 13
+2025-04-20 16:41:01,896 [DEBUG] - Frame 14 recorded to video with annotations
+2025-04-20 16:41:01,897 [DEBUG] - Skipping processing for frame 14, skip_counter: 39
+2025-04-20 16:41:02,011 [INFO] - Game is being skipped at frame 14
+2025-04-20 16:41:02,425 [DEBUG] - Frame 15 recorded to video with annotations
+2025-04-20 16:41:02,426 [DEBUG] - Skipping processing for frame 15, skip_counter: 38
+2025-04-20 16:41:02,525 [INFO] - Game is being skipped at frame 15
+2025-04-20 16:41:02,881 [DEBUG] - Frame 16 recorded to video with annotations
+2025-04-20 16:41:02,883 [DEBUG] - Skipping processing for frame 16, skip_counter: 37
+2025-04-20 16:41:02,979 [INFO] - Game is being skipped at frame 16
+2025-04-20 16:41:03,329 [DEBUG] - Frame 17 recorded to video with annotations
+2025-04-20 16:41:03,331 [DEBUG] - Skipping processing for frame 17, skip_counter: 36
+2025-04-20 16:41:03,434 [INFO] - Game is being skipped at frame 17
+2025-04-20 16:41:03,795 [DEBUG] - Frame 18 recorded to video with annotations
+2025-04-20 16:41:03,796 [DEBUG] - Skipping processing for frame 18, skip_counter: 35
+2025-04-20 16:41:03,894 [INFO] - Game is being skipped at frame 18
+2025-04-20 16:41:04,260 [DEBUG] - Frame 19 recorded to video with annotations
+2025-04-20 16:41:04,261 [DEBUG] - Skipping processing for frame 19, skip_counter: 34
+2025-04-20 16:41:04,357 [INFO] - Game is being skipped at frame 19
+2025-04-20 16:41:04,737 [DEBUG] - Frame 20 recorded to video with annotations
+2025-04-20 16:41:04,737 [DEBUG] - Skipping processing for frame 20, skip_counter: 33
+2025-04-20 16:41:04,835 [INFO] - Game is being skipped at frame 20
+2025-04-20 16:41:05,191 [DEBUG] - Frame 21 recorded to video with annotations
+2025-04-20 16:41:05,192 [DEBUG] - Skipping processing for frame 21, skip_counter: 32
+2025-04-20 16:41:05,288 [INFO] - Game is being skipped at frame 21
+2025-04-20 16:41:05,616 [DEBUG] - Frame 22 recorded to video with annotations
+2025-04-20 16:41:05,619 [DEBUG] - Skipping processing for frame 22, skip_counter: 31
+2025-04-20 16:41:05,703 [INFO] - Game is being skipped at frame 22
+2025-04-20 16:41:06,013 [DEBUG] - Frame 23 recorded to video with annotations
+2025-04-20 16:41:06,014 [DEBUG] - Skipping processing for frame 23, skip_counter: 30
+2025-04-20 16:41:06,110 [INFO] - Game is being skipped at frame 23
+2025-04-20 16:41:06,421 [DEBUG] - Frame 24 recorded to video with annotations
+2025-04-20 16:41:06,423 [DEBUG] - Skipping processing for frame 24, skip_counter: 29
+2025-04-20 16:41:06,546 [INFO] - Game is being skipped at frame 24
+2025-04-20 16:41:06,887 [DEBUG] - Frame 25 recorded to video with annotations
+2025-04-20 16:41:06,887 [DEBUG] - Skipping processing for frame 25, skip_counter: 28
+2025-04-20 16:41:06,982 [INFO] - Game is being skipped at frame 25
+2025-04-20 16:41:07,325 [DEBUG] - Frame 26 recorded to video with annotations
+2025-04-20 16:41:07,326 [DEBUG] - Skipping processing for frame 26, skip_counter: 27
+2025-04-20 16:41:07,413 [INFO] - Game is being skipped at frame 26
+2025-04-20 16:41:07,739 [DEBUG] - Frame 27 recorded to video with annotations
+2025-04-20 16:41:07,740 [DEBUG] - Skipping processing for frame 27, skip_counter: 26
+2025-04-20 16:41:07,826 [INFO] - Game is being skipped at frame 27
+2025-04-20 16:41:08,114 [DEBUG] - Frame 28 recorded to video with annotations
+2025-04-20 16:41:08,116 [DEBUG] - Skipping processing for frame 28, skip_counter: 25
+2025-04-20 16:41:08,196 [INFO] - Game is being skipped at frame 28
+2025-04-20 16:41:08,516 [DEBUG] - Frame 29 recorded to video with annotations
+2025-04-20 16:41:08,517 [DEBUG] - Skipping processing for frame 29, skip_counter: 24
+2025-04-20 16:41:08,599 [INFO] - Game is being skipped at frame 29
+2025-04-20 16:41:08,910 [DEBUG] - Frame 30 recorded to video with annotations
+2025-04-20 16:41:08,911 [DEBUG] - Skipping processing for frame 30, skip_counter: 23
+2025-04-20 16:41:08,997 [INFO] - Game is being skipped at frame 30
+2025-04-20 16:41:09,300 [DEBUG] - Frame 31 recorded to video with annotations
+2025-04-20 16:41:09,302 [DEBUG] - Skipping processing for frame 31, skip_counter: 22
+2025-04-20 16:41:09,390 [INFO] - Game is being skipped at frame 31
+2025-04-20 16:41:09,692 [DEBUG] - Frame 32 recorded to video with annotations
+2025-04-20 16:41:09,694 [DEBUG] - Skipping processing for frame 32, skip_counter: 21
+2025-04-20 16:41:09,779 [INFO] - Game is being skipped at frame 32
+2025-04-20 16:41:10,117 [DEBUG] - Frame 33 recorded to video with annotations
+2025-04-20 16:41:10,119 [DEBUG] - Skipping processing for frame 33, skip_counter: 20
+2025-04-20 16:41:10,202 [INFO] - Game is being skipped at frame 33
+2025-04-20 16:41:10,536 [DEBUG] - Frame 34 recorded to video with annotations
+2025-04-20 16:41:10,537 [DEBUG] - Skipping processing for frame 34, skip_counter: 19
+2025-04-20 16:41:10,628 [INFO] - Game is being skipped at frame 34
+2025-04-20 16:41:10,933 [DEBUG] - Frame 35 recorded to video with annotations
+2025-04-20 16:41:10,934 [DEBUG] - Skipping processing for frame 35, skip_counter: 18
+2025-04-20 16:41:11,017 [INFO] - Game is being skipped at frame 35
+2025-04-20 16:41:11,325 [DEBUG] - Frame 36 recorded to video with annotations
+2025-04-20 16:41:11,326 [DEBUG] - Skipping processing for frame 36, skip_counter: 17
+2025-04-20 16:41:11,421 [INFO] - Game is being skipped at frame 36
+2025-04-20 16:41:11,748 [DEBUG] - Frame 37 recorded to video with annotations
+2025-04-20 16:41:11,750 [DEBUG] - Skipping processing for frame 37, skip_counter: 16
+2025-04-20 16:41:11,835 [INFO] - Game is being skipped at frame 37
+2025-04-20 16:41:12,143 [DEBUG] - Frame 38 recorded to video with annotations
+2025-04-20 16:41:12,145 [DEBUG] - Skipping processing for frame 38, skip_counter: 15
+2025-04-20 16:41:12,235 [INFO] - Game is being skipped at frame 38
+2025-04-20 16:41:12,546 [DEBUG] - Frame 39 recorded to video with annotations
+2025-04-20 16:41:12,547 [DEBUG] - Skipping processing for frame 39, skip_counter: 14
+2025-04-20 16:41:12,629 [INFO] - Game is being skipped at frame 39
+2025-04-20 16:41:12,936 [DEBUG] - Frame 40 recorded to video with annotations
+2025-04-20 16:41:12,936 [DEBUG] - Skipping processing for frame 40, skip_counter: 13
+2025-04-20 16:41:13,027 [INFO] - Game is being skipped at frame 40
+2025-04-20 16:41:13,330 [DEBUG] - Frame 41 recorded to video with annotations
+2025-04-20 16:41:13,331 [DEBUG] - Skipping processing for frame 41, skip_counter: 12
+2025-04-20 16:41:13,418 [INFO] - Game is being skipped at frame 41
+2025-04-20 16:41:13,748 [DEBUG] - Frame 42 recorded to video with annotations
+2025-04-20 16:41:13,748 [DEBUG] - Skipping processing for frame 42, skip_counter: 11
+2025-04-20 16:41:13,838 [INFO] - Game is being skipped at frame 42
+2025-04-20 16:41:14,190 [DEBUG] - Frame 43 recorded to video with annotations
+2025-04-20 16:41:14,191 [DEBUG] - Skipping processing for frame 43, skip_counter: 10
+2025-04-20 16:41:14,277 [INFO] - Game is being skipped at frame 43
+2025-04-20 16:41:14,602 [DEBUG] - Frame 44 recorded to video with annotations
+2025-04-20 16:41:14,603 [DEBUG] - Skipping processing for frame 44, skip_counter: 9
+2025-04-20 16:41:14,689 [INFO] - Game is being skipped at frame 44
+2025-04-20 16:41:15,000 [DEBUG] - Frame 45 recorded to video with annotations
+2025-04-20 16:41:15,001 [DEBUG] - Skipping processing for frame 45, skip_counter: 8
+2025-04-20 16:41:15,092 [INFO] - Game is being skipped at frame 45
+2025-04-20 16:41:15,404 [DEBUG] - Frame 46 recorded to video with annotations
+2025-04-20 16:41:15,406 [DEBUG] - Skipping processing for frame 46, skip_counter: 7
+2025-04-20 16:41:15,494 [INFO] - Game is being skipped at frame 46
+2025-04-20 16:41:15,802 [DEBUG] - Frame 47 recorded to video with annotations
+2025-04-20 16:41:15,803 [DEBUG] - Skipping processing for frame 47, skip_counter: 6
+2025-04-20 16:41:15,888 [INFO] - Game is being skipped at frame 47
+2025-04-20 16:41:16,210 [DEBUG] - Frame 48 recorded to video with annotations
+2025-04-20 16:41:16,211 [DEBUG] - Skipping processing for frame 48, skip_counter: 5
+2025-04-20 16:41:16,294 [INFO] - Game is being skipped at frame 48
+2025-04-20 16:41:16,639 [DEBUG] - Frame 49 recorded to video with annotations
+2025-04-20 16:41:16,640 [DEBUG] - Skipping processing for frame 49, skip_counter: 4
+2025-04-20 16:41:16,722 [INFO] - Game is being skipped at frame 49
+2025-04-20 16:41:17,054 [DEBUG] - Frame 50 recorded to video with annotations
+2025-04-20 16:41:17,055 [DEBUG] - Skipping processing for frame 50, skip_counter: 3
+2025-04-20 16:41:17,145 [INFO] - Game is being skipped at frame 50
+2025-04-20 16:41:17,447 [DEBUG] - Frame 51 recorded to video with annotations
+2025-04-20 16:41:17,448 [DEBUG] - Skipping processing for frame 51, skip_counter: 2
+2025-04-20 16:41:17,535 [INFO] - Game is being skipped at frame 51
+2025-04-20 16:41:17,839 [DEBUG] - Frame 52 recorded to video with annotations
+2025-04-20 16:41:17,840 [DEBUG] - Skipping processing for frame 52, skip_counter: 1
+2025-04-20 16:41:17,935 [INFO] - Game is being skipped at frame 52
+2025-04-20 16:41:18,262 [DEBUG] - Frame 53 recorded to video with annotations
+2025-04-20 16:41:18,263 [DEBUG] - Skipping processing for frame 53, skip_counter: 0
+2025-04-20 16:41:18,348 [INFO] - Game is being skipped at frame 53
+2025-04-20 16:41:18,656 [DEBUG] - Frame 54 recorded to video with annotations
+2025-04-20 16:41:18,741 [DEBUG] - Saved frame 54 (seq: 54) to captured_frames_20250420_164047/frame_000054.jpg
+2025-04-20 16:41:18,741 [DEBUG] - Cleared frames_to_send buffer
+2025-04-20 16:41:19,087 [DEBUG] - Frame 55 recorded to video with annotations
+2025-04-20 16:41:19,088 [DEBUG] - Added frame to buffer, current size: 1/5, frame count: 55, sequence: 55
+2025-04-20 16:41:19,088 [INFO] - Initial attempt detected: 8
+2025-04-20 16:41:19,089 [INFO] - Score changed: 0 (was None)
+2025-04-20 16:41:19,297 [DEBUG] - Frame 55 recorded to video with annotations
+2025-04-20 16:41:19,624 [DEBUG] - Frame 56 recorded to video with annotations
+2025-04-20 16:41:19,625 [DEBUG] - Added frame to buffer, current size: 2/5, frame count: 56, sequence: 56
+2025-04-20 16:41:19,947 [DEBUG] - Frame 57 recorded to video with annotations
+2025-04-20 16:41:19,948 [DEBUG] - Added frame to buffer, current size: 3/5, frame count: 57, sequence: 57
+2025-04-20 16:41:20,287 [DEBUG] - Frame 58 recorded to video with annotations
+2025-04-20 16:41:20,289 [DEBUG] - Added frame to buffer, current size: 4/5, frame count: 58, sequence: 58
+2025-04-20 16:41:20,619 [DEBUG] - Frame 59 recorded to video with annotations
+2025-04-20 16:41:20,620 [DEBUG] - Added frame to buffer, current size: 5/5, frame count: 59, sequence: 59
+2025-04-20 16:41:20,931 [DEBUG] - Frame 60 recorded to video with annotations
+2025-04-20 16:41:20,932 [INFO] - Processing buffer of 5 frames at elapsed time: 24.09s
+2025-04-20 16:41:21,026 [INFO] - Pausing game
+2025-04-20 16:41:21,221 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250420_164047/frame_buffer_000056.jpg
+2025-04-20 16:41:21,301 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250420_164047/frame_buffer_000057.jpg
+2025-04-20 16:41:21,382 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250420_164047/frame_buffer_000058.jpg
+2025-04-20 16:41:21,469 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250420_164047/frame_buffer_000059.jpg
+2025-04-20 16:41:21,547 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250420_164047/frame_buffer_000060.jpg
+2025-04-20 16:41:21,547 [INFO] - Running computer vision analysis on buffered frames
+2025-04-20 16:41:37,341 [INFO] - COMP_VIS_TIME 15.79s
+2025-04-20 16:41:37,342 [INFO] - Scene analysis: {'players': {2: {'bbox': [1036.682861328125, 592.179443359375, 1098.471435546875, 683.764404296875], 'conf': 0.81046724, 'position': (1067, 683), 'position_transformed': [40.53819274902344, 38.065101623535156], 'team': 1}, 1: {'bbox': [963.2767944335938, 767.3629150390625, 1017.7832641601562, 911.1422119140625], 'conf': 0.79479665, 'position': (990, 911), 'position_transformed': [39.67808532714844, 46.89649200439453], 'team': 1, 'has_ball': True}, 3: {'bbox': [2113.9580078125, 730.6551513671875, 2180.54296875, 853.1485595703125], 'conf': 0.68947655, 'position': (2147, 853), 'position_transformed': [54.982521057128906, 46.28742599487305], 'team': 2}}, 'referees': {}, 'ball': {1: {'conf': 0.5329483, 'bbox': [1047.7957763671875, 882.64453125, 1082.2503662109375, 916.748291015625], 'position': (1065, 899), 'position_transformed': [40.62614822387695, 46.58164978027344]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-20 16:41:37,342 [INFO] - Ball possession: True
+2025-04-20 16:41:37,565 [DEBUG] - Frame 61 recorded to video with annotations
+2025-04-20 16:41:37,570 [INFO] - Running reinforcement learning decision making
+2025-04-20 16:41:37,570 [INFO] - First action taken: 15
+2025-04-20 16:41:37,570 [INFO] - Setting action to take: 15
+2025-04-20 16:41:37,571 [INFO] - RL_TIME 0.00s
+2025-04-20 16:41:37,770 [DEBUG] - Frame 62 recorded to video with annotations
+2025-04-20 16:41:37,956 [DEBUG] - Frame 63 recorded to video with annotations
+2025-04-20 16:41:37,957 [INFO] - Resuming game
+2025-04-20 16:41:38,058 [DEBUG] - Reset skip_counter to 2
+2025-04-20 16:41:38,250 [DEBUG] - Frame 64 recorded to video with annotations
+2025-04-20 16:41:38,250 [INFO] - Making action [15]: Dribbling the ball to the northwest
+2025-04-20 16:41:38,753 [DEBUG] - Action 15 completed
+2025-04-20 16:41:38,754 [INFO] - Action executed: 15
+2025-04-20 16:41:39,194 [DEBUG] - Frame 65 recorded to video with annotations
+2025-04-20 16:41:39,195 [DEBUG] - Skipping processing for frame 65, skip_counter: 1
+2025-04-20 16:41:39,280 [INFO] - Game is being skipped at frame 65
+2025-04-20 16:41:39,607 [DEBUG] - Frame 66 recorded to video with annotations
+2025-04-20 16:41:39,607 [DEBUG] - Skipping processing for frame 66, skip_counter: 0
+2025-04-20 16:41:39,689 [INFO] - Game is being skipped at frame 66
+2025-04-20 16:41:39,991 [DEBUG] - Frame 67 recorded to video with annotations
+2025-04-20 16:41:40,074 [DEBUG] - Saved frame 67 (seq: 67) to captured_frames_20250420_164047/frame_000067.jpg
+2025-04-20 16:41:40,074 [DEBUG] - Cleared frames_to_send buffer
+2025-04-20 16:41:40,379 [DEBUG] - Frame 68 recorded to video with annotations
+2025-04-20 16:41:40,381 [DEBUG] - Added frame to buffer, current size: 1/5, frame count: 68, sequence: 68
+2025-04-20 16:41:40,706 [DEBUG] - Frame 69 recorded to video with annotations
+2025-04-20 16:41:40,707 [DEBUG] - Added frame to buffer, current size: 2/5, frame count: 69, sequence: 69
+2025-04-20 16:41:41,034 [DEBUG] - Frame 70 recorded to video with annotations
+2025-04-20 16:41:41,035 [DEBUG] - Added frame to buffer, current size: 3/5, frame count: 70, sequence: 70
+2025-04-20 16:41:41,336 [DEBUG] - Frame 71 recorded to video with annotations
+2025-04-20 16:41:41,337 [DEBUG] - Added frame to buffer, current size: 4/5, frame count: 71, sequence: 71
+2025-04-20 16:41:41,641 [DEBUG] - Frame 72 recorded to video with annotations
+2025-04-20 16:41:41,641 [DEBUG] - Added frame to buffer, current size: 5/5, frame count: 72, sequence: 72
+2025-04-20 16:41:41,954 [DEBUG] - Frame 73 recorded to video with annotations
+2025-04-20 16:41:41,956 [INFO] - Processing buffer of 5 frames at elapsed time: 45.12s
+2025-04-20 16:41:42,051 [INFO] - Pausing game
+2025-04-20 16:41:42,232 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250420_164047/frame_buffer_000069.jpg
+2025-04-20 16:41:42,310 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250420_164047/frame_buffer_000070.jpg
+2025-04-20 16:41:42,399 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250420_164047/frame_buffer_000071.jpg
+2025-04-20 16:41:42,483 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250420_164047/frame_buffer_000072.jpg
+2025-04-20 16:41:42,602 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250420_164047/frame_buffer_000073.jpg
+2025-04-20 16:41:42,602 [INFO] - Running computer vision analysis on buffered frames
+2025-04-20 16:41:44,957 [INFO] - COMP_VIS_TIME 2.35s
+2025-04-20 16:41:44,957 [INFO] - Scene analysis: {'players': {6: {'bbox': [766.9823608398438, 706.4219360351562, 827.6351928710938, 842.2407836914062], 'conf': 0.74730384, 'position': (797, 842), 'position_transformed': [35.739227294921875, 42.45267105102539], 'team': 1, 'has_ball': True}, 9: {'bbox': [964.3988037109375, 666.966064453125, 1010.8961181640625, 758.1083984375], 'conf': 0.6247046, 'position': (987, 758), 'position_transformed': [38.060726165771484, 39.339576721191406], 'team': 1}, 10: {'bbox': [2184.8232421875, 746.793701171875, 2261.8701171875, 870.710693359375], 'conf': 0.43951395, 'position': (2223, 870), 'position_transformed': [54.626590728759766, 45.087196350097656], 'team': 2}}, 'referees': {}, 'ball': {1: {'conf': 0.6495708, 'bbox': [830.53271484375, 797.784912109375, 862.395751953125, 832.714599609375], 'position': (846, 815), 'position_transformed': [36.29560089111328, 41.4854621887207]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-20 16:41:44,959 [INFO] - Ball possession: True
+2025-04-20 16:41:45,181 [DEBUG] - Frame 74 recorded to video with annotations
+2025-04-20 16:41:45,186 [INFO] - Running reinforcement learning decision making
+2025-04-20 16:41:45,186 [INFO] - Action taken: 0
+2025-04-20 16:41:45,186 [INFO] - Calculated reward: -1.3000000000000003
+2025-04-20 16:41:45,186 [INFO] - Setting action to take: 0
+2025-04-20 16:41:45,186 [INFO] - RL_TIME 0.00s
+2025-04-20 16:41:45,393 [DEBUG] - Frame 75 recorded to video with annotations
+2025-04-20 16:41:45,597 [DEBUG] - Frame 76 recorded to video with annotations
+2025-04-20 16:41:45,598 [INFO] - Resuming game
+2025-04-20 16:41:45,701 [DEBUG] - Reset skip_counter to 2
+2025-04-20 16:41:45,911 [DEBUG] - Frame 77 recorded to video with annotations
+2025-04-20 16:41:45,912 [INFO] - Making action [0]: Passing the ball to the north
+2025-04-20 16:41:46,416 [DEBUG] - Action 0 completed
+2025-04-20 16:41:46,416 [INFO] - Action executed: 0
+2025-04-20 16:41:46,739 [DEBUG] - Frame 78 recorded to video with annotations
+2025-04-20 16:41:46,740 [DEBUG] - Skipping processing for frame 78, skip_counter: 1
+2025-04-20 16:41:46,827 [INFO] - Game is being skipped at frame 78
+2025-04-20 16:41:47,157 [DEBUG] - Frame 79 recorded to video with annotations
+2025-04-20 16:41:47,158 [DEBUG] - Skipping processing for frame 79, skip_counter: 0
+2025-04-20 16:41:47,251 [INFO] - Game is being skipped at frame 79
+2025-04-20 16:41:47,579 [DEBUG] - Frame 80 recorded to video with annotations
+2025-04-20 16:41:47,664 [DEBUG] - Saved frame 80 (seq: 80) to captured_frames_20250420_164047/frame_000080.jpg
+2025-04-20 16:41:47,664 [DEBUG] - Cleared frames_to_send buffer
+2025-04-20 16:41:47,996 [DEBUG] - Frame 81 recorded to video with annotations
+2025-04-20 16:41:47,997 [DEBUG] - Added frame to buffer, current size: 1/5, frame count: 81, sequence: 81
+2025-04-20 16:41:48,320 [DEBUG] - Frame 82 recorded to video with annotations
+2025-04-20 16:41:48,321 [DEBUG] - Added frame to buffer, current size: 2/5, frame count: 82, sequence: 82
+2025-04-20 16:41:48,707 [DEBUG] - Frame 83 recorded to video with annotations
+2025-04-20 16:41:48,707 [DEBUG] - Added frame to buffer, current size: 3/5, frame count: 83, sequence: 83
+2025-04-20 16:41:48,707 [INFO] - New attempt detected: 7 (was 8)
+2025-04-20 16:41:48,936 [DEBUG] - Frame 83 recorded to video with annotations
+2025-04-20 16:41:48,937 [INFO] - End of attempt reward: -10
+2025-04-20 16:41:48,937 [INFO] - Skipping 8 frames between attempts
+2025-04-20 16:41:49,239 [DEBUG] - Frame 84 recorded to video with annotations
+2025-04-20 16:41:49,240 [DEBUG] - Skipping processing for frame 84, skip_counter: 7
+2025-04-20 16:41:49,325 [INFO] - Game is being skipped at frame 84
+2025-04-20 16:41:49,642 [DEBUG] - Frame 85 recorded to video with annotations
+2025-04-20 16:41:49,643 [DEBUG] - Skipping processing for frame 85, skip_counter: 6
+2025-04-20 16:41:49,729 [INFO] - Game is being skipped at frame 85
+2025-04-20 16:41:50,073 [DEBUG] - Frame 86 recorded to video with annotations
+2025-04-20 16:41:50,075 [DEBUG] - Skipping processing for frame 86, skip_counter: 5
+2025-04-20 16:41:50,160 [INFO] - Game is being skipped at frame 86
+2025-04-20 16:41:50,498 [DEBUG] - Frame 87 recorded to video with annotations
+2025-04-20 16:41:50,498 [DEBUG] - Skipping processing for frame 87, skip_counter: 4
+2025-04-20 16:41:50,579 [INFO] - Game is being skipped at frame 87
+2025-04-20 16:41:50,895 [DEBUG] - Frame 88 recorded to video with annotations
+2025-04-20 16:41:50,896 [DEBUG] - Skipping processing for frame 88, skip_counter: 3
+2025-04-20 16:41:50,981 [INFO] - Game is being skipped at frame 88
+2025-04-20 16:41:51,290 [DEBUG] - Frame 89 recorded to video with annotations
+2025-04-20 16:41:51,291 [DEBUG] - Skipping processing for frame 89, skip_counter: 2
+2025-04-20 16:41:51,374 [INFO] - Game is being skipped at frame 89
+2025-04-20 16:41:51,697 [DEBUG] - Frame 90 recorded to video with annotations
+2025-04-20 16:41:51,698 [DEBUG] - Skipping processing for frame 90, skip_counter: 1
+2025-04-20 16:41:51,779 [INFO] - Game is being skipped at frame 90
+2025-04-20 16:41:52,175 [DEBUG] - Frame 91 recorded to video with annotations
+2025-04-20 16:41:52,175 [DEBUG] - Skipping processing for frame 91, skip_counter: 0
+2025-04-20 16:41:52,259 [INFO] - Game is being skipped at frame 91
+2025-04-20 16:41:52,605 [DEBUG] - Frame 92 recorded to video with annotations
+2025-04-20 16:41:52,606 [DEBUG] - Added frame to buffer, current size: 4/5, frame count: 92, sequence: 92
+2025-04-20 16:41:52,904 [DEBUG] - Frame 93 recorded to video with annotations
+2025-04-20 16:41:52,905 [DEBUG] - Added frame to buffer, current size: 5/5, frame count: 93, sequence: 93
+2025-04-20 16:41:53,221 [DEBUG] - Frame 94 recorded to video with annotations
+2025-04-20 16:41:53,223 [INFO] - Processing buffer of 5 frames at elapsed time: 56.38s
+2025-04-20 16:41:53,316 [INFO] - Pausing game
+2025-04-20 16:41:53,497 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250420_164047/frame_buffer_000090.jpg
+2025-04-20 16:41:53,579 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250420_164047/frame_buffer_000091.jpg
+2025-04-20 16:41:53,656 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250420_164047/frame_buffer_000092.jpg
+2025-04-20 16:41:53,737 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250420_164047/frame_buffer_000093.jpg
+2025-04-20 16:41:53,814 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250420_164047/frame_buffer_000094.jpg
+2025-04-20 16:41:53,814 [INFO] - Running computer vision analysis on buffered frames
+2025-04-20 16:41:54,299 [INFO] - COMP_VIS_TIME 0.48s
+2025-04-20 16:41:54,299 [INFO] - Scene analysis: {'players': {22: {'bbox': [879.9226684570312, 591.96923828125, 933.5215454101562, 680.48193359375], 'conf': 0.776273, 'position': (906, 680), 'position_transformed': [36.33378219604492, 32.901119232177734], 'team': 1}}, 'referees': {}, 'ball': {1: {'conf': 0.23666404, 'bbox': [714.605712890625, 619.9129638671875, 736.76220703125, 652.3311767578125], 'position': (725, 636), 'position_transformed': [33.681976318359375, 31.0775089263916]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-20 16:41:54,299 [INFO] - Ball possession: False
+2025-04-20 16:41:54,516 [DEBUG] - Frame 95 recorded to video with annotations
+2025-04-20 16:41:54,519 [INFO] - Running reinforcement learning decision making
+2025-04-20 16:41:54,520 [INFO] - No ball possession detected, no action taken
+2025-04-20 16:41:54,520 [INFO] - RL_TIME 0.00s
+2025-04-20 16:41:54,714 [DEBUG] - Frame 96 recorded to video with annotations
+2025-04-20 16:41:54,907 [DEBUG] - Frame 97 recorded to video with annotations
+2025-04-20 16:41:54,908 [INFO] - Resuming game
+2025-04-20 16:41:55,010 [DEBUG] - Reset skip_counter to 2
+2025-04-20 16:41:55,238 [DEBUG] - Frame 98 recorded to video with annotations
+2025-04-20 16:41:55,239 [DEBUG] - Skipping processing for frame 98, skip_counter: 1
+2025-04-20 16:41:55,310 [INFO] - Game is being skipped at frame 98
+2025-04-20 16:41:55,582 [DEBUG] - Frame 99 recorded to video with annotations
+2025-04-20 16:41:55,582 [DEBUG] - Skipping processing for frame 99, skip_counter: 0
+2025-04-20 16:41:55,658 [INFO] - Game is being skipped at frame 99
+2025-04-20 16:41:55,965 [DEBUG] - Frame 100 recorded to video with annotations
+2025-04-20 16:41:56,049 [DEBUG] - Saved frame 100 (seq: 100) to captured_frames_20250420_164047/frame_000100.jpg
+2025-04-20 16:41:56,049 [DEBUG] - Cleared frames_to_send buffer
+2025-04-20 16:41:56,357 [DEBUG] - Frame 101 recorded to video with annotations
+2025-04-20 16:41:56,358 [DEBUG] - Added frame to buffer, current size: 1/5, frame count: 101, sequence: 101
+2025-04-20 16:41:56,358 [INFO] - New attempt detected: 6 (was 7)
+2025-04-20 16:41:56,562 [DEBUG] - Frame 101 recorded to video with annotations
+2025-04-20 16:41:56,563 [INFO] - End of attempt reward: -10
+2025-04-20 16:41:56,563 [INFO] - Skipping 8 frames between attempts
+2025-04-20 16:41:56,868 [DEBUG] - Frame 102 recorded to video with annotations
+2025-04-20 16:41:56,869 [DEBUG] - Skipping processing for frame 102, skip_counter: 7
+2025-04-20 16:41:56,950 [INFO] - Game is being skipped at frame 102
+2025-04-20 16:41:57,319 [DEBUG] - Frame 103 recorded to video with annotations
+2025-04-20 16:41:57,322 [DEBUG] - Skipping processing for frame 103, skip_counter: 6
+2025-04-20 16:41:57,414 [INFO] - Game is being skipped at frame 103
+2025-04-20 16:41:57,743 [DEBUG] - Frame 104 recorded to video with annotations
+2025-04-20 16:41:57,743 [DEBUG] - Skipping processing for frame 104, skip_counter: 5
+2025-04-20 16:41:57,830 [INFO] - Game is being skipped at frame 104
+2025-04-20 16:41:58,200 [DEBUG] - Frame 105 recorded to video with annotations
+2025-04-20 16:41:58,202 [DEBUG] - Skipping processing for frame 105, skip_counter: 4
+2025-04-20 16:41:58,282 [INFO] - Game is being skipped at frame 105
+2025-04-20 16:41:58,539 [DEBUG] - Frame 106 recorded to video with annotations
+2025-04-20 16:41:58,540 [DEBUG] - Skipping processing for frame 106, skip_counter: 3
+2025-04-20 16:41:58,609 [INFO] - Game is being skipped at frame 106
+2025-04-20 16:41:58,865 [DEBUG] - Frame 107 recorded to video with annotations
+2025-04-20 16:41:58,866 [DEBUG] - Skipping processing for frame 107, skip_counter: 2
+2025-04-20 16:41:58,931 [INFO] - Game is being skipped at frame 107
+2025-04-20 16:41:59,154 [DEBUG] - Frame 108 recorded to video with annotations
+2025-04-20 16:41:59,155 [DEBUG] - Skipping processing for frame 108, skip_counter: 1
+2025-04-20 16:41:59,216 [INFO] - Game is being skipped at frame 108
+2025-04-20 16:41:59,465 [DEBUG] - Frame 109 recorded to video with annotations
+2025-04-20 16:41:59,466 [DEBUG] - Skipping processing for frame 109, skip_counter: 0
+2025-04-20 16:41:59,549 [INFO] - Game is being skipped at frame 109
+2025-04-20 16:41:59,823 [DEBUG] - Frame 110 recorded to video with annotations
+2025-04-20 16:41:59,824 [DEBUG] - Added frame to buffer, current size: 2/5, frame count: 110, sequence: 110
+2025-04-20 16:41:59,826 [INFO] - New attempt detected: None (was 6)
+2025-04-20 16:41:59,984 [DEBUG] - Frame 110 recorded to video with annotations
+2025-04-20 16:41:59,985 [INFO] - End of attempt reward: -10
+2025-04-20 16:41:59,986 [INFO] - Skipping 8 frames between attempts
+2025-04-20 16:42:00,249 [DEBUG] - Frame 111 recorded to video with annotations
+2025-04-20 16:42:00,249 [DEBUG] - Skipping processing for frame 111, skip_counter: 7
+2025-04-20 16:42:00,306 [INFO] - Game is being skipped at frame 111
+2025-04-20 16:42:00,520 [DEBUG] - Frame 112 recorded to video with annotations
+2025-04-20 16:42:00,521 [DEBUG] - Skipping processing for frame 112, skip_counter: 6
+2025-04-20 16:42:00,577 [INFO] - Game is being skipped at frame 112
+2025-04-20 16:42:00,786 [DEBUG] - Frame 113 recorded to video with annotations
+2025-04-20 16:42:00,787 [DEBUG] - Skipping processing for frame 113, skip_counter: 5
+2025-04-20 16:42:00,841 [INFO] - Game is being skipped at frame 113
+2025-04-20 16:42:01,052 [DEBUG] - Frame 114 recorded to video with annotations
+2025-04-20 16:42:01,055 [DEBUG] - Skipping processing for frame 114, skip_counter: 4
+2025-04-20 16:42:01,109 [INFO] - Game is being skipped at frame 114
+2025-04-20 16:42:01,340 [DEBUG] - Frame 115 recorded to video with annotations
+2025-04-20 16:42:01,341 [DEBUG] - Skipping processing for frame 115, skip_counter: 3
+2025-04-20 16:42:01,401 [INFO] - Game is being skipped at frame 115
+2025-04-20 16:42:01,639 [DEBUG] - Frame 116 recorded to video with annotations
+2025-04-20 16:42:01,640 [DEBUG] - Skipping processing for frame 116, skip_counter: 2
+2025-04-20 16:42:01,703 [INFO] - Game is being skipped at frame 116
+2025-04-20 16:42:01,937 [DEBUG] - Frame 117 recorded to video with annotations
+2025-04-20 16:42:01,938 [DEBUG] - Skipping processing for frame 117, skip_counter: 1
+2025-04-20 16:42:02,004 [INFO] - Game is being skipped at frame 117
+2025-04-20 16:42:02,228 [DEBUG] - Frame 118 recorded to video with annotations
+2025-04-20 16:42:02,229 [DEBUG] - Skipping processing for frame 118, skip_counter: 0
+2025-04-20 16:42:02,291 [INFO] - Game is being skipped at frame 118
+2025-04-20 16:42:02,500 [DEBUG] - Frame 119 recorded to video with annotations
+2025-04-20 16:42:02,501 [DEBUG] - Added frame to buffer, current size: 3/5, frame count: 119, sequence: 119
+2025-04-20 16:42:02,501 [INFO] - Initial attempt detected: None
+2025-04-20 16:42:02,709 [DEBUG] - Frame 120 recorded to video with annotations
+2025-04-20 16:42:02,710 [DEBUG] - Added frame to buffer, current size: 4/5, frame count: 120, sequence: 120
+2025-04-20 16:42:02,710 [INFO] - Initial attempt detected: None
+2025-04-20 16:42:02,944 [DEBUG] - Frame 121 recorded to video with annotations
+2025-04-20 16:42:02,945 [DEBUG] - Added frame to buffer, current size: 5/5, frame count: 121, sequence: 121
+2025-04-20 16:42:02,945 [INFO] - Initial attempt detected: None
+2025-04-20 16:42:03,197 [DEBUG] - Frame 122 recorded to video with annotations
+2025-04-20 16:42:03,199 [INFO] - Processing buffer of 5 frames at elapsed time: 66.42s
+2025-04-20 16:42:03,261 [INFO] - Pausing game
+2025-04-20 16:42:03,448 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250420_164047/frame_buffer_000118.jpg
+2025-04-20 16:42:03,509 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250420_164047/frame_buffer_000119.jpg
+2025-04-20 16:42:03,569 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250420_164047/frame_buffer_000120.jpg
+2025-04-20 16:42:03,651 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250420_164047/frame_buffer_000121.jpg
+2025-04-20 16:42:03,709 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250420_164047/frame_buffer_000122.jpg
+2025-04-20 16:42:03,709 [INFO] - Running computer vision analysis on buffered frames
+2025-04-20 16:42:04,290 [INFO] - COMP_VIS_TIME 0.58s
+2025-04-20 16:42:04,291 [INFO] - Scene analysis: {'players': {}, 'referees': {}, 'ball': {1: {'bbox': [552.5987548828125, 620.2901611328125, 580.9605712890625, 650.3792724609375], 'conf': 0.11, 'position': (566, 635), 'position_transformed': [26.038787841796875, 27.52483558654785]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-20 16:42:04,291 [INFO] - Ball possession: False
+2025-04-20 16:42:04,510 [DEBUG] - Frame 123 recorded to video with annotations
+2025-04-20 16:42:04,516 [INFO] - Running reinforcement learning decision making
+2025-04-20 16:42:04,516 [INFO] - No ball possession detected, no action taken
+2025-04-20 16:42:04,516 [INFO] - RL_TIME 0.00s
+2025-04-20 16:42:04,732 [DEBUG] - Frame 124 recorded to video with annotations
+2025-04-20 16:42:04,933 [DEBUG] - Frame 125 recorded to video with annotations
+2025-04-20 16:42:04,934 [INFO] - Resuming game
+2025-04-20 16:42:05,036 [DEBUG] - Reset skip_counter to 2
+2025-04-20 16:42:05,263 [DEBUG] - Frame 126 recorded to video with annotations
+2025-04-20 16:42:05,264 [DEBUG] - Skipping processing for frame 126, skip_counter: 1
+2025-04-20 16:42:05,325 [INFO] - Game is being skipped at frame 126
+2025-04-20 16:42:05,596 [DEBUG] - Frame 127 recorded to video with annotations
+2025-04-20 16:42:05,598 [DEBUG] - Skipping processing for frame 127, skip_counter: 0
+2025-04-20 16:42:05,673 [INFO] - Game is being skipped at frame 127
+2025-04-20 16:42:05,964 [DEBUG] - Frame 128 recorded to video with annotations
+2025-04-20 16:42:06,031 [DEBUG] - Saved frame 128 (seq: 128) to captured_frames_20250420_164047/frame_000128.jpg
+2025-04-20 16:42:06,031 [DEBUG] - Cleared frames_to_send buffer
+2025-04-20 16:42:06,272 [DEBUG] - Frame 129 recorded to video with annotations
+2025-04-20 16:42:06,273 [DEBUG] - Added frame to buffer, current size: 1/5, frame count: 129, sequence: 129
+2025-04-20 16:42:06,273 [INFO] - Initial attempt detected: None
+2025-04-20 16:42:06,555 [DEBUG] - Frame 130 recorded to video with annotations
+2025-04-20 16:42:06,556 [DEBUG] - Added frame to buffer, current size: 2/5, frame count: 130, sequence: 130
+2025-04-20 16:42:06,557 [INFO] - Initial attempt detected: None
+2025-04-20 16:42:06,798 [DEBUG] - Frame 131 recorded to video with annotations
+2025-04-20 16:42:06,799 [DEBUG] - Added frame to buffer, current size: 3/5, frame count: 131, sequence: 131
+2025-04-20 16:42:06,799 [INFO] - Initial attempt detected: None
+2025-04-20 16:42:06,799 [INFO] - Quit command detected at elapsed time: 70.03s
+2025-04-20 16:42:06,799 [INFO] - Saving DQN model to soccer_dqn_trained.pth
+2025-04-20 16:42:06,856 [INFO] - Video recording completed and saved
+2025-04-20 16:42:06,856 [INFO] - FIFA Vision has stopped.
+2025-04-20 16:42:06,856 [INFO] - 
+===== SUMMARY =====
+2025-04-20 16:42:06,857 [INFO] - Total frames captured: 131
+2025-04-20 16:42:06,857 [INFO] - Frames processed: 32
+2025-04-20 16:42:06,857 [INFO] - Frames skipped: 85
+2025-04-20 16:42:06,857 [INFO] - Total runtime: 70.33 seconds
+2025-04-20 16:42:06,857 [INFO] - Average capture FPS: 1.86
+2025-04-20 16:42:06,857 [INFO] - Average processing FPS: 0.46
+2025-04-20 16:42:06,857 [INFO] - Frames saved to: captured_frames_20250420_164047/
+2025-04-20 16:42:06,857 [INFO] - All frames saved to: captured_frames_20250420_164047/all_frames/
+2025-04-20 16:42:06,857 [INFO] - Video recording saved to: captured_frames_20250420_164047/
+2025-04-20 16:42:06,858 [INFO] - ==================

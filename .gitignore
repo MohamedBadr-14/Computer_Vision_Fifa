@@ -3,6 +3,7 @@ input_videos/
 output_videos/
 stubs/
 runs/
+goal1/
 #ignore pychache
 __pycache__/
 #ignore jupyter notebook checkpoints

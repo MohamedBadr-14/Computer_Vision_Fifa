@@ -1,8 +1,7 @@
 import numpy as np
 import cv2
 import torch
-from transformers import AutoProcessor
-from transformers import SiglipVisionModel
+from transformers import AutoProcessor, SiglipVisionModel
 import supervision as sv
 from more_itertools import chunked
 import joblib
@@ -14,11 +13,17 @@ class TeamAssigner:
         self.SIGLIP_MODEL_PATH = 'google/siglip-base-patch16-224'
 
         self.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-        # print(DEVICE)
+
+        print(self.DEVICE)
+
         self.EMBEDDINGS_MODEL = SiglipVisionModel.from_pretrained(self.SIGLIP_MODEL_PATH).to(self.DEVICE)
-        self.EMBEDDINGS_PROCESSOR = AutoProcessor.from_pretrained(self.SIGLIP_MODEL_PATH)
-        self.reducer = joblib.load('models/reducer_model_final.pkl')
-        self.kmeans = joblib.load('models/kmeans_trained_final.pkl')
+
+        self.EMBEDDINGS_PROCESSOR = AutoProcessor.from_pretrained(
+            self.SIGLIP_MODEL_PATH, 
+            use_fast=True  # Enable fast tokenizer if available
+        )
+        self.reducer = joblib.load('models/reducer_final.pkl')
+        self.kmeans = joblib.load('models/kmeans_final.pkl')
     
     def extract_crops(self, tracks, frame):
         crops = []
@@ -34,7 +39,7 @@ class TeamAssigner:
             ]
             crops.append(top_half_image)
             crop_ids.append(player_id)
-        print("crops" , len(crops))
+        # print("crops" , len(crops))
 
         return crops, crop_ids
 
@@ -53,7 +58,7 @@ class TeamAssigner:
         if len(data) == 0:
             return np.array([])
         data = np.concatenate(data)
-        print("data" , data.shape)
+        # print("data" , data.shape)
 
         return data
 
@@ -68,5 +73,5 @@ class TeamAssigner:
 
     def assign_clusters_to_players(self, clusters, crop_ids , frame_tracks):
         for i, id in enumerate(crop_ids):
-            self.player_team_dict[id] = 2 if clusters[i] == 0 else 1
-            frame_tracks[id]["team"] = 2 if clusters[i] == 0 else 1
+            self.player_team_dict[id] = 1 if clusters[i] == 0 else 2
+            frame_tracks[id]["team"] = 1 if clusters[i] == 0 else 2

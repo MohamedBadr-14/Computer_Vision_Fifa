@@ -1,0 +1,720 @@
+2025-04-19 20:04:17,975 [INFO] - Logging initialized: logs/controller_log_20250419_200417.log
+2025-04-19 20:04:17,975 [INFO] - Initializing Controller
+2025-04-19 20:04:30,133 [INFO] - OCR and Computer Vision modules initialized
+2025-04-19 20:04:30,133 [INFO] - Initializing DQN Agent with model path: ./soccer_dqn_trained.pth
+2025-04-19 20:04:30,141 [INFO] - Controller initialization complete
+2025-04-19 20:04:30,141 [INFO] - Video recording is enabled
+2025-04-19 20:04:30,141 [INFO] - Created output directory: captured_frames_20250419_200430
+2025-04-19 20:04:30,157 [INFO] - Video recording initialized: captured_frames_20250419_200430/gameplay_recording_20250419_200430.mp4
+2025-04-19 20:04:30,167 [INFO] - Press 's' to start capturing, 'q' to quit
+2025-04-19 20:04:41,259 [INFO] - Starting capture cycle...
+2025-04-19 20:04:41,651 [DEBUG] - Skipping frame 1, skip_counter: 52
+2025-04-19 20:04:41,751 [DEBUG] - Skipping frame 2, skip_counter: 51
+2025-04-19 20:04:41,850 [DEBUG] - Skipping frame 3, skip_counter: 50
+2025-04-19 20:04:41,949 [DEBUG] - Skipping frame 4, skip_counter: 49
+2025-04-19 20:04:42,049 [DEBUG] - Skipping frame 5, skip_counter: 48
+2025-04-19 20:04:42,146 [DEBUG] - Skipping frame 6, skip_counter: 47
+2025-04-19 20:04:42,247 [DEBUG] - Skipping frame 7, skip_counter: 46
+2025-04-19 20:04:42,344 [DEBUG] - Skipping frame 8, skip_counter: 45
+2025-04-19 20:04:42,447 [DEBUG] - Skipping frame 9, skip_counter: 44
+2025-04-19 20:04:42,563 [DEBUG] - Skipping frame 10, skip_counter: 43
+2025-04-19 20:04:42,678 [DEBUG] - Skipping frame 11, skip_counter: 42
+2025-04-19 20:04:42,773 [DEBUG] - Skipping frame 12, skip_counter: 41
+2025-04-19 20:04:42,865 [DEBUG] - Skipping frame 13, skip_counter: 40
+2025-04-19 20:04:42,962 [DEBUG] - Skipping frame 14, skip_counter: 39
+2025-04-19 20:04:43,059 [DEBUG] - Skipping frame 15, skip_counter: 38
+2025-04-19 20:04:43,152 [DEBUG] - Skipping frame 16, skip_counter: 37
+2025-04-19 20:04:43,290 [DEBUG] - Skipping frame 17, skip_counter: 36
+2025-04-19 20:04:43,382 [DEBUG] - Skipping frame 18, skip_counter: 35
+2025-04-19 20:04:43,475 [DEBUG] - Skipping frame 19, skip_counter: 34
+2025-04-19 20:04:43,575 [DEBUG] - Skipping frame 20, skip_counter: 33
+2025-04-19 20:04:43,683 [DEBUG] - Skipping frame 21, skip_counter: 32
+2025-04-19 20:04:43,782 [DEBUG] - Skipping frame 22, skip_counter: 31
+2025-04-19 20:04:43,883 [DEBUG] - Skipping frame 23, skip_counter: 30
+2025-04-19 20:04:43,981 [DEBUG] - Skipping frame 24, skip_counter: 29
+2025-04-19 20:04:44,083 [DEBUG] - Skipping frame 25, skip_counter: 28
+2025-04-19 20:04:44,205 [DEBUG] - Skipping frame 26, skip_counter: 27
+2025-04-19 20:04:44,299 [DEBUG] - Skipping frame 27, skip_counter: 26
+2025-04-19 20:04:44,395 [DEBUG] - Skipping frame 28, skip_counter: 25
+2025-04-19 20:04:44,493 [DEBUG] - Skipping frame 29, skip_counter: 24
+2025-04-19 20:04:44,589 [DEBUG] - Skipping frame 30, skip_counter: 23
+2025-04-19 20:04:44,689 [DEBUG] - Skipping frame 31, skip_counter: 22
+2025-04-19 20:04:44,785 [DEBUG] - Skipping frame 32, skip_counter: 21
+2025-04-19 20:04:44,884 [DEBUG] - Skipping frame 33, skip_counter: 20
+2025-04-19 20:04:44,978 [DEBUG] - Skipping frame 34, skip_counter: 19
+2025-04-19 20:04:45,077 [DEBUG] - Skipping frame 35, skip_counter: 18
+2025-04-19 20:04:45,176 [DEBUG] - Skipping frame 36, skip_counter: 17
+2025-04-19 20:04:45,275 [DEBUG] - Skipping frame 37, skip_counter: 16
+2025-04-19 20:04:45,385 [DEBUG] - Skipping frame 38, skip_counter: 15
+2025-04-19 20:04:45,486 [DEBUG] - Skipping frame 39, skip_counter: 14
+2025-04-19 20:04:45,586 [DEBUG] - Skipping frame 40, skip_counter: 13
+2025-04-19 20:04:45,686 [DEBUG] - Skipping frame 41, skip_counter: 12
+2025-04-19 20:04:45,785 [DEBUG] - Skipping frame 42, skip_counter: 11
+2025-04-19 20:04:45,886 [DEBUG] - Skipping frame 43, skip_counter: 10
+2025-04-19 20:04:45,986 [DEBUG] - Skipping frame 44, skip_counter: 9
+2025-04-19 20:04:46,087 [DEBUG] - Skipping frame 45, skip_counter: 8
+2025-04-19 20:04:46,196 [DEBUG] - Skipping frame 46, skip_counter: 7
+2025-04-19 20:04:46,289 [DEBUG] - Skipping frame 47, skip_counter: 6
+2025-04-19 20:04:46,417 [DEBUG] - Skipping frame 48, skip_counter: 5
+2025-04-19 20:04:46,535 [DEBUG] - Skipping frame 49, skip_counter: 4
+2025-04-19 20:04:46,663 [DEBUG] - Skipping frame 50, skip_counter: 3
+2025-04-19 20:04:46,838 [DEBUG] - Skipping frame 51, skip_counter: 2
+2025-04-19 20:04:46,957 [DEBUG] - Skipping frame 52, skip_counter: 1
+2025-04-19 20:04:47,086 [DEBUG] - Skipping frame 53, skip_counter: 0
+2025-04-19 20:04:47,317 [DEBUG] - Saved frame 53 to captured_frames_20250419_200430/frame_0053.jpg
+2025-04-19 20:04:47,346 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:04:47,452 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:04:47,480 [INFO] - Initial attempt detected: 8
+2025-04-19 20:04:47,482 [INFO] - Score changed: 0 (was None)
+2025-04-19 20:04:47,599 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:04:47,737 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:04:47,870 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:04:48,006 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:04:48,166 [INFO] - Processing buffer of 5 frames at elapsed time: 6.78s
+2025-04-19 20:04:48,167 [INFO] - Pausing game
+2025-04-19 20:04:48,350 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0059.jpg
+2025-04-19 20:04:48,426 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0060.jpg
+2025-04-19 20:04:48,505 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0061.jpg
+2025-04-19 20:04:48,587 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0062.jpg
+2025-04-19 20:04:48,684 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0063.jpg
+2025-04-19 20:05:05,750 [INFO] - Scene analysis: {'players': {1: {'bbox': [965.460205078125, 771.2872924804688, 1021.430419921875, 911.9474487304688], 'conf': 0.8209156, 'position': (993, 911), 'position_transformed': [39.56800842285156, 46.118675231933594], 'team': 1, 'has_ball': True}, 2: {'bbox': [1031.967041015625, 567.550537109375, 1084.75830078125, 687.958740234375], 'conf': 0.6100774, 'position': (1058, 687), 'position_transformed': [40.24147415161133, 37.29941177368164], 'team': 1}, 6: {'bbox': [2109.00927734375, 732.0780029296875, 2173.51904296875, 854.9027099609375], 'conf': 0.5591833, 'position': (2141, 854), 'position_transformed': [55.27042007446289, 44.740745544433594], 'team': 2}}, 'referees': {}, 'ball': {1: {'conf': 0.5251196, 'bbox': [1048.5498046875, 882.39501953125, 1082.193603515625, 916.34130859375], 'position': (1065, 899), 'position_transformed': [40.53562545776367, 45.748355865478516]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:05,751 [INFO] - Ball possession: True
+2025-04-19 20:05:05,782 [INFO] - First action taken: 10
+2025-04-19 20:05:05,782 [INFO] - Setting action to take: 10
+2025-04-19 20:05:05,783 [INFO] - Resuming game
+2025-04-19 20:05:05,884 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:05,950 [DEBUG] - Skipping frame 60, skip_counter: 19
+2025-04-19 20:05:06,059 [DEBUG] - Skipping frame 61, skip_counter: 18
+2025-04-19 20:05:06,189 [DEBUG] - Skipping frame 62, skip_counter: 17
+2025-04-19 20:05:06,327 [DEBUG] - Skipping frame 63, skip_counter: 16
+2025-04-19 20:05:06,442 [DEBUG] - Skipping frame 64, skip_counter: 15
+2025-04-19 20:05:06,573 [DEBUG] - Skipping frame 65, skip_counter: 14
+2025-04-19 20:05:06,712 [DEBUG] - Skipping frame 66, skip_counter: 13
+2025-04-19 20:05:06,860 [DEBUG] - Skipping frame 67, skip_counter: 12
+2025-04-19 20:05:06,998 [DEBUG] - Skipping frame 68, skip_counter: 11
+2025-04-19 20:05:07,134 [DEBUG] - Skipping frame 69, skip_counter: 10
+2025-04-19 20:05:07,267 [DEBUG] - Skipping frame 70, skip_counter: 9
+2025-04-19 20:05:07,398 [DEBUG] - Skipping frame 71, skip_counter: 8
+2025-04-19 20:05:07,525 [DEBUG] - Skipping frame 72, skip_counter: 7
+2025-04-19 20:05:07,667 [DEBUG] - Skipping frame 73, skip_counter: 6
+2025-04-19 20:05:07,807 [DEBUG] - Skipping frame 74, skip_counter: 5
+2025-04-19 20:05:07,932 [DEBUG] - Skipping frame 75, skip_counter: 4
+2025-04-19 20:05:08,057 [DEBUG] - Skipping frame 76, skip_counter: 3
+2025-04-19 20:05:08,194 [DEBUG] - Skipping frame 77, skip_counter: 2
+2025-04-19 20:05:08,341 [DEBUG] - Skipping frame 78, skip_counter: 1
+2025-04-19 20:05:08,480 [DEBUG] - Skipping frame 79, skip_counter: 0
+2025-04-19 20:05:08,705 [DEBUG] - Saved frame 79 to captured_frames_20250419_200430/frame_0079.jpg
+2025-04-19 20:05:08,705 [INFO] - Making action [10]: Dribbling the ball to the east
+2025-04-19 20:05:09,206 [DEBUG] - Action 10 completed
+2025-04-19 20:05:09,206 [INFO] - Action taken: 10
+2025-04-19 20:05:09,241 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:09,376 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:09,524 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:09,678 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:09,827 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:09,978 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:10,143 [INFO] - Processing buffer of 5 frames at elapsed time: 28.77s
+2025-04-19 20:05:10,143 [INFO] - Pausing game
+2025-04-19 20:05:10,324 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0085.jpg
+2025-04-19 20:05:10,403 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0086.jpg
+2025-04-19 20:05:10,484 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0087.jpg
+2025-04-19 20:05:10,562 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0088.jpg
+2025-04-19 20:05:10,643 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0089.jpg
+2025-04-19 20:05:11,110 [INFO] - Scene analysis: {'players': {2: {'bbox': [1024.986328125, 589.1817626953125, 1076.64501953125, 674.1619873046875], 'conf': 0.7454838, 'position': (1050, 674), 'position_transformed': [41.22703552246094, 38.442752838134766], 'team': 1}, 7: {'bbox': [1163.3955078125, 780.6866455078125, 1219.27685546875, 908.348876953125], 'conf': 0.67358285, 'position': (1191, 908), 'position_transformed': [43.182098388671875, 47.61161804199219], 'team': 1, 'has_ball': True}, 6: {'bbox': [2069.396484375, 724.4925537109375, 2129.8759765625, 840.9632568359375], 'conf': 0.24890949, 'position': (2099, 840), 'position_transformed': [55.06671142578125, 46.13945770263672], 'team': 2}}, 'referees': {}, 'ball': {1: {'conf': 0.50672346, 'bbox': [1239.984619140625, 880.1924438476562, 1276.077880859375, 917.3374633789062], 'position': (1258, 898), 'position_transformed': [44.03989791870117, 47.342010498046875]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:11,112 [INFO] - Ball possession: True
+2025-04-19 20:05:11,143 [INFO] - Action taken: 16
+2025-04-19 20:05:11,145 [INFO] - Calculated reward: -2.3000000000000003
+2025-04-19 20:05:11,145 [INFO] - Setting action to take: 16
+2025-04-19 20:05:11,145 [INFO] - Resuming game
+2025-04-19 20:05:11,247 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:11,316 [DEBUG] - Skipping frame 86, skip_counter: 19
+2025-04-19 20:05:11,448 [DEBUG] - Skipping frame 87, skip_counter: 18
+2025-04-19 20:05:11,576 [DEBUG] - Skipping frame 88, skip_counter: 17
+2025-04-19 20:05:11,708 [DEBUG] - Skipping frame 89, skip_counter: 16
+2025-04-19 20:05:11,840 [DEBUG] - Skipping frame 90, skip_counter: 15
+2025-04-19 20:05:12,011 [DEBUG] - Skipping frame 91, skip_counter: 14
+2025-04-19 20:05:12,244 [DEBUG] - Skipping frame 92, skip_counter: 13
+2025-04-19 20:05:12,442 [DEBUG] - Skipping frame 93, skip_counter: 12
+2025-04-19 20:05:12,625 [DEBUG] - Skipping frame 94, skip_counter: 11
+2025-04-19 20:05:12,792 [DEBUG] - Skipping frame 95, skip_counter: 10
+2025-04-19 20:05:12,955 [DEBUG] - Skipping frame 96, skip_counter: 9
+2025-04-19 20:05:13,097 [DEBUG] - Skipping frame 97, skip_counter: 8
+2025-04-19 20:05:13,242 [DEBUG] - Skipping frame 98, skip_counter: 7
+2025-04-19 20:05:13,407 [DEBUG] - Skipping frame 99, skip_counter: 6
+2025-04-19 20:05:13,558 [DEBUG] - Skipping frame 100, skip_counter: 5
+2025-04-19 20:05:13,714 [DEBUG] - Skipping frame 101, skip_counter: 4
+2025-04-19 20:05:13,855 [DEBUG] - Skipping frame 102, skip_counter: 3
+2025-04-19 20:05:13,999 [DEBUG] - Skipping frame 103, skip_counter: 2
+2025-04-19 20:05:14,144 [DEBUG] - Skipping frame 104, skip_counter: 1
+2025-04-19 20:05:14,290 [DEBUG] - Skipping frame 105, skip_counter: 0
+2025-04-19 20:05:14,541 [DEBUG] - Saved frame 105 to captured_frames_20250419_200430/frame_0105.jpg
+2025-04-19 20:05:14,541 [INFO] - Making action [16]: Shooting the ball
+2025-04-19 20:05:14,743 [DEBUG] - Action 16 completed
+2025-04-19 20:05:14,743 [INFO] - Action taken: 16
+2025-04-19 20:05:14,781 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:14,890 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:15,043 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:15,213 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:15,368 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:15,524 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:15,693 [INFO] - Processing buffer of 5 frames at elapsed time: 34.31s
+2025-04-19 20:05:15,694 [INFO] - Pausing game
+2025-04-19 20:05:15,895 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0111.jpg
+2025-04-19 20:05:15,980 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0112.jpg
+2025-04-19 20:05:16,058 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0113.jpg
+2025-04-19 20:05:16,139 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0114.jpg
+2025-04-19 20:05:16,231 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0115.jpg
+2025-04-19 20:05:16,742 [INFO] - Scene analysis: {'players': {}, 'referees': {}, 'ball': {1: {'bbox': [1721.3531494140625, 847.97705078125, 1756.6761474609375, 885.8330078125], 'conf': 0.11, 'position': (1739, 866), 'position_transformed': [52.717220306396484, 46.195655822753906]}}, 'goalkeeper': {}, 'goalpost': {1: {'conf': 0.8217778, 'bbox': [2180.966796875, 533.52685546875, 2558.986328125, 910.83251953125], 'position': (2369, 722), 'position_transformed': [62.28286361694336, 41.62657165527344]}}}
+2025-04-19 20:05:16,742 [INFO] - Ball possession: False
+2025-04-19 20:05:16,776 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:05:16,776 [INFO] - Resuming game
+2025-04-19 20:05:16,879 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:16,951 [DEBUG] - Skipping frame 112, skip_counter: 19
+2025-04-19 20:05:17,050 [DEBUG] - Skipping frame 113, skip_counter: 18
+2025-04-19 20:05:17,155 [DEBUG] - Skipping frame 114, skip_counter: 17
+2025-04-19 20:05:17,283 [DEBUG] - Skipping frame 115, skip_counter: 16
+2025-04-19 20:05:17,411 [DEBUG] - Skipping frame 116, skip_counter: 15
+2025-04-19 20:05:17,549 [DEBUG] - Skipping frame 117, skip_counter: 14
+2025-04-19 20:05:17,690 [DEBUG] - Skipping frame 118, skip_counter: 13
+2025-04-19 20:05:17,825 [DEBUG] - Skipping frame 119, skip_counter: 12
+2025-04-19 20:05:17,989 [DEBUG] - Skipping frame 120, skip_counter: 11
+2025-04-19 20:05:18,146 [DEBUG] - Skipping frame 121, skip_counter: 10
+2025-04-19 20:05:18,290 [DEBUG] - Skipping frame 122, skip_counter: 9
+2025-04-19 20:05:18,426 [DEBUG] - Skipping frame 123, skip_counter: 8
+2025-04-19 20:05:18,565 [DEBUG] - Skipping frame 124, skip_counter: 7
+2025-04-19 20:05:18,697 [DEBUG] - Skipping frame 125, skip_counter: 6
+2025-04-19 20:05:18,817 [DEBUG] - Skipping frame 126, skip_counter: 5
+2025-04-19 20:05:18,953 [DEBUG] - Skipping frame 127, skip_counter: 4
+2025-04-19 20:05:19,072 [DEBUG] - Skipping frame 128, skip_counter: 3
+2025-04-19 20:05:19,216 [DEBUG] - Skipping frame 129, skip_counter: 2
+2025-04-19 20:05:19,354 [DEBUG] - Skipping frame 130, skip_counter: 1
+2025-04-19 20:05:19,506 [DEBUG] - Skipping frame 131, skip_counter: 0
+2025-04-19 20:05:19,743 [DEBUG] - Saved frame 131 to captured_frames_20250419_200430/frame_0131.jpg
+2025-04-19 20:05:19,776 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:19,873 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:19,902 [INFO] - New attempt detected: 7 (was 8)
+2025-04-19 20:05:19,903 [INFO] - End of attempt reward: -2
+2025-04-19 20:05:19,903 [INFO] - Skipping 10 frames between attempts
+2025-04-19 20:05:20,008 [DEBUG] - Skipping frame 134, skip_counter: 9
+2025-04-19 20:05:20,149 [DEBUG] - Skipping frame 135, skip_counter: 8
+2025-04-19 20:05:20,316 [DEBUG] - Skipping frame 136, skip_counter: 7
+2025-04-19 20:05:20,467 [DEBUG] - Skipping frame 137, skip_counter: 6
+2025-04-19 20:05:20,616 [DEBUG] - Skipping frame 138, skip_counter: 5
+2025-04-19 20:05:20,760 [DEBUG] - Skipping frame 139, skip_counter: 4
+2025-04-19 20:05:20,915 [DEBUG] - Skipping frame 140, skip_counter: 3
+2025-04-19 20:05:21,066 [DEBUG] - Skipping frame 141, skip_counter: 2
+2025-04-19 20:05:21,234 [DEBUG] - Skipping frame 142, skip_counter: 1
+2025-04-19 20:05:21,383 [DEBUG] - Skipping frame 143, skip_counter: 0
+2025-04-19 20:05:21,601 [DEBUG] - Saved frame 143 to captured_frames_20250419_200430/frame_0143.jpg
+2025-04-19 20:05:21,634 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:21,738 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:21,778 [INFO] - Score changed: 948 (was 0)
+2025-04-19 20:05:21,899 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:22,037 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:22,168 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:22,314 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:22,455 [INFO] - Processing buffer of 5 frames at elapsed time: 41.09s
+2025-04-19 20:05:22,456 [INFO] - Pausing game
+2025-04-19 20:05:22,642 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0149.jpg
+2025-04-19 20:05:22,718 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0150.jpg
+2025-04-19 20:05:22,794 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0151.jpg
+2025-04-19 20:05:22,872 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0152.jpg
+2025-04-19 20:05:22,952 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0153.jpg
+2025-04-19 20:05:23,498 [INFO] - Scene analysis: {'players': {31: {'bbox': [2463.97021484375, 797.5693359375, 2522.53369140625, 951.19384765625], 'conf': 0.7612046, 'position': (2493, 951), 'position_transformed': [56.30950927734375, 43.01759719848633], 'team': 2}, 33: {'bbox': [910.6297607421875, 650.923828125, 973.5008544921875, 758.6702880859375], 'conf': 0.74605197, 'position': (942, 758), 'position_transformed': [37.38003158569336, 36.61952209472656], 'team': 1}}, 'referees': {}, 'ball': {1: {'bbox': [826.4793701171875, 663.6294555664062, 862.2559814453125, 699.0922241210938], 'conf': 0.11, 'position': (844, 681), 'position_transformed': [35.95597839355469, 33.589088439941406]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:23,498 [INFO] - Ball possession: False
+2025-04-19 20:05:23,531 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:05:23,533 [INFO] - Resuming game
+2025-04-19 20:05:23,634 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:23,702 [DEBUG] - Skipping frame 150, skip_counter: 19
+2025-04-19 20:05:23,800 [DEBUG] - Skipping frame 151, skip_counter: 18
+2025-04-19 20:05:23,901 [DEBUG] - Skipping frame 152, skip_counter: 17
+2025-04-19 20:05:24,017 [DEBUG] - Skipping frame 153, skip_counter: 16
+2025-04-19 20:05:24,133 [DEBUG] - Skipping frame 154, skip_counter: 15
+2025-04-19 20:05:24,280 [DEBUG] - Skipping frame 155, skip_counter: 14
+2025-04-19 20:05:24,413 [DEBUG] - Skipping frame 156, skip_counter: 13
+2025-04-19 20:05:24,555 [DEBUG] - Skipping frame 157, skip_counter: 12
+2025-04-19 20:05:24,724 [DEBUG] - Skipping frame 158, skip_counter: 11
+2025-04-19 20:05:24,866 [DEBUG] - Skipping frame 159, skip_counter: 10
+2025-04-19 20:05:25,008 [DEBUG] - Skipping frame 160, skip_counter: 9
+2025-04-19 20:05:25,142 [DEBUG] - Skipping frame 161, skip_counter: 8
+2025-04-19 20:05:25,282 [DEBUG] - Skipping frame 162, skip_counter: 7
+2025-04-19 20:05:25,414 [DEBUG] - Skipping frame 163, skip_counter: 6
+2025-04-19 20:05:25,540 [DEBUG] - Skipping frame 164, skip_counter: 5
+2025-04-19 20:05:25,653 [DEBUG] - Skipping frame 165, skip_counter: 4
+2025-04-19 20:05:25,781 [DEBUG] - Skipping frame 166, skip_counter: 3
+2025-04-19 20:05:25,932 [DEBUG] - Skipping frame 167, skip_counter: 2
+2025-04-19 20:05:26,065 [DEBUG] - Skipping frame 168, skip_counter: 1
+2025-04-19 20:05:26,216 [DEBUG] - Skipping frame 169, skip_counter: 0
+2025-04-19 20:05:26,441 [DEBUG] - Saved frame 169 to captured_frames_20250419_200430/frame_0169.jpg
+2025-04-19 20:05:26,471 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:26,573 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:26,601 [INFO] - New attempt detected: 6 (was 7)
+2025-04-19 20:05:26,602 [INFO] - End of attempt reward: 100
+2025-04-19 20:05:26,603 [INFO] - Skipping 10 frames between attempts
+2025-04-19 20:05:26,716 [DEBUG] - Skipping frame 172, skip_counter: 9
+2025-04-19 20:05:26,855 [DEBUG] - Skipping frame 173, skip_counter: 8
+2025-04-19 20:05:26,989 [DEBUG] - Skipping frame 174, skip_counter: 7
+2025-04-19 20:05:27,147 [DEBUG] - Skipping frame 175, skip_counter: 6
+2025-04-19 20:05:27,299 [DEBUG] - Skipping frame 176, skip_counter: 5
+2025-04-19 20:05:27,464 [DEBUG] - Skipping frame 177, skip_counter: 4
+2025-04-19 20:05:27,616 [DEBUG] - Skipping frame 178, skip_counter: 3
+2025-04-19 20:05:27,764 [DEBUG] - Skipping frame 179, skip_counter: 2
+2025-04-19 20:05:27,916 [DEBUG] - Skipping frame 180, skip_counter: 1
+2025-04-19 20:05:28,056 [DEBUG] - Skipping frame 181, skip_counter: 0
+2025-04-19 20:05:28,314 [DEBUG] - Saved frame 181 to captured_frames_20250419_200430/frame_0181.jpg
+2025-04-19 20:05:28,350 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:28,456 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:28,599 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:28,756 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:28,899 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:29,050 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:29,198 [INFO] - Processing buffer of 5 frames at elapsed time: 47.82s
+2025-04-19 20:05:29,198 [INFO] - Pausing game
+2025-04-19 20:05:29,383 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0187.jpg
+2025-04-19 20:05:29,464 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0188.jpg
+2025-04-19 20:05:29,541 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0189.jpg
+2025-04-19 20:05:29,623 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0190.jpg
+2025-04-19 20:05:29,708 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0191.jpg
+2025-04-19 20:05:30,231 [INFO] - Scene analysis: {'players': {43: {'bbox': [318.5712890625, 997.3934326171875, 382.583984375, 1184.5240478515625], 'conf': 0.76291347, 'position': (350, 1184), 'position_transformed': [31.802532196044922, 56.29988479614258], 'team': 1, 'has_ball': True}, 49: {'bbox': [2386.5390625, 648.3204345703125, 2454.8056640625, 765.83740234375], 'conf': 0.6045996, 'position': (2420, 765), 'position_transformed': [56.552398681640625, 48.11573791503906], 'team': 2}}, 'referees': {}, 'ball': {1: {'conf': 0.47444403, 'bbox': [379.17987060546875, 1138.416015625, 415.11419677734375, 1181.8388671875], 'position': (397, 1160), 'position_transformed': [32.105674743652344, 55.851173400878906]}}, 'goalkeeper': {40: {'bbox': [2386.48291015625, 647.36669921875, 2456.546875, 766.234619140625], 'conf': None, 'position': (2421, 766), 'position_transformed': [56.550445556640625, 48.159912109375]}}, 'goalpost': {1: {'conf': 0.76419514, 'bbox': [2465.7890625, 489.4720458984375, 2560.0, 804.9793701171875], 'position': (2512, 647), 'position_transformed': [60.37514114379883, 42.757205963134766]}}}
+2025-04-19 20:05:30,232 [INFO] - Ball possession: True
+2025-04-19 20:05:30,265 [INFO] - First action taken: 12
+2025-04-19 20:05:30,265 [INFO] - Setting action to take: 12
+2025-04-19 20:05:30,265 [INFO] - Resuming game
+2025-04-19 20:05:30,367 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:30,430 [DEBUG] - Skipping frame 188, skip_counter: 19
+2025-04-19 20:05:30,523 [DEBUG] - Skipping frame 189, skip_counter: 18
+2025-04-19 20:05:30,624 [DEBUG] - Skipping frame 190, skip_counter: 17
+2025-04-19 20:05:30,739 [DEBUG] - Skipping frame 191, skip_counter: 16
+2025-04-19 20:05:30,861 [DEBUG] - Skipping frame 192, skip_counter: 15
+2025-04-19 20:05:31,015 [DEBUG] - Skipping frame 193, skip_counter: 14
+2025-04-19 20:05:31,149 [DEBUG] - Skipping frame 194, skip_counter: 13
+2025-04-19 20:05:31,333 [DEBUG] - Skipping frame 195, skip_counter: 12
+2025-04-19 20:05:31,499 [DEBUG] - Skipping frame 196, skip_counter: 11
+2025-04-19 20:05:31,647 [DEBUG] - Skipping frame 197, skip_counter: 10
+2025-04-19 20:05:31,789 [DEBUG] - Skipping frame 198, skip_counter: 9
+2025-04-19 20:05:31,931 [DEBUG] - Skipping frame 199, skip_counter: 8
+2025-04-19 20:05:32,074 [DEBUG] - Skipping frame 200, skip_counter: 7
+2025-04-19 20:05:32,232 [DEBUG] - Skipping frame 201, skip_counter: 6
+2025-04-19 20:05:32,381 [DEBUG] - Skipping frame 202, skip_counter: 5
+2025-04-19 20:05:32,522 [DEBUG] - Skipping frame 203, skip_counter: 4
+2025-04-19 20:05:32,662 [DEBUG] - Skipping frame 204, skip_counter: 3
+2025-04-19 20:05:32,798 [DEBUG] - Skipping frame 205, skip_counter: 2
+2025-04-19 20:05:32,948 [DEBUG] - Skipping frame 206, skip_counter: 1
+2025-04-19 20:05:33,087 [DEBUG] - Skipping frame 207, skip_counter: 0
+2025-04-19 20:05:33,335 [DEBUG] - Saved frame 207 to captured_frames_20250419_200430/frame_0207.jpg
+2025-04-19 20:05:33,335 [INFO] - Making action [12]: Dribbling the ball to the south
+2025-04-19 20:05:33,838 [DEBUG] - Action 12 completed
+2025-04-19 20:05:33,838 [INFO] - Action taken: 12
+2025-04-19 20:05:33,876 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:33,981 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:34,121 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:34,282 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:34,433 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:34,582 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:34,740 [INFO] - Processing buffer of 5 frames at elapsed time: 53.37s
+2025-04-19 20:05:34,740 [INFO] - Pausing game
+2025-04-19 20:05:34,920 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0213.jpg
+2025-04-19 20:05:34,995 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0214.jpg
+2025-04-19 20:05:35,075 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0215.jpg
+2025-04-19 20:05:35,154 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0216.jpg
+2025-04-19 20:05:35,236 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0217.jpg
+2025-04-19 20:05:35,787 [INFO] - Scene analysis: {'players': {61: {'bbox': [150.58831787109375, 1043.541748046875, 232.45333862304688, 1161.850341796875], 'conf': 0.7982023, 'position': (191, 1161), 'position_transformed': [29.293386459350586, 55.317359924316406], 'team': 1}, 55: {'bbox': [2220.70068359375, 706.6697387695312, 2286.67529296875, 812.6597290039062], 'conf': 0.6376032, 'position': (2253, 812), 'position_transformed': [51.41350173950195, 48.69717788696289], 'team': 2}}, 'referees': {}, 'ball': {1: {'bbox': [379.17987060546875, 1138.416015625, 415.11419677734375, 1181.8388671875], 'conf': 0.11, 'position': (397, 1160), 'position_transformed': [31.132673263549805, 55.57225799560547]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:35,788 [INFO] - Ball possession: False
+2025-04-19 20:05:35,822 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:05:35,824 [INFO] - Resuming game
+2025-04-19 20:05:35,925 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:35,992 [DEBUG] - Skipping frame 214, skip_counter: 19
+2025-04-19 20:05:36,092 [DEBUG] - Skipping frame 215, skip_counter: 18
+2025-04-19 20:05:36,197 [DEBUG] - Skipping frame 216, skip_counter: 17
+2025-04-19 20:05:36,324 [DEBUG] - Skipping frame 217, skip_counter: 16
+2025-04-19 20:05:36,449 [DEBUG] - Skipping frame 218, skip_counter: 15
+2025-04-19 20:05:36,599 [DEBUG] - Skipping frame 219, skip_counter: 14
+2025-04-19 20:05:36,738 [DEBUG] - Skipping frame 220, skip_counter: 13
+2025-04-19 20:05:36,899 [DEBUG] - Skipping frame 221, skip_counter: 12
+2025-04-19 20:05:37,049 [DEBUG] - Skipping frame 222, skip_counter: 11
+2025-04-19 20:05:37,201 [DEBUG] - Skipping frame 223, skip_counter: 10
+2025-04-19 20:05:37,347 [DEBUG] - Skipping frame 224, skip_counter: 9
+2025-04-19 20:05:37,489 [DEBUG] - Skipping frame 225, skip_counter: 8
+2025-04-19 20:05:37,632 [DEBUG] - Skipping frame 226, skip_counter: 7
+2025-04-19 20:05:37,790 [DEBUG] - Skipping frame 227, skip_counter: 6
+2025-04-19 20:05:37,932 [DEBUG] - Skipping frame 228, skip_counter: 5
+2025-04-19 20:05:38,072 [DEBUG] - Skipping frame 229, skip_counter: 4
+2025-04-19 20:05:38,232 [DEBUG] - Skipping frame 230, skip_counter: 3
+2025-04-19 20:05:38,380 [DEBUG] - Skipping frame 231, skip_counter: 2
+2025-04-19 20:05:38,520 [DEBUG] - Skipping frame 232, skip_counter: 1
+2025-04-19 20:05:38,648 [DEBUG] - Skipping frame 233, skip_counter: 0
+2025-04-19 20:05:38,868 [DEBUG] - Saved frame 233 to captured_frames_20250419_200430/frame_0233.jpg
+2025-04-19 20:05:38,907 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:39,015 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:39,155 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:39,300 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:39,435 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:39,635 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:39,781 [INFO] - Processing buffer of 5 frames at elapsed time: 58.41s
+2025-04-19 20:05:39,781 [INFO] - Pausing game
+2025-04-19 20:05:39,971 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0239.jpg
+2025-04-19 20:05:40,060 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0240.jpg
+2025-04-19 20:05:40,144 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0241.jpg
+2025-04-19 20:05:40,232 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0242.jpg
+2025-04-19 20:05:40,313 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0243.jpg
+2025-04-19 20:05:40,799 [INFO] - Scene analysis: {'players': {55: {'bbox': [2201.21337890625, 699.5196533203125, 2272.79833984375, 813.6917724609375], 'conf': 0.77084947, 'position': (2237, 813), 'position_transformed': [51.1312255859375, 49.70664596557617], 'team': 2}, 64: {'bbox': [282.62322998046875, 635.8587646484375, 341.14666748046875, 773.5306396484375], 'conf': 0.74026316, 'position': (311, 773), 'position_transformed': [26.86269760131836, 44.124786376953125], 'team': 1}}, 'referees': {}, 'ball': {1: {'bbox': [379.17987060546875, 1138.416015625, 415.11419677734375, 1181.8388671875], 'conf': 0.11, 'position': (397, 1160), 'position_transformed': [31.08844566345215, 56.02313995361328]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:40,799 [INFO] - Ball possession: False
+2025-04-19 20:05:40,829 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:05:40,829 [INFO] - Resuming game
+2025-04-19 20:05:40,931 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:41,002 [DEBUG] - Skipping frame 240, skip_counter: 19
+2025-04-19 20:05:41,115 [DEBUG] - Skipping frame 241, skip_counter: 18
+2025-04-19 20:05:41,233 [DEBUG] - Skipping frame 242, skip_counter: 17
+2025-04-19 20:05:41,350 [DEBUG] - Skipping frame 243, skip_counter: 16
+2025-04-19 20:05:41,466 [DEBUG] - Skipping frame 244, skip_counter: 15
+2025-04-19 20:05:41,599 [DEBUG] - Skipping frame 245, skip_counter: 14
+2025-04-19 20:05:41,731 [DEBUG] - Skipping frame 246, skip_counter: 13
+2025-04-19 20:05:41,867 [DEBUG] - Skipping frame 247, skip_counter: 12
+2025-04-19 20:05:42,031 [DEBUG] - Skipping frame 248, skip_counter: 11
+2025-04-19 20:05:42,205 [DEBUG] - Skipping frame 249, skip_counter: 10
+2025-04-19 20:05:42,365 [DEBUG] - Skipping frame 250, skip_counter: 9
+2025-04-19 20:05:42,512 [DEBUG] - Skipping frame 251, skip_counter: 8
+2025-04-19 20:05:42,648 [DEBUG] - Skipping frame 252, skip_counter: 7
+2025-04-19 20:05:42,782 [DEBUG] - Skipping frame 253, skip_counter: 6
+2025-04-19 20:05:42,924 [DEBUG] - Skipping frame 254, skip_counter: 5
+2025-04-19 20:05:43,080 [DEBUG] - Skipping frame 255, skip_counter: 4
+2025-04-19 20:05:43,232 [DEBUG] - Skipping frame 256, skip_counter: 3
+2025-04-19 20:05:43,372 [DEBUG] - Skipping frame 257, skip_counter: 2
+2025-04-19 20:05:43,514 [DEBUG] - Skipping frame 258, skip_counter: 1
+2025-04-19 20:05:43,658 [DEBUG] - Skipping frame 259, skip_counter: 0
+2025-04-19 20:05:43,886 [DEBUG] - Saved frame 259 to captured_frames_20250419_200430/frame_0259.jpg
+2025-04-19 20:05:43,923 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:44,021 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:44,168 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:44,315 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:44,451 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:44,615 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:44,757 [INFO] - Processing buffer of 5 frames at elapsed time: 63.39s
+2025-04-19 20:05:44,757 [INFO] - Pausing game
+2025-04-19 20:05:44,941 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0265.jpg
+2025-04-19 20:05:45,017 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0266.jpg
+2025-04-19 20:05:45,093 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0267.jpg
+2025-04-19 20:05:45,175 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0268.jpg
+2025-04-19 20:05:45,256 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0269.jpg
+2025-04-19 20:05:45,771 [INFO] - Scene analysis: {'players': {55: {'bbox': [2253.3671875, 676.3555908203125, 2322.73095703125, 829.4915771484375], 'conf': 0.80955446, 'position': (2288, 829), 'position_transformed': [50.27959060668945, 48.53706359863281], 'team': 2}, 68: {'bbox': [0.11599349975585938, 992.2138671875, 50.19076919555664, 1104.23388671875], 'conf': 0.76386803, 'position': (25, 1104), 'position_transformed': [25.58966636657715, 54.16070556640625], 'team': 2}, 67: {'bbox': [384.25250244140625, 650.8585815429688, 440.77886962890625, 806.7056274414062], 'conf': 0.3376174, 'position': (412, 806), 'position_transformed': [26.424457550048828, 45.14306640625], 'team': 1}}, 'referees': {}, 'ball': {1: {'bbox': [379.17987060546875, 1138.416015625, 415.11419677734375, 1181.8388671875], 'conf': 0.11, 'position': (397, 1160), 'position_transformed': [29.74342918395996, 55.77121353149414]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:45,772 [INFO] - Ball possession: False
+2025-04-19 20:05:45,802 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:05:45,803 [INFO] - Resuming game
+2025-04-19 20:05:45,905 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:45,985 [DEBUG] - Skipping frame 266, skip_counter: 19
+2025-04-19 20:05:46,089 [DEBUG] - Skipping frame 267, skip_counter: 18
+2025-04-19 20:05:46,198 [DEBUG] - Skipping frame 268, skip_counter: 17
+2025-04-19 20:05:46,323 [DEBUG] - Skipping frame 269, skip_counter: 16
+2025-04-19 20:05:46,433 [DEBUG] - Skipping frame 270, skip_counter: 15
+2025-04-19 20:05:46,566 [DEBUG] - Skipping frame 271, skip_counter: 14
+2025-04-19 20:05:46,715 [DEBUG] - Skipping frame 272, skip_counter: 13
+2025-04-19 20:05:46,882 [DEBUG] - Skipping frame 273, skip_counter: 12
+2025-04-19 20:05:47,048 [DEBUG] - Skipping frame 274, skip_counter: 11
+2025-04-19 20:05:47,199 [DEBUG] - Skipping frame 275, skip_counter: 10
+2025-04-19 20:05:47,335 [DEBUG] - Skipping frame 276, skip_counter: 9
+2025-04-19 20:05:47,484 [DEBUG] - Skipping frame 277, skip_counter: 8
+2025-04-19 20:05:47,616 [DEBUG] - Skipping frame 278, skip_counter: 7
+2025-04-19 20:05:47,747 [DEBUG] - Skipping frame 279, skip_counter: 6
+2025-04-19 20:05:47,873 [DEBUG] - Skipping frame 280, skip_counter: 5
+2025-04-19 20:05:47,991 [DEBUG] - Skipping frame 281, skip_counter: 4
+2025-04-19 20:05:48,120 [DEBUG] - Skipping frame 282, skip_counter: 3
+2025-04-19 20:05:48,245 [DEBUG] - Skipping frame 283, skip_counter: 2
+2025-04-19 20:05:48,365 [DEBUG] - Skipping frame 284, skip_counter: 1
+2025-04-19 20:05:48,489 [DEBUG] - Skipping frame 285, skip_counter: 0
+2025-04-19 20:05:48,701 [DEBUG] - Saved frame 285 to captured_frames_20250419_200430/frame_0285.jpg
+2025-04-19 20:05:48,729 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:48,829 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:48,859 [INFO] - New attempt detected: 5 (was 6)
+2025-04-19 20:05:48,860 [INFO] - End of attempt reward: -10
+2025-04-19 20:05:48,860 [INFO] - Skipping 10 frames between attempts
+2025-04-19 20:05:48,952 [DEBUG] - Skipping frame 288, skip_counter: 9
+2025-04-19 20:05:49,097 [DEBUG] - Skipping frame 289, skip_counter: 8
+2025-04-19 20:05:49,237 [DEBUG] - Skipping frame 290, skip_counter: 7
+2025-04-19 20:05:49,387 [DEBUG] - Skipping frame 291, skip_counter: 6
+2025-04-19 20:05:49,517 [DEBUG] - Skipping frame 292, skip_counter: 5
+2025-04-19 20:05:49,683 [DEBUG] - Skipping frame 293, skip_counter: 4
+2025-04-19 20:05:49,847 [DEBUG] - Skipping frame 294, skip_counter: 3
+2025-04-19 20:05:49,989 [DEBUG] - Skipping frame 295, skip_counter: 2
+2025-04-19 20:05:50,137 [DEBUG] - Skipping frame 296, skip_counter: 1
+2025-04-19 20:05:50,280 [DEBUG] - Skipping frame 297, skip_counter: 0
+2025-04-19 20:05:50,496 [DEBUG] - Saved frame 297 to captured_frames_20250419_200430/frame_0297.jpg
+2025-04-19 20:05:50,534 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:50,639 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:50,785 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:50,920 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:51,054 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:51,214 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:51,356 [INFO] - Processing buffer of 5 frames at elapsed time: 70.00s
+2025-04-19 20:05:51,356 [INFO] - Pausing game
+2025-04-19 20:05:51,540 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0303.jpg
+2025-04-19 20:05:51,618 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0304.jpg
+2025-04-19 20:05:51,703 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0305.jpg
+2025-04-19 20:05:51,785 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0306.jpg
+2025-04-19 20:05:51,865 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0307.jpg
+2025-04-19 20:05:52,362 [INFO] - Scene analysis: {'players': {73: {'bbox': [821.9924926757812, 841.331298828125, 887.4954223632812, 993.453125], 'conf': 0.8321469, 'position': (854, 993), 'position_transformed': [36.46324157714844, 43.33945846557617], 'team': 1}, 74: {'bbox': [762.45654296875, 521.6906127929688, 813.011474609375, 635.0366821289062], 'conf': 0.5647803, 'position': (787, 635), 'position_transformed': [34.90445327758789, 30.796573638916016], 'team': 1, 'has_ball': True}, 77: {'bbox': [2495.53173828125, 852.8555297851562, 2559.64013671875, 972.0228881835938], 'conf': 0.30019152, 'position': (2527, 972), 'position_transformed': [56.19606399536133, 42.02813720703125], 'team': 2}}, 'referees': {}, 'ball': {1: {'conf': 0.34999058, 'bbox': [795.2042846679688, 610.349609375, 822.0436401367188, 635.85107421875], 'position': (808, 623), 'position_transformed': [35.16929244995117, 30.258201599121094]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:52,362 [INFO] - Ball possession: True
+2025-04-19 20:05:52,392 [INFO] - First action taken: 16
+2025-04-19 20:05:52,392 [INFO] - Setting action to take: 16
+2025-04-19 20:05:52,392 [INFO] - Resuming game
+2025-04-19 20:05:52,495 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:52,560 [DEBUG] - Skipping frame 304, skip_counter: 19
+2025-04-19 20:05:52,654 [DEBUG] - Skipping frame 305, skip_counter: 18
+2025-04-19 20:05:52,782 [DEBUG] - Skipping frame 306, skip_counter: 17
+2025-04-19 20:05:52,914 [DEBUG] - Skipping frame 307, skip_counter: 16
+2025-04-19 20:05:53,050 [DEBUG] - Skipping frame 308, skip_counter: 15
+2025-04-19 20:05:53,214 [DEBUG] - Skipping frame 309, skip_counter: 14
+2025-04-19 20:05:53,358 [DEBUG] - Skipping frame 310, skip_counter: 13
+2025-04-19 20:05:53,508 [DEBUG] - Skipping frame 311, skip_counter: 12
+2025-04-19 20:05:53,666 [DEBUG] - Skipping frame 312, skip_counter: 11
+2025-04-19 20:05:53,816 [DEBUG] - Skipping frame 313, skip_counter: 10
+2025-04-19 20:05:53,966 [DEBUG] - Skipping frame 314, skip_counter: 9
+2025-04-19 20:05:54,112 [DEBUG] - Skipping frame 315, skip_counter: 8
+2025-04-19 20:05:54,254 [DEBUG] - Skipping frame 316, skip_counter: 7
+2025-04-19 20:05:54,400 [DEBUG] - Skipping frame 317, skip_counter: 6
+2025-04-19 20:05:54,537 [DEBUG] - Skipping frame 318, skip_counter: 5
+2025-04-19 20:05:54,672 [DEBUG] - Skipping frame 319, skip_counter: 4
+2025-04-19 20:05:54,813 [DEBUG] - Skipping frame 320, skip_counter: 3
+2025-04-19 20:05:54,947 [DEBUG] - Skipping frame 321, skip_counter: 2
+2025-04-19 20:05:55,087 [DEBUG] - Skipping frame 322, skip_counter: 1
+2025-04-19 20:05:55,220 [DEBUG] - Skipping frame 323, skip_counter: 0
+2025-04-19 20:05:55,438 [DEBUG] - Saved frame 323 to captured_frames_20250419_200430/frame_0323.jpg
+2025-04-19 20:05:55,438 [INFO] - Making action [16]: Shooting the ball
+2025-04-19 20:05:55,640 [DEBUG] - Action 16 completed
+2025-04-19 20:05:55,640 [INFO] - Action taken: 16
+2025-04-19 20:05:55,682 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:55,783 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:55,830 [INFO] - New attempt detected: 4 (was 5)
+2025-04-19 20:05:55,830 [INFO] - End of attempt reward: -2
+2025-04-19 20:05:55,831 [INFO] - Skipping 10 frames between attempts
+2025-04-19 20:05:55,913 [DEBUG] - Skipping frame 326, skip_counter: 9
+2025-04-19 20:05:56,049 [DEBUG] - Skipping frame 327, skip_counter: 8
+2025-04-19 20:05:56,178 [DEBUG] - Skipping frame 328, skip_counter: 7
+2025-04-19 20:05:56,301 [DEBUG] - Skipping frame 329, skip_counter: 6
+2025-04-19 20:05:56,415 [DEBUG] - Skipping frame 330, skip_counter: 5
+2025-04-19 20:05:56,531 [DEBUG] - Skipping frame 331, skip_counter: 4
+2025-04-19 20:05:56,649 [DEBUG] - Skipping frame 332, skip_counter: 3
+2025-04-19 20:05:56,798 [DEBUG] - Skipping frame 333, skip_counter: 2
+2025-04-19 20:05:56,940 [DEBUG] - Skipping frame 334, skip_counter: 1
+2025-04-19 20:05:57,088 [DEBUG] - Skipping frame 335, skip_counter: 0
+2025-04-19 20:05:57,320 [DEBUG] - Saved frame 335 to captured_frames_20250419_200430/frame_0335.jpg
+2025-04-19 20:05:57,347 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:05:57,453 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:05:57,580 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:05:57,718 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:05:57,865 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:05:58,031 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:05:58,181 [INFO] - Processing buffer of 5 frames at elapsed time: 76.81s
+2025-04-19 20:05:58,181 [INFO] - Pausing game
+2025-04-19 20:05:58,365 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0341.jpg
+2025-04-19 20:05:58,446 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0342.jpg
+2025-04-19 20:05:58,523 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0343.jpg
+2025-04-19 20:05:58,599 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0344.jpg
+2025-04-19 20:05:58,677 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0345.jpg
+2025-04-19 20:05:59,168 [INFO] - Scene analysis: {'players': {85: {'bbox': [601.9901733398438, 630.343505859375, 675.1000366210938, 726.96142578125], 'conf': 0.79435635, 'position': (638, 726), 'position_transformed': [31.805557250976562, 35.60839080810547], 'team': 1, 'has_ball': True}}, 'referees': {}, 'ball': {1: {'conf': 0.3945893, 'bbox': [663.0033569335938, 699.7080078125, 691.6588745117188, 730.4481201171875], 'position': (677, 715), 'position_transformed': [32.27887725830078, 35.11231231689453]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:05:59,168 [INFO] - Ball possession: True
+2025-04-19 20:05:59,202 [INFO] - First action taken: 14
+2025-04-19 20:05:59,202 [INFO] - Setting action to take: 14
+2025-04-19 20:05:59,202 [INFO] - Resuming game
+2025-04-19 20:05:59,303 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:05:59,369 [DEBUG] - Skipping frame 342, skip_counter: 19
+2025-04-19 20:05:59,479 [DEBUG] - Skipping frame 343, skip_counter: 18
+2025-04-19 20:05:59,579 [DEBUG] - Skipping frame 344, skip_counter: 17
+2025-04-19 20:05:59,704 [DEBUG] - Skipping frame 345, skip_counter: 16
+2025-04-19 20:05:59,820 [DEBUG] - Skipping frame 346, skip_counter: 15
+2025-04-19 20:05:59,966 [DEBUG] - Skipping frame 347, skip_counter: 14
+2025-04-19 20:06:00,099 [DEBUG] - Skipping frame 348, skip_counter: 13
+2025-04-19 20:06:00,260 [DEBUG] - Skipping frame 349, skip_counter: 12
+2025-04-19 20:06:00,425 [DEBUG] - Skipping frame 350, skip_counter: 11
+2025-04-19 20:06:00,577 [DEBUG] - Skipping frame 351, skip_counter: 10
+2025-04-19 20:06:00,727 [DEBUG] - Skipping frame 352, skip_counter: 9
+2025-04-19 20:06:00,885 [DEBUG] - Skipping frame 353, skip_counter: 8
+2025-04-19 20:06:01,036 [DEBUG] - Skipping frame 354, skip_counter: 7
+2025-04-19 20:06:01,202 [DEBUG] - Skipping frame 355, skip_counter: 6
+2025-04-19 20:06:01,340 [DEBUG] - Skipping frame 356, skip_counter: 5
+2025-04-19 20:06:01,469 [DEBUG] - Skipping frame 357, skip_counter: 4
+2025-04-19 20:06:01,608 [DEBUG] - Skipping frame 358, skip_counter: 3
+2025-04-19 20:06:01,734 [DEBUG] - Skipping frame 359, skip_counter: 2
+2025-04-19 20:06:01,866 [DEBUG] - Skipping frame 360, skip_counter: 1
+2025-04-19 20:06:02,003 [DEBUG] - Skipping frame 361, skip_counter: 0
+2025-04-19 20:06:02,227 [DEBUG] - Saved frame 361 to captured_frames_20250419_200430/frame_0361.jpg
+2025-04-19 20:06:02,227 [INFO] - Making action [14]: Dribbling the ball to the west
+2025-04-19 20:06:02,728 [DEBUG] - Action 14 completed
+2025-04-19 20:06:02,728 [INFO] - Action taken: 14
+2025-04-19 20:06:02,768 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:06:02,870 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:06:03,009 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:06:03,140 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:06:03,291 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:06:03,451 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:06:03,600 [INFO] - Processing buffer of 5 frames at elapsed time: 82.23s
+2025-04-19 20:06:03,600 [INFO] - Pausing game
+2025-04-19 20:06:03,783 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0367.jpg
+2025-04-19 20:06:03,863 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0368.jpg
+2025-04-19 20:06:03,942 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0369.jpg
+2025-04-19 20:06:04,021 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0370.jpg
+2025-04-19 20:06:04,102 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0371.jpg
+2025-04-19 20:06:04,716 [INFO] - Scene analysis: {'players': {101: {'bbox': [490.35797119140625, 638.76318359375, 569.3659057617188, 736.1710205078125], 'conf': 0.8130563, 'position': (529, 736), 'position_transformed': [26.831401824951172, 35.003662109375], 'team': 2, 'has_ball': True}, 95: {'bbox': [887.5469360351562, 618.572021484375, 937.9144897460938, 720.7637939453125], 'conf': 0.7624524, 'position': (912, 720), 'position_transformed': [32.910003662109375, 34.403160095214844], 'team': 1}, 96: {'bbox': [111.05819702148438, 888.6690673828125, 202.57867431640625, 1061.9554443359375], 'conf': 0.59788835, 'position': (156, 1061), 'position_transformed': [25.66361427307129, 47.24336624145508], 'team': 1}}, 'referees': {}, 'ball': {1: {'conf': 0.58848274, 'bbox': [484.91168212890625, 708.29931640625, 518.9605102539062, 742.7337646484375], 'position': (501, 725), 'position_transformed': [26.221025466918945, 34.40559768676758]}}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:06:04,717 [INFO] - Ball possession: False
+2025-04-19 20:06:04,756 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:06:04,756 [INFO] - Resuming game
+2025-04-19 20:06:04,858 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:06:04,921 [DEBUG] - Skipping frame 368, skip_counter: 19
+2025-04-19 20:06:05,026 [DEBUG] - Skipping frame 369, skip_counter: 18
+2025-04-19 20:06:05,137 [DEBUG] - Skipping frame 370, skip_counter: 17
+2025-04-19 20:06:05,266 [DEBUG] - Skipping frame 371, skip_counter: 16
+2025-04-19 20:06:05,385 [DEBUG] - Skipping frame 372, skip_counter: 15
+2025-04-19 20:06:05,517 [DEBUG] - Skipping frame 373, skip_counter: 14
+2025-04-19 20:06:05,668 [DEBUG] - Skipping frame 374, skip_counter: 13
+2025-04-19 20:06:05,810 [DEBUG] - Skipping frame 375, skip_counter: 12
+2025-04-19 20:06:05,967 [DEBUG] - Skipping frame 376, skip_counter: 11
+2025-04-19 20:06:06,111 [DEBUG] - Skipping frame 377, skip_counter: 10
+2025-04-19 20:06:06,245 [DEBUG] - Skipping frame 378, skip_counter: 9
+2025-04-19 20:06:06,374 [DEBUG] - Skipping frame 379, skip_counter: 8
+2025-04-19 20:06:06,499 [DEBUG] - Skipping frame 380, skip_counter: 7
+2025-04-19 20:06:06,616 [DEBUG] - Skipping frame 381, skip_counter: 6
+2025-04-19 20:06:06,740 [DEBUG] - Skipping frame 382, skip_counter: 5
+2025-04-19 20:06:06,857 [DEBUG] - Skipping frame 383, skip_counter: 4
+2025-04-19 20:06:07,001 [DEBUG] - Skipping frame 384, skip_counter: 3
+2025-04-19 20:06:07,140 [DEBUG] - Skipping frame 385, skip_counter: 2
+2025-04-19 20:06:07,286 [DEBUG] - Skipping frame 386, skip_counter: 1
+2025-04-19 20:06:07,427 [DEBUG] - Skipping frame 387, skip_counter: 0
+2025-04-19 20:06:07,642 [DEBUG] - Saved frame 387 to captured_frames_20250419_200430/frame_0387.jpg
+2025-04-19 20:06:07,673 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:06:07,776 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:06:07,809 [INFO] - New attempt detected: 3 (was 4)
+2025-04-19 20:06:07,810 [INFO] - End of attempt reward: -10
+2025-04-19 20:06:07,810 [INFO] - Skipping 10 frames between attempts
+2025-04-19 20:06:07,918 [DEBUG] - Skipping frame 390, skip_counter: 9
+2025-04-19 20:06:08,066 [DEBUG] - Skipping frame 391, skip_counter: 8
+2025-04-19 20:06:08,218 [DEBUG] - Skipping frame 392, skip_counter: 7
+2025-04-19 20:06:08,370 [DEBUG] - Skipping frame 393, skip_counter: 6
+2025-04-19 20:06:08,516 [DEBUG] - Skipping frame 394, skip_counter: 5
+2025-04-19 20:06:08,657 [DEBUG] - Skipping frame 395, skip_counter: 4
+2025-04-19 20:06:08,789 [DEBUG] - Skipping frame 396, skip_counter: 3
+2025-04-19 20:06:08,932 [DEBUG] - Skipping frame 397, skip_counter: 2
+2025-04-19 20:06:09,073 [DEBUG] - Skipping frame 398, skip_counter: 1
+2025-04-19 20:06:09,260 [DEBUG] - Skipping frame 399, skip_counter: 0
+2025-04-19 20:06:09,453 [DEBUG] - Saved frame 399 to captured_frames_20250419_200430/frame_0399.jpg
+2025-04-19 20:06:09,496 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:06:09,564 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:06:09,602 [INFO] - New attempt detected: None (was 3)
+2025-04-19 20:06:09,602 [INFO] - End of attempt reward: -10
+2025-04-19 20:06:09,602 [INFO] - Skipping 10 frames between attempts
+2025-04-19 20:06:09,679 [DEBUG] - Skipping frame 402, skip_counter: 9
+2025-04-19 20:06:09,785 [DEBUG] - Skipping frame 403, skip_counter: 8
+2025-04-19 20:06:09,887 [DEBUG] - Skipping frame 404, skip_counter: 7
+2025-04-19 20:06:09,989 [DEBUG] - Skipping frame 405, skip_counter: 6
+2025-04-19 20:06:10,075 [DEBUG] - Skipping frame 406, skip_counter: 5
+2025-04-19 20:06:10,188 [DEBUG] - Skipping frame 407, skip_counter: 4
+2025-04-19 20:06:10,293 [DEBUG] - Skipping frame 408, skip_counter: 3
+2025-04-19 20:06:10,392 [DEBUG] - Skipping frame 409, skip_counter: 2
+2025-04-19 20:06:10,482 [DEBUG] - Skipping frame 410, skip_counter: 1
+2025-04-19 20:06:10,584 [DEBUG] - Skipping frame 411, skip_counter: 0
+2025-04-19 20:06:10,738 [DEBUG] - Saved frame 411 to captured_frames_20250419_200430/frame_0411.jpg
+2025-04-19 20:06:10,760 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:06:10,834 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:06:10,856 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:10,931 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:06:10,957 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:11,031 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:06:11,054 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:11,131 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:06:11,158 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:11,241 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:06:11,264 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:11,338 [INFO] - Processing buffer of 5 frames at elapsed time: 90.01s
+2025-04-19 20:06:11,339 [INFO] - Pausing game
+2025-04-19 20:06:11,502 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0417.jpg
+2025-04-19 20:06:11,576 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0418.jpg
+2025-04-19 20:06:11,650 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0419.jpg
+2025-04-19 20:06:11,713 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0420.jpg
+2025-04-19 20:06:11,781 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0421.jpg
+2025-04-19 20:06:12,235 [INFO] - Scene analysis: {'players': {}, 'referees': {}, 'ball': {}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:06:12,235 [INFO] - Ball possession: False
+2025-04-19 20:06:12,265 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:06:12,265 [INFO] - Resuming game
+2025-04-19 20:06:12,368 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:06:12,452 [DEBUG] - Skipping frame 418, skip_counter: 19
+2025-04-19 20:06:12,564 [DEBUG] - Skipping frame 419, skip_counter: 18
+2025-04-19 20:06:12,690 [DEBUG] - Skipping frame 420, skip_counter: 17
+2025-04-19 20:06:12,817 [DEBUG] - Skipping frame 421, skip_counter: 16
+2025-04-19 20:06:12,967 [DEBUG] - Skipping frame 422, skip_counter: 15
+2025-04-19 20:06:13,120 [DEBUG] - Skipping frame 423, skip_counter: 14
+2025-04-19 20:06:13,306 [DEBUG] - Skipping frame 424, skip_counter: 13
+2025-04-19 20:06:13,450 [DEBUG] - Skipping frame 425, skip_counter: 12
+2025-04-19 20:06:13,591 [DEBUG] - Skipping frame 426, skip_counter: 11
+2025-04-19 20:06:13,706 [DEBUG] - Skipping frame 427, skip_counter: 10
+2025-04-19 20:06:13,821 [DEBUG] - Skipping frame 428, skip_counter: 9
+2025-04-19 20:06:13,923 [DEBUG] - Skipping frame 429, skip_counter: 8
+2025-04-19 20:06:14,028 [DEBUG] - Skipping frame 430, skip_counter: 7
+2025-04-19 20:06:14,145 [DEBUG] - Skipping frame 431, skip_counter: 6
+2025-04-19 20:06:14,289 [DEBUG] - Skipping frame 432, skip_counter: 5
+2025-04-19 20:06:14,401 [DEBUG] - Skipping frame 433, skip_counter: 4
+2025-04-19 20:06:14,503 [DEBUG] - Skipping frame 434, skip_counter: 3
+2025-04-19 20:06:14,597 [DEBUG] - Skipping frame 435, skip_counter: 2
+2025-04-19 20:06:14,705 [DEBUG] - Skipping frame 436, skip_counter: 1
+2025-04-19 20:06:14,796 [DEBUG] - Skipping frame 437, skip_counter: 0
+2025-04-19 20:06:14,957 [DEBUG] - Saved frame 437 to captured_frames_20250419_200430/frame_0437.jpg
+2025-04-19 20:06:14,981 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:06:15,059 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:06:15,083 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:15,156 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:06:15,188 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:15,272 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:06:15,296 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:15,375 [DEBUG] - Added frame to buffer, current size: 4/5
+2025-04-19 20:06:15,399 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:15,473 [DEBUG] - Added frame to buffer, current size: 5/5
+2025-04-19 20:06:15,497 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:15,570 [INFO] - Processing buffer of 5 frames at elapsed time: 94.24s
+2025-04-19 20:06:15,571 [INFO] - Pausing game
+2025-04-19 20:06:15,727 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250419_200430/frame_tbs_0443.jpg
+2025-04-19 20:06:15,781 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250419_200430/frame_tbs_0444.jpg
+2025-04-19 20:06:15,835 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250419_200430/frame_tbs_0445.jpg
+2025-04-19 20:06:15,894 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250419_200430/frame_tbs_0446.jpg
+2025-04-19 20:06:15,947 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250419_200430/frame_tbs_0447.jpg
+2025-04-19 20:06:16,453 [INFO] - Scene analysis: {'players': {104: {'bbox': [26.212646484375, 597.73583984375, 61.56433868408203, 645.77783203125], 'conf': 0.53682184, 'position': (43, 645), 'position_transformed': [16.691608428955078, 29.378286361694336], 'team': 2}}, 'referees': {}, 'ball': {}, 'goalkeeper': {}, 'goalpost': {}}
+2025-04-19 20:06:16,454 [INFO] - Ball possession: False
+2025-04-19 20:06:16,480 [INFO] - No ball possession detected, no action taken
+2025-04-19 20:06:16,481 [INFO] - Resuming game
+2025-04-19 20:06:16,583 [DEBUG] - Reset skip_counter to 20
+2025-04-19 20:06:16,659 [DEBUG] - Skipping frame 444, skip_counter: 19
+2025-04-19 20:06:16,753 [DEBUG] - Skipping frame 445, skip_counter: 18
+2025-04-19 20:06:16,841 [DEBUG] - Skipping frame 446, skip_counter: 17
+2025-04-19 20:06:16,927 [DEBUG] - Skipping frame 447, skip_counter: 16
+2025-04-19 20:06:17,019 [DEBUG] - Skipping frame 448, skip_counter: 15
+2025-04-19 20:06:17,096 [DEBUG] - Skipping frame 449, skip_counter: 14
+2025-04-19 20:06:17,198 [DEBUG] - Skipping frame 450, skip_counter: 13
+2025-04-19 20:06:17,294 [DEBUG] - Skipping frame 451, skip_counter: 12
+2025-04-19 20:06:17,383 [DEBUG] - Skipping frame 452, skip_counter: 11
+2025-04-19 20:06:17,464 [DEBUG] - Skipping frame 453, skip_counter: 10
+2025-04-19 20:06:17,555 [DEBUG] - Skipping frame 454, skip_counter: 9
+2025-04-19 20:06:17,650 [DEBUG] - Skipping frame 455, skip_counter: 8
+2025-04-19 20:06:17,740 [DEBUG] - Skipping frame 456, skip_counter: 7
+2025-04-19 20:06:17,833 [DEBUG] - Skipping frame 457, skip_counter: 6
+2025-04-19 20:06:17,925 [DEBUG] - Skipping frame 458, skip_counter: 5
+2025-04-19 20:06:18,019 [DEBUG] - Skipping frame 459, skip_counter: 4
+2025-04-19 20:06:18,108 [DEBUG] - Skipping frame 460, skip_counter: 3
+2025-04-19 20:06:18,204 [DEBUG] - Skipping frame 461, skip_counter: 2
+2025-04-19 20:06:18,294 [DEBUG] - Skipping frame 462, skip_counter: 1
+2025-04-19 20:06:18,386 [DEBUG] - Skipping frame 463, skip_counter: 0
+2025-04-19 20:06:18,550 [DEBUG] - Saved frame 463 to captured_frames_20250419_200430/frame_0463.jpg
+2025-04-19 20:06:18,570 [DEBUG] - Cleared frames_to_send buffer
+2025-04-19 20:06:18,631 [DEBUG] - Added frame to buffer, current size: 1/5
+2025-04-19 20:06:18,654 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:18,726 [DEBUG] - Added frame to buffer, current size: 2/5
+2025-04-19 20:06:18,749 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:18,816 [DEBUG] - Added frame to buffer, current size: 3/5
+2025-04-19 20:06:18,839 [INFO] - Initial attempt detected: None
+2025-04-19 20:06:18,839 [INFO] - Quit command detected at elapsed time: 97.49s
+2025-04-19 20:06:18,840 [INFO] - Saving DQN model to soccer_dqn_trained.pth
+2025-04-19 20:06:18,885 [INFO] - Video recording completed and saved
+2025-04-19 20:06:18,885 [INFO] - FIFA Vision has stopped.
+2025-04-19 20:06:18,885 [INFO] - 
+===== SUMMARY =====
+2025-04-19 20:06:18,885 [INFO] - Total frames processed: 467
+2025-04-19 20:06:18,885 [INFO] - Total runtime: 97.63 seconds
+2025-04-19 20:06:18,885 [INFO] - Average FPS: 4.78
+2025-04-19 20:06:18,886 [INFO] - Frames saved to: captured_frames_20250419_200430/
+2025-04-19 20:06:18,886 [INFO] - Video recording saved to: captured_frames_20250419_200430/
+2025-04-19 20:06:18,886 [INFO] - ==================

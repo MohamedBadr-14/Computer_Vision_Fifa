@@ -3,33 +3,13 @@ from trackers import Tracker
 import numpy as np
 from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
-from camera_movement_estimator import CameraMovementEstimator
+# from camera_movement_estimator import CameraMovementEstimator
 from view_transformer import  KeypointsTransformer
 import cv2
 import os
 import pickle
 import sys
 import time
-
-def adjust_all_tracks(all_tracks):
-    loaded_tracks = {}
-    for key in all_tracks.keys():
-        loaded_tracks[key] = []
-        for frame_num, frame_tracks in enumerate(all_tracks[key]):
-            loaded_tracks[key].append({})
-            for track_id, track in frame_tracks.items():
-                #only load bounding box of each track
-                # if key == "ball":
-                #     print(track)
-                if "bbox" in track.keys():
-                    loaded_tracks[key][frame_num][track_id] = {
-                        "bbox": track["bbox"]
-                    }
-                    if "conf" in track.keys():
-                        loaded_tracks[key][frame_num][track_id]["conf"] = track["conf"]
-                else:
-                    loaded_tracks[key][frame_num][track_id] = {}
-    return loaded_tracks
 
 class ComputerVision:
     def __init__(self):
@@ -51,7 +31,7 @@ class ComputerVision:
         # Read Video
         # print("Reading video..." , track_stubs)
         # video_frames = read_video("input_videos/general_small.mp4")
-        # all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
+        all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
         to_be_sent = {}
 
         # if track_stubs and os.path.exists("stubs/tracks.pkl"):
@@ -215,11 +195,11 @@ class ComputerVision:
             
         
 
-            # all_tracks["players"].append(frame_tracks["players"])
-            # all_tracks["referees"].append(frame_tracks["referees"])
-            # all_tracks["ball"].append(frame_tracks["ball"])
-            # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            # all_tracks["goalpost"].append(frame_tracks["goalpost"])
+            all_tracks["players"].append(frame_tracks["players"])
+            all_tracks["referees"].append(frame_tracks["referees"])
+            all_tracks["ball"].append(frame_tracks["ball"])
+            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            all_tracks["goalpost"].append(frame_tracks["goalpost"])
 
         # Draw output
         # output_video_frames = self.tracker.draw_annotations(
@@ -232,3 +212,14 @@ class ComputerVision:
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
         return frame_tracks, hasBall
+
+
+
+    # def voting_algo_frames (self,all_tracks):
+    #     # all tracks is a dictionary of lists of dictionaries
+    #     # all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
+    #     # i want to return single dictionary of players, referees, ball, goalkeeper, goalpost
+    #     # the problem if i take the last frame only is that it might not be the most accurate i want to make like voting algo and take average
+
+
+

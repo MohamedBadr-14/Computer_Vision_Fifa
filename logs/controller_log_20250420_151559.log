@@ -1,0 +1,80 @@
+2025-04-20 15:15:59,269 [INFO] - Logging initialized: logs/controller_log_20250420_151559.log
+2025-04-20 15:15:59,270 [INFO] - Initializing Controller
+2025-04-20 15:16:10,662 [INFO] - OCR and Computer Vision modules initialized
+2025-04-20 15:16:10,662 [INFO] - Initializing DQN Agent with model path: ./soccer_dqn_trained.pth
+2025-04-20 15:16:10,683 [INFO] - Controller initialization complete
+2025-04-20 15:16:10,683 [INFO] - Video recording is enabled
+2025-04-20 15:16:10,683 [INFO] - Created output directory: captured_frames_20250420_151610
+2025-04-20 15:16:10,688 [INFO] - Video recording initialized: captured_frames_20250420_151610/gameplay_recording_20250420_151610.mp4
+2025-04-20 15:16:10,696 [INFO] - Press 's' to start capturing, 'q' to quit
+2025-04-20 15:16:17,555 [INFO] - Starting capture cycle...
+2025-04-20 15:16:17,966 [DEBUG] - Skipping frame 1, skip_counter: 52
+2025-04-20 15:16:18,083 [DEBUG] - Skipping frame 2, skip_counter: 51
+2025-04-20 15:16:18,180 [DEBUG] - Skipping frame 3, skip_counter: 50
+2025-04-20 15:16:18,273 [DEBUG] - Skipping frame 4, skip_counter: 49
+2025-04-20 15:16:18,374 [DEBUG] - Skipping frame 5, skip_counter: 48
+2025-04-20 15:16:18,472 [DEBUG] - Skipping frame 6, skip_counter: 47
+2025-04-20 15:16:18,576 [DEBUG] - Skipping frame 7, skip_counter: 46
+2025-04-20 15:16:18,672 [DEBUG] - Skipping frame 8, skip_counter: 45
+2025-04-20 15:16:18,773 [DEBUG] - Skipping frame 9, skip_counter: 44
+2025-04-20 15:16:18,888 [DEBUG] - Skipping frame 10, skip_counter: 43
+2025-04-20 15:16:19,003 [DEBUG] - Skipping frame 11, skip_counter: 42
+2025-04-20 15:16:19,099 [DEBUG] - Skipping frame 12, skip_counter: 41
+2025-04-20 15:16:19,188 [DEBUG] - Skipping frame 13, skip_counter: 40
+2025-04-20 15:16:19,287 [DEBUG] - Skipping frame 14, skip_counter: 39
+2025-04-20 15:16:19,386 [DEBUG] - Skipping frame 15, skip_counter: 38
+2025-04-20 15:16:19,480 [DEBUG] - Skipping frame 16, skip_counter: 37
+2025-04-20 15:16:19,607 [DEBUG] - Skipping frame 17, skip_counter: 36
+2025-04-20 15:16:19,709 [DEBUG] - Skipping frame 18, skip_counter: 35
+2025-04-20 15:16:19,806 [DEBUG] - Skipping frame 19, skip_counter: 34
+2025-04-20 15:16:19,906 [DEBUG] - Skipping frame 20, skip_counter: 33
+2025-04-20 15:16:20,023 [DEBUG] - Skipping frame 21, skip_counter: 32
+2025-04-20 15:16:20,119 [DEBUG] - Skipping frame 22, skip_counter: 31
+2025-04-20 15:16:20,218 [DEBUG] - Skipping frame 23, skip_counter: 30
+2025-04-20 15:16:20,321 [DEBUG] - Skipping frame 24, skip_counter: 29
+2025-04-20 15:16:20,417 [DEBUG] - Skipping frame 25, skip_counter: 28
+2025-04-20 15:16:20,529 [DEBUG] - Skipping frame 26, skip_counter: 27
+2025-04-20 15:16:20,626 [DEBUG] - Skipping frame 27, skip_counter: 26
+2025-04-20 15:16:20,717 [DEBUG] - Skipping frame 28, skip_counter: 25
+2025-04-20 15:16:20,815 [DEBUG] - Skipping frame 29, skip_counter: 24
+2025-04-20 15:16:20,918 [DEBUG] - Skipping frame 30, skip_counter: 23
+2025-04-20 15:16:21,025 [DEBUG] - Skipping frame 31, skip_counter: 22
+2025-04-20 15:16:21,116 [DEBUG] - Skipping frame 32, skip_counter: 21
+2025-04-20 15:16:21,212 [DEBUG] - Skipping frame 33, skip_counter: 20
+2025-04-20 15:16:21,316 [DEBUG] - Skipping frame 34, skip_counter: 19
+2025-04-20 15:16:21,416 [DEBUG] - Skipping frame 35, skip_counter: 18
+2025-04-20 15:16:21,515 [DEBUG] - Skipping frame 36, skip_counter: 17
+2025-04-20 15:16:21,615 [DEBUG] - Skipping frame 37, skip_counter: 16
+2025-04-20 15:16:21,720 [DEBUG] - Skipping frame 38, skip_counter: 15
+2025-04-20 15:16:21,819 [DEBUG] - Skipping frame 39, skip_counter: 14
+2025-04-20 15:16:21,921 [DEBUG] - Skipping frame 40, skip_counter: 13
+2025-04-20 15:16:22,033 [DEBUG] - Skipping frame 41, skip_counter: 12
+2025-04-20 15:16:22,127 [DEBUG] - Skipping frame 42, skip_counter: 11
+2025-04-20 15:16:22,219 [DEBUG] - Skipping frame 43, skip_counter: 10
+2025-04-20 15:16:22,323 [DEBUG] - Skipping frame 44, skip_counter: 9
+2025-04-20 15:16:22,421 [DEBUG] - Skipping frame 45, skip_counter: 8
+2025-04-20 15:16:22,530 [DEBUG] - Skipping frame 46, skip_counter: 7
+2025-04-20 15:16:22,632 [DEBUG] - Skipping frame 47, skip_counter: 6
+2025-04-20 15:16:22,754 [DEBUG] - Skipping frame 48, skip_counter: 5
+2025-04-20 15:16:22,865 [DEBUG] - Skipping frame 49, skip_counter: 4
+2025-04-20 15:16:22,986 [DEBUG] - Skipping frame 50, skip_counter: 3
+2025-04-20 15:16:23,173 [DEBUG] - Skipping frame 51, skip_counter: 2
+2025-04-20 15:16:23,313 [DEBUG] - Skipping frame 52, skip_counter: 1
+2025-04-20 15:16:23,455 [DEBUG] - Skipping frame 53, skip_counter: 0
+2025-04-20 15:16:23,682 [DEBUG] - Saved frame 54 (seq: 54) to captured_frames_20250420_151610/frame_000054.jpg
+2025-04-20 15:16:23,710 [DEBUG] - Cleared frames_to_send buffer
+2025-04-20 15:16:23,821 [DEBUG] - Added frame to buffer, current size: 1/5, frame count: 55, sequence: 55
+2025-04-20 15:16:23,850 [INFO] - Initial attempt detected: 8
+2025-04-20 15:16:23,851 [INFO] - Score changed: 0 (was None)
+2025-04-20 15:16:23,979 [DEBUG] - Added frame to buffer, current size: 2/5, frame count: 56, sequence: 56
+2025-04-20 15:16:24,131 [DEBUG] - Added frame to buffer, current size: 3/5, frame count: 57, sequence: 57
+2025-04-20 15:16:24,264 [DEBUG] - Added frame to buffer, current size: 4/5, frame count: 58, sequence: 58
+2025-04-20 15:16:24,414 [DEBUG] - Added frame to buffer, current size: 5/5, frame count: 59, sequence: 59
+2025-04-20 15:16:24,537 [INFO] - Processing buffer of 5 frames at elapsed time: 6.89s
+2025-04-20 15:16:24,537 [INFO] - Pausing game
+2025-04-20 15:16:24,722 [DEBUG] - Saved buffered frame 1/5 to captured_frames_20250420_151610/frame_buffer_000056.jpg
+2025-04-20 15:16:24,805 [DEBUG] - Saved buffered frame 2/5 to captured_frames_20250420_151610/frame_buffer_000057.jpg
+2025-04-20 15:16:24,884 [DEBUG] - Saved buffered frame 3/5 to captured_frames_20250420_151610/frame_buffer_000058.jpg
+2025-04-20 15:16:24,975 [DEBUG] - Saved buffered frame 4/5 to captured_frames_20250420_151610/frame_buffer_000059.jpg
+2025-04-20 15:16:25,056 [DEBUG] - Saved buffered frame 5/5 to captured_frames_20250420_151610/frame_buffer_000060.jpg
+2025-04-20 15:16:25,057 [INFO] - Running computer vision analysis on buffered frames
