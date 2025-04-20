@@ -1,48 +1,80 @@
-import numpy as np 
 import cv2
+import numpy as np
+from ultralytics import YOLO
+
+# Define the pixel coordinates of the 4 keypoints (from the image)
 
 class ViewTransformer():
+    
     def __init__(self):
-        court_width = 33
-        court_length = 100
-
-        # self.pixel_vertices = np.array([[110, 1035], 
-        #                        [265, 275], 
-        #                        [910, 260], 
-        #                        [1640, 915]])
-        self.pixel_vertices = np.array([[0, 1080], 
-                               [0, 0], 
-                               [1920, 0], 
-                               [1920, 1080]])
+        self.real_world_points = np.array([
+        [49, 45],      # PEN_DOT
+        [43.5,37.6875],    # ARC_UP
+        [39.85, 45],       # ARC_CURVE
+        [43.5,52.31]      # ARC_DOWN
+        ], dtype=np.float32)
+        self.keypoint_detector = YOLO('models/keypoints.pt')
+        # self.keypoint_detector.to('cuda')
         
-        self.target_vertices = np.array([
-            [0,court_width],
-            [0, 0],
-            [court_length, 0],
-            [court_length, court_width]
-        ])
+        self.last_valid_keypoints = np.array([
+        [1991, 1013],  #PEN_DOT #BADR 
+        [1486, 799],  #ARC_UP
+        [1223, 1017], #ARC_CURVE
+        [1587, 1324] #ARC_DOWN
+        ],dtype=np.float32)
 
-        self.pixel_vertices = self.pixel_vertices.astype(np.float32)
-        self.target_vertices = self.target_vertices.astype(np.float32)
 
-        self.persepctive_trasnformer = cv2.getPerspectiveTransform(self.pixel_vertices, self.target_vertices)
 
-    def transform_point(self,point):
-        p = (int(point[0]),int(point[1]))
-        is_inside = cv2.pointPolygonTest(self.pixel_vertices,p,False) >= 0 
-        if not is_inside:
-            return None
+    def detect_keypoints(self, image):
+        # Use the YOLO model to detect keypoints in the image
+        results = self.keypoint_detector.predict(image, conf=0.5, show=False)
+        keypoints = []
+        
+        for result in results:
+            keypoints.append(result.keypoints.xy)
+            
 
-        reshaped_point = point.reshape(-1,1,2).astype(np.float32)
-        tranform_point = cv2.perspectiveTransform(reshaped_point,self.persepctive_trasnformer)
-        return tranform_point.reshape(-1,2)
+        if keypoints[0].shape[1] < 4:
+            print(f"Only {keypoints[0].shape[1]} keypoints detected, need 4. Keypoints:", keypoints)
+            return self.last_valid_keypoints
+        
+        self.last_valid_keypoints = keypoints[0].cpu().numpy()
+        keypoints = self.last_valid_keypoints
+
+        return keypoints
+    
+    # Compute the perspective transform matrix
+    def get_matrix_transform(self, frame):
+        keypoints = self.detect_keypoints(frame)
+        print("Keypoints detected in mt:", keypoints)
+        
+        
+        pixel_points = np.array(keypoints, dtype=np.float32)
+        real_world_points = np.array(self.real_world_points, dtype=np.float32)
+
+        # Ensure the points are in the correct shape
+        pixel_points = pixel_points.reshape(-1, 1, 2)
+        real_world_points = real_world_points.reshape(-1, 1, 2)
+
+        # Compute the perspective transform matrix
+        self.matrix = cv2.getPerspectiveTransform(pixel_points, real_world_points)
+        return self.matrix
+
+
+    # Function to convert a pixel position to real-world position
+    def pixel_to_real_world(self,pixel_pos):
+        px = np.array([[list(pixel_pos)]], dtype=np.float32)  # Shape (1,1,2)
+        real_world = cv2.perspectiveTransform(px, self.matrix)
+        return real_world[0][0]
+
 
     def add_transformed_position_to_tracks(self,frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
-                position = track_info['position_adjusted']
+                position = track_info['position']
                 position = np.array(position)
-                position_trasnformed = self.transform_point(position)
+                position_trasnformed = self.pixel_to_real_world(position)
                 if position_trasnformed is not None:
                     position_trasnformed = position_trasnformed.squeeze().tolist()
                 frame_tracks[object_type][track_id]['position_transformed'] = position_trasnformed
+                

@@ -37,7 +37,7 @@ def adjust_all_tracks(all_tracks):
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("input_videos/general_small.mp4")
+    video_frames = read_video("input_videos/goalkeeper.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
@@ -109,20 +109,22 @@ def main(track_stubs=False):
         tracker.add_position_to_tracks(frame_tracks)
 
         # camera movement estimator
-        if counter == 0:
-            camera_movement_estimator = CameraMovementEstimator(frame)
-            counter += 1
+        # if counter == 0:
+        #     camera_movement_estimator = CameraMovementEstimator(frame)
+        #     counter += 1
 
-        camera_movement_per_frame = camera_movement_estimator.get_camera_movement(
-            frame,
-            read_from_stub=False,
-            stub_path="camera_movement_estimator/stubs/camera_movement_stub.pkl",
-        )
-        camera_movement_estimator.add_adjust_positions_to_tracks(
-            frame_tracks, camera_movement_per_frame
-        )
+        # camera_movement_per_frame = camera_movement_estimator.get_camera_movement(
+        #     frame,
+        #     read_from_stub=False,
+        #     stub_path="camera_movement_estimator/stubs/camera_movement_stub.pkl",
+        # )
+        # camera_movement_estimator.add_adjust_positions_to_tracks(
+        #     frame_tracks, camera_movement_per_frame
+        # )
 
         # # View Trasnformer
+        # view_transformer.add_transformed_position_to_tracks(frame_tracks)
+        view_transformer.get_matrix_transform(frame)
         view_transformer.add_transformed_position_to_tracks(frame_tracks)
 
         # Assign Player Teams
@@ -152,23 +154,16 @@ def main(track_stubs=False):
 
         # Assign Ball to Player
         if frame_tracks["ball"]:
-            ball_bbox = frame_tracks["ball"][1]["bbox"]
-            assigned_player = player_assigner.assign_ball_to_player(
-                frame_tracks["players"], ball_bbox
-            )
+                ball_position = frame_tracks["ball"][1]["bbox"]
+                assigned_player = player_assigner.assign_ball_to_player(
+                    frame_tracks["players"], ball_position
+                )
 
-            if assigned_player != -1:
-                frame_tracks["players"][assigned_player]["has_ball"] = True
-                # #print("assigned_player", assigned_player , test)
-                team_ball_control.append(
-                    frame_tracks["players"][assigned_player]["team"]
-                )
-            else:
-                team_ball_control.append(
-                    team_ball_control[-1] if team_ball_control else 0
-                )
-        else:
-            team_ball_control.append(team_ball_control[-1] if team_ball_control else 0)
+                if assigned_player != -1:
+                    print("frame_tracks:" , frame_tracks["players"])
+                    print("assigned player:" , assigned_player)
+                    print("ball position:" , ball_position)
+                    frame_tracks["players"][assigned_player]["has_ball"] = True
 
         # print(frame_tracks)
         # print("start attempts and points")
