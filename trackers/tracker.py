@@ -47,7 +47,7 @@ class Tracker:
                 distance = min(distance_left,distance_right)
 
                 if distance < miniumum_distance:
-                    print("GOALLL" , distance , player_id)
+                    # print("GOALLL" , distance , player_id)
                     if distance < self.max_player_post_distance:
                         miniumum_distance = distance
                         goalkeeper = player_id
@@ -130,8 +130,8 @@ class Tracker:
             track_id = frame_detection[4]
             conf = frame_detection[2]
 
-            if cls_id == cls_names_inv["goalkeeper"]:
-                print("SHAYEFFF GOALLL")
+            # if cls_id == cls_names_inv["goalkeeper"]:
+            #     print("SHAYEFFF GOALLL")
             
 
             if cls_id == cls_names_inv["player"] or cls_id == cls_names_inv["referee"] or cls_id == cls_names_inv["goalkeeper"]:

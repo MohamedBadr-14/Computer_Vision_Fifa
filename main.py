@@ -178,9 +178,9 @@ def main(track_stubs=False):
                 )
 
                 if assigned_player != -1:
-                    print("frame_tracks:" , frame_tracks["players"])
-                    print("assigned player:" , assigned_player)
-                    print("ball position:" , ball_position)
+                    # print("frame_tracks:" , frame_tracks["players"])
+                    # print("assigned player:" , assigned_player)
+                    # print("ball position:" , ball_position)
                     frame_tracks["players"][assigned_player]["has_ball"] = True
 
         # print(frame_tracks)
@@ -191,15 +191,6 @@ def main(track_stubs=False):
         # save_count+=1
         # print("end attempts and points" , "Points: ", ocr_dict)
         
-        to_be_sent = {
-            "players": frame_tracks["players"],
-            "referees": frame_tracks["referees"],
-            "ball": frame_tracks["ball"],
-            "goalkeeper": frame_tracks["goalkeeper"],
-            "goalpost": frame_tracks["goalpost"]
-            # "points": ocr_dict['points'],
-            # "attempts": ocr_dict['attempts'],
-            }
 
         all_tracks["players"].append(frame_tracks["players"])
         all_tracks["referees"].append(frame_tracks["referees"])

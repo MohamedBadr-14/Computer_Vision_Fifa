@@ -35,7 +35,7 @@ class ViewTransformer():
             
 
         if keypoints[0].shape[1] < 4:
-            print(f"Only {keypoints[0].shape[1]} keypoints detected, need 4. Keypoints:", keypoints)
+            # print(f"Only {keypoints[0].shape[1]} keypoints detected, need 4. Keypoints:", keypoints)
             return self.last_valid_keypoints
         
         self.last_valid_keypoints = keypoints[0].cpu().numpy()
@@ -46,7 +46,7 @@ class ViewTransformer():
     # Compute the perspective transform matrix
     def get_matrix_transform(self, frame):
         keypoints = self.detect_keypoints(frame)
-        print("Keypoints detected in mt:", keypoints)
+        # print("Keypoints detected in mt:", keypoints)
         
         
         pixel_points = np.array(keypoints, dtype=np.float32)
