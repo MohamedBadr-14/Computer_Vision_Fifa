@@ -32,10 +32,10 @@ class Controller:
         # self.logger.info("OCR and Computer Vision modules initialized")
         
         # Frame skipping parameters for game control
-        self.pause_frames_skip = 10     # Number of frames to skip after pausing
-        self.between_attacks_skip = 0  # Frames to skip between game attacks
-        self.first_start_skip = 53     # Frames to skip at initial game start
-        self.skip_counter = 53         # Counter for skipping frames
+        self.pause_frames_skip = 7     # Number of frames to skip after pausing
+        self.between_attacks_skip = 5  # Frames to skip between game attacks
+        self.first_start_skip = 70    # Frames to skip at initial game start
+        self.skip_counter = 70         # Counter for skipping frames
         
         # Game state tracking
         self.last_attempt = None        # Track the last attempt number
@@ -44,10 +44,6 @@ class Controller:
         self.frames_to_send = []        # Buffer for frames to process
         self.first_time = True          # Flag for first action
         
-        # Timing tracking for FPS calculation
-        self.start_time = time.time()
-        self.frame_times = []
-        self.current_fps = 0
 
         self.to_be_sent = []
         
@@ -223,7 +219,8 @@ class Controller:
                 keyboard.release('k')
                 keyboard.release('d')
             case _:
-                self.logger.warning(f"Unknown action: {action}")
+                print(f"Unknown action: {action}")
+                # self.logger.warning(f"Unknown action: {action}")
                 
         # self.logger.debug(f"Action {action} completed")
 
@@ -239,7 +236,7 @@ class Controller:
         
 
         with mss() as sct:
-            # self.logger.info("Press 's' to start capturing, 'q' to quit")
+            print("Press 's' to start capturing, 'q' to quit")
             
             # Wait for start command
             while not keyboard.is_pressed('s'):
@@ -256,7 +253,7 @@ class Controller:
             
             running = True
             self.temp_flag = False
-            self.start_time = time.time()
+            # self.start_time = time.time()
             
             # Main capture and processing loop
             while running:
@@ -291,7 +288,7 @@ class Controller:
                     continue
                
                 # Process accumulated frames when buffer is full
-                if len(self.frames_to_send) == 5:
+                if len(self.frames_to_send) ==7:
                     self.to_be_sent.append(self.frames_to_send.copy())
                     # self.logger.info(f"Processing buffer of {len(self.frames_to_send)} frames at elapsed time: {elapsed:.2f}s")
                     # Pause game to process frames
@@ -343,15 +340,14 @@ class Controller:
                     self.resume_game()
                     if self.action_taken is not None:
                         self.make_action(self.action_taken)
-                        # self.logger.info(f"Action taken: {self.action_taken}")
                         self.action_taken = None
                     continue
                 
 
-                if frame_count % 2 == 0:
-                    # Skip every other frame for processing
-                    frame_count += 1
-                    continue
+                # if frame_count % 2 == 0:
+                #     # Skip every other frame for processing
+                #     frame_count += 1
+                #     continue
                 # Add frame to buffer
                 self.frames_to_send.append(frame)
                 # self.logger.debug(f"Added frame to buffer, current size: {len(self.frames_to_send)}/5, frame count: {frame_count}")
