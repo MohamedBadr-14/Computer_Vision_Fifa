@@ -52,7 +52,7 @@ def read_frames(frames_path):
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    # video_frames = read_video("input_videos/goalkeeper.mp4")
+    video_frames = read_video("input_videos/goalkeeper.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
     all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
@@ -76,9 +76,9 @@ def main(track_stubs=False):
     # ocr_extractor = OCRExtractor()
     
     # video_frames = [video_frames[30]]  
-    video_frames = read_frames("./goal1/frames")
+    # video_frames = read_frames("./badr")
     # video_frames = [cv2.imread("./goal1/frames/frame_0003.png")]
-    video_frames = video_frames[1:5]
+    # video_frames = video_frames[1:5]
 
     print(len(video_frames))
     while test < len(video_frames):  # just for testing
@@ -217,12 +217,12 @@ def main(track_stubs=False):
     #     pickle.dump(to_bo_loaded_tracks, f)
 
     # # Draw output
-    # output_video_frames = tracker.draw_annotations(
-    #     video_frames, all_tracks, team_ball_control
-    # )
+    output_video_frames = tracker.draw_annotations(
+        video_frames, all_tracks, team_ball_control
+    )
 
     # # # Save video
-    # save_video(output_video_frames, "output_videos/sad.mp4")
+    save_video(output_video_frames, "output_videos/sad.mp4")
     # for frame in output_video_frames:
     #     cv2.imwrite("output_videos/frame_{}.jpg".format(save_count), frame)
     #     save_count+=1

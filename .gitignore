@@ -8,3 +8,5 @@ __pycache__/
 #ignore jupyter notebook checkpoints
 *.png
 *.jpg
+badr_test/
+badr/

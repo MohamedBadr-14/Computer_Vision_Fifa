@@ -22,8 +22,8 @@ class TeamAssigner:
             self.SIGLIP_MODEL_PATH, 
             use_fast=True  # Enable fast tokenizer if available
         )
-        self.reducer = joblib.load('models/reducer_final.pkl')
-        self.kmeans = joblib.load('models/kmeans_final.pkl')
+        self.reducer = joblib.load('models/reducer_model_final.pkl')
+        self.kmeans = joblib.load('models/kmeans_trained_final.pkl')
     
     def extract_crops(self, tracks, frame):
         crops = []
