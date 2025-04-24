@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 # Load the frames (shape: 14 batches × 5 frames × H × W × 3)
-batched_frames = np.load('D:/fifa-vision/goal1/to_be_sent.npy')  # Shape: (14, 5, 1600, 2560, 3)
+batched_frames = np.load('./to_be_sent.npy')  # Shape: (14, 5, 1600, 2560, 3)
 
 # Combine all batches into a single array of frames (shape: 70 × H × W × 3)
 frames = batched_frames.reshape(-1, 1600, 2560, 3)  # Now shape: (70, 1600, 2560, 3)

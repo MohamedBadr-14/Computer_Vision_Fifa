@@ -9,6 +9,7 @@ from mss import mss
 from ocr_extractor import OCRExtractor
 from computer_vision import ComputerVision
 from rl import DQNAgent, get_state_from_positions, calculate_reward
+from pr import pause_process, resume_process
 
 class Controller:
     """
@@ -30,12 +31,13 @@ class Controller:
         self.ocr_extractor = OCRExtractor()
         self.computer_vision = ComputerVision()
         # self.logger.info("OCR and Computer Vision modules initialized")
+        self.all_frames = []
         
         # Frame skipping parameters for game control
-        self.pause_frames_skip = 7     # Number of frames to skip after pausing
-        self.between_attacks_skip = 5  # Frames to skip between game attacks
-        self.first_start_skip = 70    # Frames to skip at initial game start
-        self.skip_counter = 70         # Counter for skipping frames
+        self.pause_frames_skip = 10    # Number of frames to skip after pausing 10
+        self.between_attacks_skip = 5  # Frames to skip between game attacks 15
+        self.first_start_skip = 110    # Frames to skip at initial game start
+        self.skip_counter = 110         # Counter for skipping frames
         
         # Game state tracking
         self.last_attempt = None        # Track the last attempt number
@@ -43,9 +45,11 @@ class Controller:
         self.temp_flag = False          # Flag for temporary state control
         self.frames_to_send = []        # Buffer for frames to process
         self.first_time = True          # Flag for first action
+        self.is_paused = False          # Flag for game pause state
         
 
         self.to_be_sent = []
+        self.rlstates=[]
         
         # Reinforcement learning setup
         # self.logger.info(f"Initializing DQN Agent with model path: {model_path if model_path else 'None - creating new model'}")
@@ -54,6 +58,7 @@ class Controller:
         self.action_taken = None        # Current action
         self.prev_action = None         # Previous action
         self.last_action_time = None    # Time when last action was taken
+
         
         # Default scene state when data is unavailable
         self.dummy_scene = {
@@ -69,7 +74,7 @@ class Controller:
         time.sleep(0.1)
         keyboard.release('esc')
 
-    def resume_game(self):
+    def resume_game(self,is_action=False):
         """
         Resume the game by simulating ENTER key press and reset relevant counters.
         """
@@ -77,8 +82,14 @@ class Controller:
         keyboard.press('enter')
         time.sleep(0.1)
         keyboard.release('enter')
-        self.skip_counter = self.pause_frames_skip
-        self.temp_flag = False
+        if is_action:
+            self.skip_counter = 0
+            self.temp_flag = True
+        else:
+            self.skip_counter = self.pause_frames_skip
+            self.temp_flag = False
+        # self.skip_counter = self.pause_frames_skip
+        # self.temp_flag = False
         # self.logger.debug(f"Reset skip_counter to {self.pause_frames_skip}")
 
     def make_action(self, action, pass_duration=0.5, dribble_duration=0.5, shoot_duration=0.2):
@@ -242,6 +253,7 @@ class Controller:
             while not keyboard.is_pressed('s'):
                 time.sleep(0.1)
                 if keyboard.is_pressed('q'):
+                
                     # self.logger.info("Quit command detected before starting")
                     return
             
@@ -260,39 +272,40 @@ class Controller:
                 # current_time = time.time()
                 # elapsed = current_time - self.start_time                
                 # Capture current screen frame
+                # if self.is_paused:
+                #         resume_process()
+                #         self.is_paused = False
+                #         print("RESUME FOOOOO2")
                 frame = np.array(sct.grab(monitor))
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+                # self.all_frames.append(frame)
                 
                 # Extract OCR results for logging
                 ocr_results = self.ocr_extractor.extract_points_and_attempts(frame)
                 
                 # Skip frames if counter is active (e.g., after pausing)
-                if self.skip_counter > 0:
-                    self.skip_counter -= 1
-                    frame_count += 1
 
-                    continue
+                if True:
+                    if self.skip_counter > 0:
+                        self.skip_counter -= 1
+                        frame_count += 1
+                        continue
 
                 # Handle temporary state flag for frame processing control
-                if self.temp_flag == False:
-
-                    
-                    self.temp_flag = True
-                    
-                    # Record frame with action information
-                    # self.write_frame_to_video(frame, frame_count, ocr_results)
-                    
-                    frame_count += 1
-                    self.frames_to_send.clear()
-                    # self.logger.debug("Cleared frames_to_send buffer")
-                    continue
+                if True:
+                    if self.temp_flag == False:              
+                        self.temp_flag = True
+                        frame_count += 1
+                        self.frames_to_send.clear()
+                        continue
                
                 # Process accumulated frames when buffer is full
-                if len(self.frames_to_send) ==7:
+                if len(self.frames_to_send) == 5:
                     self.to_be_sent.append(self.frames_to_send.copy())
-                    # self.logger.info(f"Processing buffer of {len(self.frames_to_send)} frames at elapsed time: {elapsed:.2f}s")
-                    # Pause game to process frames
-                    self.pause_game()
+
+                    pause_process()
+                    time.sleep(0.1)
+                    self.is_paused = True
                     
                     scene, has_ball = self.computer_vision.run(self.frames_to_send, self.last_attempt)
                     print("HAS BALL:", has_ball)
@@ -306,6 +319,7 @@ class Controller:
                         scene_toRL = scene.copy()
                         scene_toRL['Attemps'] = self.last_attempt
                         scene_toRL['Score'] = self.last_points
+                        self.rlstates.append(scene_toRL)
                         cur_state = get_state_from_positions(scene_toRL)
                         prev_state = self.rl_agent.prev_state 
                         action_taken = None
@@ -322,22 +336,21 @@ class Controller:
                             reward = calculate_reward(prev_state, cur_state, self.prev_action)
                             # self.logger.info(f"Calculated reward: {reward}")
                             self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False)
-                        
-                        # Periodically train the neural network
-                        self.trainNN_counter += 1
-                        if self.trainNN_counter == 10:
-                            # self.logger.info("Training neural network on batch of experiences")
-                            self.rl_agent.replay(32)  # Train on batch of 32 experiences
-                            self.trainNN_counter = 0
-                        
+                            self.rl_agent.prev_state = cur_state #OUDA
+
+                        if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 1024 and len(self.rl_agent.memory) % 4 == 0):
+                            self.rl_agent.replay(64)  # Train on batch of 32 experiences
+                   
                         print("ACTION TAKEN:", action_taken)
                         self.action_taken = action_taken
                         self.prev_action = action_taken
-                    # else:
-                        # self.logger.info("No ball possession detected, no action taken")
+                    else:
+                        time.sleep(0.4)
                     
                     # Resume game and continue
-                    self.resume_game()
+                    # is_action = True if (self.action_taken is not None and has_ball) else False
+                    resume_process()
+                    self.is_paused = False
                     if self.action_taken is not None:
                         self.make_action(self.action_taken)
                         self.action_taken = None
@@ -371,6 +384,7 @@ class Controller:
                     cur_state = get_state_from_positions(scene_toRL)
                     prev_state = self.rl_agent.prev_state
                     self.last_attempt = None
+                    self.last_points = None
                     self.temp_flag = False
                     frame_count += 1
                     
@@ -384,12 +398,14 @@ class Controller:
                 # Track attempts and handle attempt transitions
                 if self.last_attempt is None:
                     self.last_attempt = ocr_results['attempts']
+                    self.last_points = ocr_results['points']
                     # self.logger.info(f"Initial attempt detected: {self.last_attempt}")
                 else: 
                     if ocr_results['attempts'] != self.last_attempt and ocr_results['attempts'] is not None:
                         # New attempt detected - process end of previous attempt
                         self.computer_vision.tracker.reset_tracker()
                         self.last_attempt = ocr_results['attempts']
+                        self.last_points = ocr_results['points']
                         scene_toRL = self.dummy_scene.copy()
                         scene_toRL['Attemps'] = self.last_attempt
                         scene_toRL['Score'] = self.last_points
@@ -418,11 +434,24 @@ class Controller:
                     # self.logger.info(f"Saving DQN model to {model_save_path}")
                     self.rl_agent.save(model_save_path)
                     # save self.to_be_sent to a file
-                    
-                    to_be_sent_array = np.array(self.to_be_sent)
-                    to_be_sent_path = "to_be_sent.npy"
-                    np.save(to_be_sent_path, to_be_sent_array)
 
+                    if self.is_paused:
+                        resume_process()
+                        self.is_paused = False
+                    
+                    # to_be_sent_array = np.array(self.to_be_sent)
+                    # to_be_sent_path = "to_be_sent.npy"
+                    # np.save(to_be_sent_path, to_be_sent_array)
+                    # print(self.rlstates)
+
+                    
+                    
+                    #  loop over self.all_frames and save them to a folder
+                    # all_frames_path = "all_frames"
+                    # os.makedirs(all_frames_path, exist_ok=True)
+                    # for i, frame in enumerate(self.all_frames):
+                    #     frame_filename = os.path.join(all_frames_path, f'frame_{i:04d}.png')
+                    #     cv2.imwrite(frame_filename, frame)
                 
                 frame_count += 1
             
@@ -431,7 +460,15 @@ class Controller:
 if __name__ == "__main__":
     # Create and run the controller with optional video recording
     controller = Controller(
-        model_path="./soccer_dqn_trained.pth",
-        record_video=False  # Set to False to disable video recording
-    )
-    controller.run()
+        model_path="./soccer_dqn_trained.pth"
+        )
+    try:
+        controller.run()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        try:
+            resume_process()
+        except Exception as e:
+            print(f"An error occurred while resuming the process: {e}")
+
+

@@ -22,12 +22,20 @@ class ComputerVision:
 
     def run(self,video_frames,attempts):
 
+        # for i, frame in enumerate(video_frames):
+        #             timestamp = time.time()
+        #             cv2.imwrite(f"D:/fifa-vision/all/frame_{timestamp}_{i}.jpg", frame)
         if self.attempts is None:
             self.attempts = attempts
 
+        print("Prev attempt: ", self.attempts)
+        print("Cur attempt: ", attempts)
         if self.attempts != attempts:
+            # print("New attempt detected, resetting tracker...")
             self.attempts = attempts
             self.tracker.reset_tracker()
+            # for i, frame in enumerate(video_frames):
+            #         cv2.imwrite(f"D:/fifa-vision/new_attempts/frame_{self.attempts}_{i}.jpg", frame)
         # Read Video
         # print("Reading video..." , track_stubs)
         # video_frames = read_video("input_videos/general_small.mp4")
