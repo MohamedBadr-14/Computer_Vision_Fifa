@@ -5,3 +5,5 @@ stubs/
 runs/
 #ignore pychache
 __pycache__/
+*.png
+*.jpg
