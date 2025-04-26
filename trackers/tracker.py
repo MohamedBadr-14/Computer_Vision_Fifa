@@ -16,9 +16,12 @@ class Tracker:
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
         self.ball_positions_history = []
+        self.goal_post_history = []
         self.last_valid_position = None
         self.frame_num = 0
-        self.max_player_post_distance = 300
+        self.max_player_post_distance = 350
+        self.detected_goal_post = False
+        # self.previously_interpolated_ids = []
 
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
@@ -47,7 +50,7 @@ class Tracker:
                 distance = min(distance_left,distance_right)
 
                 if distance < miniumum_distance:
-                    # print("GOALLL" , distance , player_id)
+                    print("GOALLL" , distance , player_id)
                     if distance < self.max_player_post_distance:
                         miniumum_distance = distance
                         goalkeeper = player_id
@@ -66,12 +69,16 @@ class Tracker:
         return frame_tracks  
 
     def interpolate_ball_positions(self, ball_position):
-        self.ball_positions_history.append(ball_position.get(1, {}).get("bbox", []))
-
-        if not self.ball_positions_history or all(
-            len(bbox) == 0 for bbox in self.ball_positions_history
-        ):
-            return ball_position
+        bbox = ball_position.get(1, {}).get("bbox", [])
+        if bbox:
+            self.ball_positions_history.append(bbox)
+            return bbox
+        else:
+            if not self.ball_positions_history or all(
+                len(bbox) == 0 for bbox in self.ball_positions_history
+            ):
+                print("A7MOSSSSSSS")
+                return ball_position
 
         # Convert the ball positions history to a DataFrame
         df_ball_positions = pd.DataFrame(
@@ -86,6 +93,8 @@ class Tracker:
 
         # Get the interpolated ball position for the current frame
         interpolated_bbox = df_ball_positions.iloc[-1].tolist()
+        self.ball_positions_history.append(interpolated_bbox)
+        
 
         # Format the result
         # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
@@ -109,7 +118,7 @@ class Tracker:
         goal_count = 0
 
         # Initialize tracks for the current frame
-        frame_tracks = {"players": {}, "referees": {}, "ball": {} , "goalkeeper": {} , "goalpost": {}}
+        frame_tracks = {"players": {},"ball": {} , "goalkeeper": {} , "goalpost": {}}
 
         cls_names = detection[0].names
         cls_names_inv = {v: k for k, v in cls_names.items()}
@@ -120,14 +129,16 @@ class Tracker:
 
 
         # Track objects in the current frame
-        detection_with_tracks = self.tracker.update_with_detections(
-            detections_nms
-        )
+        # detection_with_tracks = self.tracker.update_with_detections(
+        #     detections_nms
+        # )
 
-        for frame_detection in detection_with_tracks:
+            
+
+        for i,frame_detection in enumerate(detections_nms):
             bbox = frame_detection[0].tolist()
             cls_id = frame_detection[3]
-            track_id = frame_detection[4]
+            track_id = i
             conf = frame_detection[2]
 
             # if cls_id == cls_names_inv["goalkeeper"]:
@@ -145,11 +156,7 @@ class Tracker:
                     continue
                 frame_tracks["goalpost"][1] = {"conf": frame_detection[2], "bbox": bbox}
                 goal_count += 1
-
-        for frame_detection in detections_nms:
-            bbox = frame_detection[0].tolist()
-            cls_id = frame_detection[3]
-
+                
             if cls_id == cls_names_inv["ball"]:
                 if (
                     ball_count > 0
@@ -162,12 +169,12 @@ class Tracker:
                 # print("BALLLL CONFFF" , frame_detection[2])
                 ball_count += 1
 
-            # if cls_id == cls_names_inv["goalkeeper"]:
-            #     frame_tracks["goalkeeper"][keeper_count] = {"bbox": bbox , "conf": frame_detection[2]} 
-            #     keeper_count += 1
-
            
         return frame_tracks
+    
+                    
+            
+            
 
     def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
         position = ball_track.get(1, {}).get("bbox", [])
@@ -195,6 +202,42 @@ class Tracker:
                 else:
                     self.last_valid_position = position[0:2]
                     return ball_track
+    def reset_goal_post(self):
+        self.goal_post_history = []
+        self.detected_goal_post = False
+        
+        
+    def interpolate_goal_posts(self , goalpost_position):
+        bbox = goalpost_position.get(1, {}).get("bbox", [])
+        if bbox:
+            self.goal_post_history.append(bbox)
+            return bbox
+        else:
+            if not self.goal_post_history or all(
+                len(bbox) == 0 for bbox in self.goal_post_history
+            ):
+                print("A7AAAAA")
+                return goalpost_position
+
+
+        # Convert the ball positions history to a DataFrame
+        df_goal_post = pd.DataFrame(
+            self.goal_post_history, columns=["x1", "y1", "x2", "y2"]
+        )
+
+        # Interpolate missing values
+        df_goal_post = df_goal_post.interpolate()
+        df_goal_post = (
+            df_goal_post.bfill()
+        )  # Backward fill for any remaining NaNs
+
+        # Get the interpolated ball position for the current frame
+        interpolated_bbox = df_goal_post.iloc[-1].tolist()
+        self.goal_post_history.append(interpolated_bbox)
+
+        # Format the result
+        # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
+        return interpolated_bbox
 
     def draw_ellipse(self, frame, bbox, color, track_id=None):
         y2 = int(bbox[3])
@@ -312,7 +355,6 @@ class Tracker:
             ball_dict = (
                 tracks["ball"][frame_num] if frame_num < len(tracks["ball"]) else {}
             )
-            referee_dict = tracks["referees"][frame_num]
             goal_keeper_dict = tracks["goalkeeper"][frame_num] if frame_num < len(tracks["goalkeeper"]) else {}
             goalpost_dict = tracks["goalpost"][frame_num]
 
@@ -324,10 +366,6 @@ class Tracker:
 
                 if player.get("has_ball", False):
                     frame = self.draw_traingle(frame, player["bbox"], (0, 0, 255))
-
-            # Draw Referee
-            for _, referee in referee_dict.items():
-                frame = self.draw_ellipse(frame, referee["bbox"], (0, 255, 255))
             
             for _, goalkeeper in goal_keeper_dict.items():
                 frame = self.draw_ellipse(frame, goalkeeper["bbox"], (255, 0, 255))
@@ -346,3 +384,37 @@ class Tracker:
             output_video_frames.append(frame)
 
         return output_video_frames
+
+    # def get_dropped_player_ids(self, frame_tracks, all_tracks,frame_num):
+    #     dropped_player_ids = []
+    #     if frame_num > 0:
+    #         for track_id in frame_tracks["players"].keys():
+    #             if track_id not in all_tracks["players"][frame_num-1].keys():
+    #                 dropped_player_ids.append(track_id)
+    #         return dropped_player_ids
+    #     else:
+    #         return []
+        
+    # def get_all_past_bbox(self, all_tracks, track_id):
+    #     bboxes = []
+    #     for frame_num, frame_tracks in all_tracks.items():
+    #         if track_id in frame_tracks["players"].keys():
+    #             bbox = frame_tracks["players"][track_id]["bbox"]
+    #             bboxes.append(bbox)
+    #     return bboxes
+    
+    # def interpolate_player_positions(self, frame_tracks, all_tracks,frame_num):
+    #     dropped_ids = self.get_dropped_player_ids(frame_tracks, all_tracks,frame_num)
+    #     if dropped_ids:
+    #         for track_id in dropped_ids:
+    #             bboxes = self.get_all_past_bbox(all_tracks, track_id)
+    #             if len(bboxes) > 0:
+    #                 # Interpolate the missing positions using the past positions
+    #                 df_bboxes = pd.DataFrame(bboxes, columns=["x1", "y1", "x2", "y2"])
+    #                 df_bboxes = df_bboxes.interpolate()
+    #                 df_bboxes = df_bboxes.bfill()
+    #                 interpolated_bbox = df_bboxes.iloc[-1].tolist()
+    #                 frame_tracks["players"][track_id] = {
+    #                     "bbox": interpolated_bbox,
+    #                     "conf": 0.1,
+    #                 }

@@ -48,13 +48,21 @@ def read_frames(frames_path):
             count += 1
     return frames
 
+def get_dominant_has_ball(team_ball_control):
+    # Get the most common team that has the ball
+    if len(team_ball_control) == 0:
+        return None
+    unique, counts = np.unique(team_ball_control, return_counts=True)
+    dominant_team = unique[np.argmax(counts)]
+    return dominant_team
+    
 
 def main(track_stubs=False):
     # Read Video
     print("Reading video..." , track_stubs)
-    video_frames = read_video("input_videos/goalkeeper.mp4")
+    # video_frames = read_video("input_videos/training_final.mp4")
     # video_frames = video_frames[:30]  # Downsample the video frames for testing
-    all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
+    all_tracks = {"players": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
     if track_stubs and os.path.exists("stubs/tracks.pkl"):
         with open("stubs/tracks.pkl", "rb") as f:
@@ -62,9 +70,7 @@ def main(track_stubs=False):
 
     # Initialize Tracker
     tracker = Tracker("models/best_new.pt")
-    counter = 0
     test = 0
-    save_count = 0
     team_ball_control = []
     view_transformer = ViewTransformer()
     team_assign_time = time.time()
@@ -72,22 +78,22 @@ def main(track_stubs=False):
     after_team_assign = time.time()
     print("team assign time", after_team_assign - team_assign_time)
     player_assigner = PlayerBallAssigner()
-    team_assigner = TeamAssigner()
     # ocr_extractor = OCRExtractor()
     
     # video_frames = [video_frames[30]]  
-    # video_frames = read_frames("./badr")
+    video_frames = read_frames("./badr")
     # video_frames = [cv2.imread("./goal1/frames/frame_0003.png")]
     # video_frames = video_frames[1:5]
 
     print(len(video_frames))
     while test < len(video_frames):  # just for testing
         frame = video_frames[test]
+        if test == 0:
+            start_time = time.time()
         
 
         if track_stubs and os.path.exists("stubs/tracks.pkl"):
             frame_tracks = {"players" : loaded_tracks["players"][test-1],
-                            "referees" : loaded_tracks["referees"][test-1],
                             "ball" : loaded_tracks["ball"][test-1],
                             "goalkeeper" : loaded_tracks["goalkeeper"][test-1],
                             "goalpost" : loaded_tracks["goalpost"][test-1]}
@@ -95,8 +101,24 @@ def main(track_stubs=False):
             frame_tracks = tracker.get_object_track(frame)
         test += 1  # test
 
+        
         #adjust goalkeeper detections
         # print("\nframe tracks before adjust: ", frame_tracks , "\n")
+        if frame_tracks["goalpost"]:
+            # print("FOUND GOALPOST")
+            tracker.detected_goal_post = True
+            tracker.interpolate_goal_posts(frame_tracks['goalpost'])
+        if tracker.detected_goal_post and not frame_tracks["goalpost"]:
+            # print("Start interpolation for goal post")
+            frame_tracks["goalpost"] = {
+                1: {
+                    "bbox": tracker.interpolate_goal_posts(
+                        frame_tracks["goalpost"]
+                    ),
+                    "conf": 0.111,
+                }
+            }
+            
         frame_tracks = tracker.adjust_goalkeeper_detection(frame_tracks)
 
         # Replace Outliers
@@ -122,23 +144,10 @@ def main(track_stubs=False):
                         "conf": 0.11
                     }
                 }
+                
 
         # Get object positions
         tracker.add_position_to_tracks(frame_tracks)
-
-        # camera movement estimator
-        # if counter == 0:
-        #     camera_movement_estimator = CameraMovementEstimator(frame)
-        #     counter += 1
-
-        # camera_movement_per_frame = camera_movement_estimator.get_camera_movement(
-        #     frame,
-        #     read_from_stub=False,
-        #     stub_path="camera_movement_estimator/stubs/camera_movement_stub.pkl",
-        # )
-        # camera_movement_estimator.add_adjust_positions_to_tracks(
-        #     frame_tracks, camera_movement_per_frame
-        # )
 
         # # View Trasnformer
         # view_transformer.add_transformed_position_to_tracks(frame_tracks)
@@ -146,26 +155,50 @@ def main(track_stubs=False):
         view_transformer.add_transformed_position_to_tracks(frame_tracks)
 
         # Assign Player Teams
-        # detection_supervision = sv.Detections.from_ultralytics(result[0])
         crops,crop_ids = team_assigner.extract_crops(frame_tracks["players"], frame)
         embedings = team_assigner.extract_embeddings(crops)
-        
         clusters = team_assigner.predict_kmeans(embedings)
         team_assigner.assign_clusters_to_players(clusters, crop_ids, frame_tracks["players"])
-        # print(frame_tracks["players"])
-        # #save crops to new directory named crops
-        # if not os.path.exists("crops"):
-        #     os.makedirs("crops")
-        # for i, crop in zip(crop_ids, crops):
-        #     cv2.imwrite(f"crops/crop_{i}.jpg", crop)
-        
-        
-        
-        
+        # Merge players from the same team who are very close to each other
+        merged_players = {}
+        distance_threshold = 40  # Adjust this threshold based on your use case
+
+        for player_id, track in list(frame_tracks["players"].items()):
+            if player_id in merged_players:
+                continue  # Skip already merged players
+            # print('one track: ', track)
+            position1 = track["position"]
+            team1 = track["team"]
+            conf1 = track["conf"]  # Confidence of the first player
+
+            for other_player_id, other_track in list(frame_tracks["players"].items()):
+                if player_id == other_player_id or other_player_id in merged_players:
+                    continue
+
+                position2 = other_track["position"]
+                team2 = other_track["team"]
+                conf2 = other_track["conf"]  # Confidence of the second player
+
+                # Check if players are from the same team and very close
+                if team1 == team2:
+                    distance = np.linalg.norm(np.array(position1) - np.array(position2))
+                    if distance < distance_threshold:
+                        # Keep the player with the highest confidence
+                        if conf1 >= conf2:
+                            merged_players[other_player_id] = True
+                        else:
+                            merged_players[player_id] = True
+                            # Update the current player's data with the other player's data
+                            # frame_tracks["players"][player_id] = other_track
+                            break  # Stop checking further for this player
 
         # Remove duplicate players
-        # for player_id in merged_players:
-        #     del frame_tracks["players"][player_id]
+        for player_id in merged_players:
+            del frame_tracks["players"][player_id]
+        
+        
+        
+    
 
         # print('frame trackss after:', frame_tracks["players"].items())
         # print('frame 222:', frame_tracks["players"][2])
@@ -182,6 +215,7 @@ def main(track_stubs=False):
                     # print("assigned player:" , assigned_player)
                     # print("ball position:" , ball_position)
                     frame_tracks["players"][assigned_player]["has_ball"] = True
+                    team_ball_control.append(frame_tracks["players"][assigned_player]["team"])
 
         # print(frame_tracks)
         # print("start attempts and points")
@@ -193,13 +227,17 @@ def main(track_stubs=False):
         
 
         all_tracks["players"].append(frame_tracks["players"])
-        all_tracks["referees"].append(frame_tracks["referees"])
         all_tracks["ball"].append(frame_tracks["ball"])
         all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
         all_tracks["goalpost"].append(frame_tracks["goalpost"])
+    print("DONEEEEEE" , time.time() - start_time)
+    # print("\n\n ALL TRACKSS " , all_tracks["goalpost"])
 
-    team_ball_control = np.array(team_ball_control)
-    print("\n\n" , all_tracks)
+    team_ball_control = np.array([0,0,1,1])
+    dominant = get_dominant_has_ball(team_ball_control)
+    print(team_ball_control)
+    print(dominant)
+    # print("\n\n" , all_tracks)
     # to_bo_loaded_tracks = adjust_all_tracks(all_tracks)
     # # Save all tracks to stub
     # if not os.path.exists("stubs"):
@@ -250,42 +288,7 @@ if __name__ == "__main__":
 
 #         team_assigned = time.time()
 #         # print('frame trackss before:', frame_tracks["players"].items())
-#         # Merge players from the same team who are very close to each other
-#         merged_players = {}
-#         distance_threshold = 40  # Adjust this threshold based on your use case
-
-#         for player_id, track in list(frame_tracks["players"].items()):
-#             if player_id in merged_players:
-#                 continue  # Skip already merged players
-#             # print('one track: ', track)
-#             position1 = track["position"]
-#             team1 = track["team"]
-#             conf1 = track["conf"]  # Confidence of the first player
-
-#             for other_player_id, other_track in list(frame_tracks["players"].items()):
-#                 if player_id == other_player_id or other_player_id in merged_players:
-#                     continue
-
-#                 position2 = other_track["position"]
-#                 team2 = other_track["team"]
-#                 conf2 = other_track["conf"]  # Confidence of the second player
-
-#                 # Check if players are from the same team and very close
-#                 if team1 == team2:
-#                     distance = np.linalg.norm(np.array(position1) - np.array(position2))
-#                     if distance < distance_threshold:
-#                         # Keep the player with the highest confidence
-#                         if conf1 >= conf2:
-#                             merged_players[other_player_id] = True
-#                         else:
-#                             merged_players[player_id] = True
-#                             # Update the current player's data with the other player's data
-#                             # frame_tracks["players"][player_id] = other_track
-#                             break  # Stop checking further for this player
-
-#         # Remove duplicate players
-#         for player_id in merged_players:
-#             del frame_tracks["players"][player_id]
+#         
 
 #         # print('frame trackss after:', frame_tracks["players"].items())
 #         # print('frame 222:', frame_tracks["players"][2])
