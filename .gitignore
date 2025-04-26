@@ -5,3 +5,5 @@ output_videos/
 __pycache__/
 runs/
 stubs/
+*.png
+*.jpg
