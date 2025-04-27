@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 from ultralytics import YOLO
-import logging
-
+import torch
 # Define the pixel coordinates of the 4 keypoints (from the image)
 
 class KeypointsTransformer():
@@ -14,9 +13,8 @@ class KeypointsTransformer():
         [39.85, 45],       # ARC_CURVE
         [43.5,52.31]      # ARC_DOWN
         ], dtype=np.float32)
-        self.keypoint_detector = YOLO('models/keypoints.pt',verbose=False)
-        self.keypoint_detector.to('cuda')
-        logging.getLogger().setLevel(logging.ERROR)
+        self.keypoint_detector = YOLO('models/keypoints.pt')
+        # self.keypoint_detector.to('cuda') 
         
         self.last_valid_keypoints = np.array([
         [1991, 1013],  #PEN_DOT #BADR 
@@ -29,18 +27,24 @@ class KeypointsTransformer():
 
     def detect_keypoints(self, image):
         # Use the YOLO model to detect keypoints in the image
-        results = self.keypoint_detector.predict(image, conf=0.5, show=False,device=0)
+        results = self.keypoint_detector.predict(image, conf=0.5, show=False)
         keypoints = []
-        
+        results = results[0].keypoints.xy[0]
+
         for result in results:
-            keypoints.append(result.keypoints.xy)
+            if torch.all(result == 0):
+                continue
+                # Convert keypoints to numpy array and append to the list
+            keypoints.append(result.cpu().numpy())
             
 
-        if keypoints[0].shape[1] < 4:
-            print(f"Only {keypoints[0].shape[1]} keypoints detected, need 4. Keypoints:", keypoints)
+        # print("Keypoints detected in detect_keypoints:", keypoints )
+        if len(keypoints) < 4:            
+            
             return self.last_valid_keypoints
         
-        self.last_valid_keypoints = keypoints[0].cpu().numpy()
+        keypoints = np.array(keypoints, dtype=np.float32)
+        self.last_valid_keypoints = keypoints
         keypoints = self.last_valid_keypoints
 
         return keypoints
@@ -79,4 +83,10 @@ class KeypointsTransformer():
                 if position_trasnformed is not None:
                     position_trasnformed = position_trasnformed.squeeze().tolist()
                 frame_tracks[object_type][track_id]['position_transformed'] = position_trasnformed
+    
+    def real_world_to_pixel(self, real_world_pos):
+        # Inverse the perspective transform to get pixel coordinates
+        real_world_pos = np.array([[list(real_world_pos)]], dtype=np.float32)
+        pixel_pos = cv2.perspectiveTransform(real_world_pos, np.linalg.inv(self.matrix))
+        return pixel_pos[0][0]
 
