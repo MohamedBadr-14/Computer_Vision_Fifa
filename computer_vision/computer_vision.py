@@ -10,7 +10,8 @@ import time
 
 class ComputerVision:
     def __init__(self):
-        self.tracker = Tracker("models/best_new.pt")
+        print(os.getcwd())
+        self.tracker = Tracker("../drive/MyDrive/models/best_new.pt")
         self.team_assigner = TeamAssigner()
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
