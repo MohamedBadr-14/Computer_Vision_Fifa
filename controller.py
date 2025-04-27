@@ -10,6 +10,7 @@ from ocr_extractor import OCRExtractor
 from computer_vision import ComputerVision
 from rl import DQNAgent, get_state_from_positions, calculate_reward
 from pr import pause_process, resume_process
+import gc
 
 class Controller:
     """
@@ -46,6 +47,7 @@ class Controller:
         self.frames_to_send = []        # Buffer for frames to process
         self.first_time = True          # Flag for first action
         self.is_paused = False          # Flag for game pause state
+
         
 
         self.to_be_sent = []
@@ -58,6 +60,7 @@ class Controller:
         self.action_taken = None        # Current action
         self.prev_action = None         # Previous action
         self.last_action_time = None    # Time when last action was taken
+        self.action_shoot=False
 
         
         # Default scene state when data is unavailable
@@ -244,6 +247,8 @@ class Controller:
         # Set up screen capture parameters for a wide screen monitor
         monitor = {"top": 0, "left": 0, "width": 2560, "height": 1600}
         frame_count = 0
+
+        gc.collect()  # Force garbage collection to free up memory
         
 
         with mss() as sct:
@@ -276,8 +281,13 @@ class Controller:
                 #         resume_process()
                 #         self.is_paused = False
                 #         print("RESUME FOOOOO2")
-                frame = np.array(sct.grab(monitor))
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+                try:
+                    frame = np.array(sct.grab(monitor))
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+                except MemoryError:
+                    print("MemoryError: Frame capture failed. Attempting to free up memory.")
+                    gc.collect()  # Force garbage collection to free up memory
+                    continue
                 # self.all_frames.append(frame)
                 
                 # Extract OCR results for logging
@@ -313,8 +323,9 @@ class Controller:
 
                     
                     self.frames_to_send.clear()
+                    gc.collect()
                     
-                    if has_ball:
+                    if has_ball and not self.action_shoot:
                         # Reinforcement learning decision making
                         scene_toRL = scene.copy()
                         scene_toRL['Attemps'] = self.last_attempt
@@ -343,6 +354,8 @@ class Controller:
                    
                         print("ACTION TAKEN:", action_taken)
                         self.action_taken = action_taken
+                        if action_taken == 16:
+                            self.action_shoot = True
                         self.prev_action = action_taken
                     else:
                         time.sleep(0.4)
@@ -393,6 +406,7 @@ class Controller:
                     # self.logger.info(f"End of episode reward: {reward}")
                     self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
                     self.first_time = True
+                    self.action_shoot= False
                     continue
 
                 # Track attempts and handle attempt transitions
@@ -422,6 +436,8 @@ class Controller:
                         self.skip_counter = self.between_attacks_skip
                         self.temp_flag = False
                         frame_count += 1
+                        self.action_shoot= False
+
                         continue
 
 
@@ -460,11 +476,15 @@ class Controller:
 if __name__ == "__main__":
     # Create and run the controller with optional video recording
     controller = Controller(
-        model_path="./soccer_dqn_trained.pth"
         )
+    rl_model = controller.rl_agent
     try:
         controller.run()
     except Exception as e:
+        model_save_path = "soccer_dqn_trained.pth"
+        rl_model.save(model_save_path)
+        print("Saved model to", model_save_path)
+
         print(f"An error occurred: {e}")
         try:
             resume_process()
