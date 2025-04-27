@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from ultralytics import YOLO
-
+import torch
 # Define the pixel coordinates of the 4 keypoints (from the image)
 
 class ViewTransformer():
@@ -29,16 +29,25 @@ class ViewTransformer():
         # Use the YOLO model to detect keypoints in the image
         results = self.keypoint_detector.predict(image, conf=0.5, show=False)
         keypoints = []
-        
+        results = results[0].keypoints.xy[0]
+
         for result in results:
-            keypoints.append(result.keypoints.xy)
+            if torch.all(result == 0):
+                continue
+                # Convert keypoints to numpy array and append to the list
+            keypoints.append(result.cpu().numpy())
             
 
-        if keypoints[0].shape[1] < 4:
-            # print(f"Only {keypoints[0].shape[1]} keypoints detected, need 4. Keypoints:", keypoints)
+        # print("Keypoints detected in detect_keypoints:", keypoints )
+        if len(keypoints) < 4:
+            # print(f"Only {len(keypoints)} keypoints detected, need 4. Keypoints:", keypoints)
+            # print("Using last valid keypoints" , self.last_valid_keypoints)
+            
+            
             return self.last_valid_keypoints
         
-        self.last_valid_keypoints = keypoints[0].cpu().numpy()
+        keypoints = np.array(keypoints, dtype=np.float32)
+        self.last_valid_keypoints = keypoints
         keypoints = self.last_valid_keypoints
 
         return keypoints
@@ -77,4 +86,10 @@ class ViewTransformer():
                 if position_trasnformed is not None:
                     position_trasnformed = position_trasnformed.squeeze().tolist()
                 frame_tracks[object_type][track_id]['position_transformed'] = position_trasnformed
-                
+    
+    def real_world_to_pixel(self, real_world_pos):
+        # Inverse the perspective transform to get pixel coordinates
+        real_world_pos = np.array([[list(real_world_pos)]], dtype=np.float32)
+        pixel_pos = cv2.perspectiveTransform(real_world_pos, np.linalg.inv(self.matrix))
+        return pixel_pos[0][0]
+

@@ -23,8 +23,8 @@ class TeamAssigner:
             self.SIGLIP_MODEL_PATH, 
             use_fast=True  # Enable fast tokenizer if available
         )
-        self.reducer = joblib.load('models/reducer_model_final.pkl')
-        self.kmeans = joblib.load('models/kmeans_trained_final.pkl')
+        self.reducer = joblib.load('models/reducer_model_cpu.pkl')
+        self.kmeans = joblib.load('models/kmeans_trained_cpu.pkl')
     
     def extract_crops(self, tracks, frame):
         crops = []
@@ -84,5 +84,5 @@ class TeamAssigner:
 
     def assign_clusters_to_players(self, clusters, crop_ids , frame_tracks):
         for i, id in enumerate(crop_ids):
-            self.player_team_dict[id] = 2 if clusters[i] == 0 else 1
-            frame_tracks[id]["team"] = 2 if clusters[i] == 0 else 1
+            self.player_team_dict[id] = 1 if clusters[i] == 0 else 2
+            frame_tracks[id]["team"] = 1 if clusters[i] == 0 else 2

@@ -16,69 +16,70 @@ class Tracker:
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
         self.ball_positions_history = []
-        self.goal_post_history = []
         self.last_valid_position = None
         self.frame_num = 0
-        self.max_player_post_distance = 350
-        self.detected_goal_post = False
+        self.max_player_post_distance = 1000
+        self.goal_position = (60,42)
         # self.previously_interpolated_ids = []
 
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
                 bbox = track_info["bbox"]
-                if object_type == "goalpost" or object_type == "ball":
+                if object_type == "ball":
                     position = get_center_of_bbox(bbox)
                 else:
                     position = get_foot_position(bbox)
                 frame_tracks[object_type][track_id]["position"] = position
+    
 
     def adjust_goalkeeper_detection(self, frame_tracks):
-        if frame_tracks["goalpost"]:
+        # if frame_tracks["goalpost"][1]["position"][0] < 2560:
             # print("DKHALT")
             
-            post_position = get_center_of_bbox(frame_tracks["goalpost"][1]["bbox"])
+        post_position = frame_tracks["goalpost"][1]["position"]
 
-            miniumum_distance = 99999
-            goalkeeper=-1
+        miniumum_distance = 99999
+        goalkeeper=-1
 
-            for player_id, player in frame_tracks["players"].items():
-                player_bbox = player['bbox']
+        for player_id, player in frame_tracks["players"].items():
+            player_pos = player['position']
 
-                distance_left = measure_distance((player_bbox[0],player_bbox[-1]),post_position)
-                distance_right = measure_distance((player_bbox[2],player_bbox[-1]),post_position)
-                distance = min(distance_left,distance_right)
+            distance = measure_distance(player_pos,post_position)
 
-                if distance < miniumum_distance:
-                    print("GOALLL" , distance , player_id)
-                    if distance < self.max_player_post_distance:
-                        miniumum_distance = distance
-                        goalkeeper = player_id
-                        # print("GOALKEEPER ID" , goalkeeper , "DISTANCE" , distance)
-                        # print("FRAME_TRACKS" , frame_tracks["players"])
-            if goalkeeper != -1:
-                frame_tracks["goalkeeper"][goalkeeper] = {
-                    "bbox": frame_tracks["players"][goalkeeper]["bbox"],
-                    "conf": None, #BADRR
-                }
-                # print("GOALKEEPER ADDED", goalkeeper, frame_tracks["goalkeeper"][goalkeeper])
-                # print("PLAYER ADDED" , goalkeeper , goalkeeper in frame_tracks["players"])
-                del frame_tracks["players"][goalkeeper] #baheb pythonnn
-                # print("\nPLAYER REMOVED" ,  goalkeeper in frame_tracks["players"].keys())
-        # print("FINAL KEEPER TRACKS" , frame_tracks["goalkeeper"])
-        return frame_tracks  
+            if distance < miniumum_distance:
+                if distance < self.max_player_post_distance:
+                    miniumum_distance = distance
+                    goalkeeper = player_id
+                    # print("FRAME_TRACKS" , frame_tracks["players"])
+        if goalkeeper != -1:
+            frame_tracks["goalkeeper"][goalkeeper] = {
+                "bbox": frame_tracks["players"][goalkeeper]["bbox"],
+                "conf": None, #BADRR
+                "position": frame_tracks["players"][goalkeeper]["position"],
+                "position_transformed": frame_tracks["players"][goalkeeper]["position_transformed"],
+            }
+            del frame_tracks["players"][goalkeeper] 
+        return frame_tracks
+    
+    def remove_out_of_pitch_detections(self,player_tracks , height):
+        to_be_deleted = []
+        for player_id, player in player_tracks.items():
+            bbox = player["bbox"]
+            y = bbox[1]
+            if y < 0.1*height:
+                # Remove the player from the track if they are out of the pitch
+                to_be_deleted.append(player_id)
+        for player_id in to_be_deleted:
+            del player_tracks[player_id]
 
     def interpolate_ball_positions(self, ball_position):
-        bbox = ball_position.get(1, {}).get("bbox", [])
-        if bbox:
-            self.ball_positions_history.append(bbox)
-            return bbox
-        else:
-            if not self.ball_positions_history or all(
-                len(bbox) == 0 for bbox in self.ball_positions_history
-            ):
-                print("A7MOSSSSSSS")
-                return ball_position
+        self.ball_positions_history.append(ball_position.get(1, {}).get("bbox", []))
+
+        if not self.ball_positions_history or all(
+            len(bbox) == 0 for bbox in self.ball_positions_history
+        ):
+            return ball_position
 
         # Convert the ball positions history to a DataFrame
         df_ball_positions = pd.DataFrame(
@@ -93,8 +94,6 @@ class Tracker:
 
         # Get the interpolated ball position for the current frame
         interpolated_bbox = df_ball_positions.iloc[-1].tolist()
-        self.ball_positions_history.append(interpolated_bbox)
-        
 
         # Format the result
         # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
@@ -103,7 +102,7 @@ class Tracker:
 
     def detect_frame(self, frame):
         # Process a single frame
-        detection = self.model.predict(frame, conf=0.1)
+        detection = self.model.predict(frame) #BADR MIDO
         return detection
 
     def get_object_track(self, frame):
@@ -148,14 +147,14 @@ class Tracker:
             if cls_id == cls_names_inv["player"] or cls_id == cls_names_inv["referee"] or cls_id == cls_names_inv["goalkeeper"]:
                 frame_tracks["players"][track_id] = {"bbox": bbox, "conf": conf}
 
-            if cls_id == cls_names_inv["goalpost"]:
-                if (
-                    goal_count > 0
-                    and frame_detection[2] < frame_tracks["goalpost"][1]["conf"]
-                ):
-                    continue
-                frame_tracks["goalpost"][1] = {"conf": frame_detection[2], "bbox": bbox}
-                goal_count += 1
+            # if cls_id == cls_names_inv["goalpost"]:
+            #     if (
+            #         goal_count > 0
+            #         and frame_detection[2] < frame_tracks["goalpost"][1]["conf"]
+            #     ):
+            #         continue
+            #     frame_tracks["goalpost"][1] = {"conf": frame_detection[2], "bbox": bbox}
+            #     goal_count += 1
                 
             if cls_id == cls_names_inv["ball"]:
                 if (
@@ -173,9 +172,6 @@ class Tracker:
         return frame_tracks
     
                     
-            
-            
-
     def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
         position = ball_track.get(1, {}).get("bbox", [])
         if not position:
@@ -197,47 +193,12 @@ class Tracker:
                 # #print("distance", distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
-                    # print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
+                    print("Replaced balll" , distance ,  " prev" , self.last_valid_position, "curr" , position[0:2])
                     return {}
                 else:
                     self.last_valid_position = position[0:2]
                     return ball_track
-    def reset_goal_post(self):
-        self.goal_post_history = []
-        self.detected_goal_post = False
         
-        
-    def interpolate_goal_posts(self , goalpost_position):
-        bbox = goalpost_position.get(1, {}).get("bbox", [])
-        if bbox:
-            self.goal_post_history.append(bbox)
-            return bbox
-        else:
-            if not self.goal_post_history or all(
-                len(bbox) == 0 for bbox in self.goal_post_history
-            ):
-                print("A7AAAAA")
-                return goalpost_position
-
-
-        # Convert the ball positions history to a DataFrame
-        df_goal_post = pd.DataFrame(
-            self.goal_post_history, columns=["x1", "y1", "x2", "y2"]
-        )
-
-        # Interpolate missing values
-        df_goal_post = df_goal_post.interpolate()
-        df_goal_post = (
-            df_goal_post.bfill()
-        )  # Backward fill for any remaining NaNs
-
-        # Get the interpolated ball position for the current frame
-        interpolated_bbox = df_goal_post.iloc[-1].tolist()
-        self.goal_post_history.append(interpolated_bbox)
-
-        # Format the result
-        # interpolated_ball_position = {1: {"bbox": interpolated_bbox}}
-        return interpolated_bbox
 
     def draw_ellipse(self, frame, bbox, color, track_id=None):
         y2 = int(bbox[3])
@@ -288,16 +249,21 @@ class Tracker:
 
         return frame
 
-    def draw_traingle(self, frame, bbox, color):
-        y = int(bbox[1])
-        x, _ = get_center_of_bbox(bbox)
+    def draw_traingle(self, frame, center, color):
+        # y = int(bbox[1])
+        # x, _ = get_center_of_bbox(bbox)
+        x,y = center[0], center[1]
+        if x > 2581:
+            return frame
 
         triangle_points = np.array(
             [
                 [x, y],
                 [x - 10, y - 20],
                 [x + 10, y - 20],
-            ]
+            ],
+            dtype=np.int32  # Ensure the points are integers
+
         )
         cv2.drawContours(frame, [triangle_points], 0, color, cv2.FILLED)
         cv2.drawContours(frame, [triangle_points], 0, (0, 0, 0), 2)
@@ -348,6 +314,7 @@ class Tracker:
         # #print("len(video_frames)", len(video_frames))
         # print("len(tracks['players'])", len(tracks['players']))
         # print("len(tracks['ball'])", len(tracks['ball']))
+        
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()
 
@@ -365,18 +332,18 @@ class Tracker:
                 frame = self.draw_ellipse(frame, player["bbox"], color, track_id)
 
                 if player.get("has_ball", False):
-                    frame = self.draw_traingle(frame, player["bbox"], (0, 0, 255))
+                    frame = self.draw_traingle(frame, player["position"], (0, 0, 255))
             
             for _, goalkeeper in goal_keeper_dict.items():
                 frame = self.draw_ellipse(frame, goalkeeper["bbox"], (255, 0, 255))
 
             # Draw ball
             for track_id, ball in ball_dict.items():
-                frame = self.draw_traingle(frame, ball["bbox"], (0, 255, 0))
+                frame = self.draw_traingle(frame, ball["position"], (0, 255, 0))
 
             # Draw Goalpost
             for _, goalpost in goalpost_dict.items():
-                frame = self.draw_traingle(frame, goalpost["bbox"], (255, 0, 0))
+                frame = self.draw_traingle(frame, goalpost["position"], (255, 0, 0))
 
             # Draw Team Ball Control
             # frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)

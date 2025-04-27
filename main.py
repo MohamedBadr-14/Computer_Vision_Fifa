@@ -43,7 +43,7 @@ def read_frames(frames_path):
             frame_path = os.path.join(frames_path, filename)
             frame = cv2.imread(frame_path)
             frames.append(frame)
-            if count == 10:
+            if count == 150:
                 break
             count += 1
     return frames
@@ -81,16 +81,20 @@ def main(track_stubs=False):
     # ocr_extractor = OCRExtractor()
     
     # video_frames = [video_frames[30]]  
-    video_frames = read_frames("./badr")
+    video_frames = read_frames("./badr/all")
     # video_frames = [cv2.imread("./goal1/frames/frame_0003.png")]
-    # video_frames = video_frames[1:5]
+    # video_frames = video_frames[94:]
+    print(video_frames[0].shape)
 
     print(len(video_frames))
     while test < len(video_frames):  # just for testing
+        print("FRAME NUMBER: ", test)
         frame = video_frames[test]
+        height, width, _ = frame.shape
+        # frame[:int(0.1*height)] = 0  # Set the bottom 10% of the frame to black
         if test == 0:
+            cv2.imwrite("frame_save.png" , frame)
             start_time = time.time()
-        
 
         if track_stubs and os.path.exists("stubs/tracks.pkl"):
             frame_tracks = {"players" : loaded_tracks["players"][test-1],
@@ -101,29 +105,12 @@ def main(track_stubs=False):
             frame_tracks = tracker.get_object_track(frame)
         test += 1  # test
 
-        
+        tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
         #adjust goalkeeper detections
-        # print("\nframe tracks before adjust: ", frame_tracks , "\n")
-        if frame_tracks["goalpost"]:
-            # print("FOUND GOALPOST")
-            tracker.detected_goal_post = True
-            tracker.interpolate_goal_posts(frame_tracks['goalpost'])
-        if tracker.detected_goal_post and not frame_tracks["goalpost"]:
-            # print("Start interpolation for goal post")
-            frame_tracks["goalpost"] = {
-                1: {
-                    "bbox": tracker.interpolate_goal_posts(
-                        frame_tracks["goalpost"]
-                    ),
-                    "conf": 0.111,
-                }
-            }
-            
-        frame_tracks = tracker.adjust_goalkeeper_detection(frame_tracks)
 
         # Replace Outliers
         if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.2 :
-            # print("CONFF" , frame_tracks["ball"][1]["conf"])
+            print("CONFF" , frame_tracks["ball"][1]["conf"])
             frame_tracks["ball"] = tracker.replace_outliers_based_on_distance(
                 frame_tracks["ball"], 120
             )
@@ -131,11 +118,12 @@ def main(track_stubs=False):
         # interpolate again
 
         if frame_tracks["ball"]:
+            print("ball detected" , frame_tracks["ball"][1]["bbox"] , frame_tracks["ball"][1]["conf"])
             frame_tracks["ball"][1]["bbox"] = tracker.interpolate_ball_positions(
                 frame_tracks["ball"]
             )
         else:
-            # print("ball not detected")
+            print("ball not detected")
             bbox = tracker.interpolate_ball_positions(frame_tracks["ball"])
             if bbox:
                 frame_tracks["ball"] = {
@@ -153,6 +141,15 @@ def main(track_stubs=False):
         # view_transformer.add_transformed_position_to_tracks(frame_tracks)
         view_transformer.get_matrix_transform(frame)
         view_transformer.add_transformed_position_to_tracks(frame_tracks)
+        goal_post = view_transformer.real_world_to_pixel(tracker.goal_position)
+        frame_tracks["goalpost"] = {
+            1:{
+                "position_transformed": tracker.goal_position,
+                "position": goal_post
+            }
+        }
+        
+        frame_tracks = tracker.adjust_goalkeeper_detection(frame_tracks)
 
         # Assign Player Teams
         crops,crop_ids = team_assigner.extract_crops(frame_tracks["players"], frame)
@@ -161,7 +158,7 @@ def main(track_stubs=False):
         team_assigner.assign_clusters_to_players(clusters, crop_ids, frame_tracks["players"])
         # Merge players from the same team who are very close to each other
         merged_players = {}
-        distance_threshold = 40  # Adjust this threshold based on your use case
+        distance_threshold = 75  # Adjust this threshold based on your use case
 
         for player_id, track in list(frame_tracks["players"].items()):
             if player_id in merged_players:
@@ -194,6 +191,7 @@ def main(track_stubs=False):
 
         # Remove duplicate players
         for player_id in merged_players:
+            # print("Removing player ID:", player_id)
             del frame_tracks["players"][player_id]
         
         
@@ -217,7 +215,6 @@ def main(track_stubs=False):
                     frame_tracks["players"][assigned_player]["has_ball"] = True
                     team_ball_control.append(frame_tracks["players"][assigned_player]["team"])
 
-        # print(frame_tracks)
         # print("start attempts and points")
         # if save_count == 0:
         #     cv2.imwrite("frame_save.png" , frame)
@@ -235,8 +232,6 @@ def main(track_stubs=False):
 
     team_ball_control = np.array([0,0,1,1])
     dominant = get_dominant_has_ball(team_ball_control)
-    print(team_ball_control)
-    print(dominant)
     # print("\n\n" , all_tracks)
     # to_bo_loaded_tracks = adjust_all_tracks(all_tracks)
     # # Save all tracks to stub
@@ -251,7 +246,7 @@ def main(track_stubs=False):
     )
 
     # # # Save video
-    save_video(output_video_frames, "output_videos/sad.mp4")
+    save_video(output_video_frames, "output_videos/CV_Final.mp4")
     # for frame in output_video_frames:
     #     cv2.imwrite("output_videos/frame_{}.jpg".format(save_count), frame)
     #     save_count+=1
