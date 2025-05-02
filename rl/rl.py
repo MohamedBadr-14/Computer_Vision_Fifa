@@ -480,7 +480,7 @@ logger.addHandler(console_handler)
 
 def calculate_reward(prev_state, new_state, action):
     """
-    Normalized reward function that keeps values in a reasonable range (-10 to +10)
+    Normalized reward function that keeps values in a reasonable range (-8 to +15)
     """
     reward = 0
     reward_components = {}
@@ -496,13 +496,94 @@ def calculate_reward(prev_state, new_state, action):
         logger.warning("Missing state or action data, returning zero reward")
         return 0
     
-    # Distance to goal improvement (normalize from -5 to +5)
+    # Goal scored (maximum reward of +15) - Check this first as it's the primary objective
+    prev_score = prev_state[feature_dict['score']]
+    new_score = new_state[feature_dict['score']]
+    score_change = new_score - prev_score
+    
+    if score_change > 500:  # Goal scored
+        reward = 15  # Override all other rewards
+        reward_components['goal_scored'] = 15
+        logger.info(f"\n[GOAL SCORED!]")
+        logger.info(f"  Score increased by: {score_change}")
+        logger.info(f"  Reward: +15.00")
+        logger.info(f"\nFINAL REWARD: +15.00 (Goal scored overrides all other rewards)")
+        return 15
+    elif score_change > 0:  # Shot on target
+        # Reward based on distance - shooting from closer is better
+        agent_x = prev_state[feature_dict['agent_x']] * 60  # Unnormalize position
+        if agent_x > 45:  # Close to goal shot
+            shot_reward = 5
+            reward_components['close_shot_on_target'] = shot_reward
+            logger.info(f"\n[CLOSE SHOT ON TARGET]")
+            logger.info(f"  Position: {agent_x:.2f}")
+            logger.info(f"  Reward: +5.00")
+            return 5
+        elif agent_x > 35:  # Medium distance shot
+            shot_reward = 3
+            reward_components['medium_shot_on_target'] = shot_reward
+            logger.info(f"\n[MEDIUM SHOT ON TARGET]")
+            logger.info(f"  Position: {agent_x:.2f}")
+            logger.info(f"  Reward: +3.00")
+            return 3
+        else:  # Long distance shot
+            shot_reward = 0.5
+            reward_components['long_shot_on_target'] = shot_reward
+            logger.info(f"\n[LONG SHOT ON TARGET]")
+            logger.info(f"  Position: {agent_x:.2f}")
+            logger.info(f"  Reward: +0.50")
+            return 0.5
+
+    # Check for turnover - significant negative reward
+    if (new_score == prev_score) and new_state[feature_dict['attemps']] != prev_state[feature_dict['attemps']]:
+        if action == 16:  # Shooting action
+            # Adjust penalty based on position - less penalty for shooting from good positions
+            agent_x = prev_state[feature_dict['agent_x']] * 60  # Unnormalize
+            if agent_x > 45:  # Good shooting position but missed
+                turnover_reward = -1
+                reward_components['close_shot_missed'] = turnover_reward
+                logger.info(f"\n[TURNOVER - CLOSE SHOT MISSED]")
+                logger.info(f"  Position: {agent_x:.2f}")
+                logger.info(f"  Reward: -1.00")
+                return -1
+            elif agent_x > 35:  # Decent shooting position
+                turnover_reward = -2
+                reward_components['medium_shot_missed'] = turnover_reward
+                logger.info(f"\n[TURNOVER - MEDIUM SHOT MISSED]")
+                logger.info(f"  Position: {agent_x:.2f}")
+                logger.info(f"  Reward: -2.00")
+                return -2
+            else:  # Poor shooting position
+                turnover_reward = -3
+                reward_components['poor_shot_choice'] = turnover_reward
+                logger.info(f"\n[TURNOVER - POOR SHOT CHOICE]")
+                logger.info(f"  Position: {agent_x:.2f}")
+                logger.info(f"  Reward: -3.00")
+                return -3
+        else:
+            # Different penalties based on action type
+            if 0 <= action <= 7:  # Pass actions
+                turnover_reward = -2  # Less penalty for passing than dribbling
+                reward_components['pass_intercepted'] = turnover_reward
+                logger.info(f"\n[TURNOVER - PASS INTERCEPTED]")
+                logger.info(f"  Action: {action_list.get(action, 'Unknown')}")
+                logger.info(f"  Reward: -2.00")
+                return -2
+            else:  # Dribble actions
+                turnover_reward = -5
+                reward_components['dribble_lost'] = turnover_reward
+                logger.info(f"\n[TURNOVER - LOST DURING DRIBBLE]")
+                logger.info(f"  Action: {action_list.get(action, 'Unknown')}")
+                logger.info(f"  Reward: -5.00")
+                return -5
+    
+    # Distance to goal improvement (normalize from -2 to +2)
     if prev_state[feature_dict['dist_goal']] != 0 and new_state[feature_dict['dist_goal']] != 0:
         # Scale based on field size, assuming max dist ~FIELD_WIDTH
         prev_dist = prev_state[feature_dict['dist_goal']] * 75  # Unnormalize
         new_dist = new_state[feature_dict['dist_goal']] * 75    # Unnormalize
         dist_change = prev_dist - new_dist
-        normalized_dist_change = max(min(dist_change, 5), -5)  # Clamp between -5 and 5
+        normalized_dist_change = max(min(dist_change, 2), -2)  # Clamp between -2 and 2
         reward += normalized_dist_change
         reward_components['distance_to_goal'] = normalized_dist_change
         logger.info(f"\n[DISTANCE TO GOAL]")
@@ -512,7 +593,7 @@ def calculate_reward(prev_state, new_state, action):
         logger.info(f"  Normalized reward: {normalized_dist_change:.2f}")
         logger.info(f"  Distance improved: {'YES' if dist_change > 0 else 'NO'}")
     
-    # Facing goal (normalized to +1)
+    # Facing goal (normalized to +1/-0.5)
     prev_angle = abs(prev_state[feature_dict['angle_goal']])
     new_angle = abs(new_state[feature_dict['angle_goal']])
     angle_change = prev_angle - new_angle
@@ -535,13 +616,19 @@ def calculate_reward(prev_state, new_state, action):
     
     reward_components['angle_to_goal'] = angle_reward
     
-    # Clear path vs opponent in front (normalized to +3/-1)
-    if new_state[feature_dict['no_opponent_in_front']]:
+    # Clear path vs opponent in front (normalized to +3/-0.1)
+    if new_state[feature_dict['no_opponent_in_front']] and prev_state[feature_dict['no_opponent_in_front']] == 0:
         path_reward = 3
         reward += 3
         logger.info(f"\n[CLEAR PATH]")
-        logger.info(f"  Clear path ahead: YES")
+        logger.info(f"  Clear path ahead: YES (improved)")
         logger.info(f"  Reward: +3.00")
+    elif new_state[feature_dict['no_opponent_in_front']]:
+        path_reward = 0.5
+        reward += 0.5
+        logger.info(f"\n[CLEAR PATH]")
+        logger.info(f"  Clear path ahead: YES (maintained)")
+        logger.info(f"  Reward: +0.50")
     else:
         path_reward = -0.1
         reward -= 0.1
@@ -550,35 +637,6 @@ def calculate_reward(prev_state, new_state, action):
         logger.info(f"  Reward: -0.10")
     
     reward_components['clear_path'] = path_reward
-    
-    # Goal visibility rewards/penalties (normalized to +2/-2)
-    prev_goal_visible = bool(prev_state[feature_dict['goaldetected']])
-    new_goal_visible = bool(new_state[feature_dict['goaldetected']])
-    
-    logger.info(f"\n[GOAL VISIBILITY]")
-    logger.info(f"  Previous: {'Visible' if prev_goal_visible else 'Not visible'}")
-    logger.info(f"  New: {'Visible' if new_goal_visible else 'Not visible'}")
-    
-    # if not new_goal_visible and not prev_goal_visible:
-    #     goal_visibility_reward = -2  # Still can't see goal
-    #     reward -= 2
-    #     status = "Still can't see goal"
-    # elif new_goal_visible and not prev_goal_visible:
-    #     goal_visibility_reward = 2   # Now can see goal
-    #     reward += 2
-    #     status = "Now can see goal"
-    # elif new_goal_visible and prev_goal_visible:
-    #     goal_visibility_reward = 0.1   # Still can see goal
-    #     reward += 0.1
-    #     status = "Still can see goal"
-    # elif not new_goal_visible and prev_goal_visible:
-    #     goal_visibility_reward = -2  # Lost sight of goal
-    #     reward -= 2
-    #     status = "Lost sight of goal"
-    
-    # logger.info(f"  Status: {status}")
-    # logger.info(f"  Reward: {goal_visibility_reward:.2f}")
-    # reward_components['goal_visibility'] = goal_visibility_reward
     
     # Time penalty (small negative reward for each step in same attack)
     logger.info(f"\n[TIME PENALTY]")
@@ -594,72 +652,19 @@ def calculate_reward(prev_state, new_state, action):
     
     reward_components['time_penalty'] = time_penalty
     
-    # Goal scored (maximum reward of +10)
-    prev_score = prev_state[feature_dict['score']]
-    new_score = new_state[feature_dict['score']]
-    score_change = new_score - prev_score
-    
-    if score_change > 500:
-        score_reward = 15  # Goal scored
-        reward = 15  # Override all other rewards
-        reward_components['goal_scored'] = score_reward
-        logger.info(f"\n[GOAL SCORED!]")
-        logger.info(f"  Score increased by: {score_change}")
-        logger.info(f"  Reward: +100.00")
-        logger.info(f"\nFINAL REWARD: +100.00 (Goal scored overrides all other rewards)")
-        return 15
-    elif score_change > 0:
-        score_reward = -3   # Shot on target but missed
-        reward = 3
-        reward_components['shot_on_target'] = score_reward
-        logger.info(f"\n[SHOT ON TARGET]")
-        logger.info(f"  Score increased by: {score_change}")
-        logger.info(f"  Reward: +3.00")
-        if prev_state[feature_dict['agent_x']]*60<40:
-            return -1
-        else:
-            return 0.5
-
-
-      
-    
-    # Turnover (normalized to -5)
-  
-
-
-    if (new_score == prev_score) and new_state[feature_dict['attemps']] != prev_state[feature_dict['attemps']]:
-        if action == 16:  # Shooting action
-            turnover_reward = -1
-            reward = -2  # Override with fixed value
-            reward_components['turnover_shot'] = turnover_reward
-            logger.info(f"\n[TURNOVER - SHOT MISSED]")
-            logger.info(f"  Reward: -2.00")
-            logger.info(f"\nFINAL REWARD: -2.00 (Shot miss overrides other rewards)")
-            return -2
-        else:
-            turnover_reward = -10
-            reward = -10  # Override with fixed value
-            reward_components['turnover_other'] = turnover_reward
-            logger.info(f"\n[TURNOVER - LOST POSSESSION]")
-            logger.info(f"  Action: {action_list.get(action, 'Unknown')}")
-            logger.info(f"  Reward: -10.00")
-            logger.info(f"\nFINAL REWARD: -10.00 (Turnover overrides other rewards)")
-            return -10
-    
     # Pass reward/penalty based on pass direction flags
     if 0 <= action <= 7:  # If action was a pass
         direction_idx = action + feature_dict['pass_N_flag']
-        direction_name = list(action_list.keys())[action]
         
         logger.info(f"\n[PASS DECISION]")
         logger.info(f"  Direction: {action_list[action]}")
         
         if prev_state[direction_idx] == 0:
-            pass_reward = -8  # Bad pass decision
-            reward -= 8
+            pass_reward = -1  # Bad pass decision
+            reward -= 1
             reward_components['bad_pass'] = pass_reward
             logger.info(f"  No teammate available in that direction")
-            logger.info(f"  Penalty: -8.00")
+            logger.info(f"  Penalty: -1.00")
         else:
             pass_reward = 2  # Good pass
             reward += 2

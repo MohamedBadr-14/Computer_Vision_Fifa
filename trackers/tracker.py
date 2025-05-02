@@ -20,6 +20,11 @@ class Tracker:
         self.goal_position = (60,42)
         # self.previously_interpolated_ids = []
 
+    def reset_tracker(self):
+        self.ball_positions_history = []
+        self.last_valid_position = None
+        self.frame_num = 0    
+
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
             for track_id, track_info in object_tracks.items():
@@ -100,7 +105,7 @@ class Tracker:
 
     def detect_frame(self, frame):
         # Process a single frame
-        detection = self.model.predict(frame , conf = 0.1) #BADR MIDO
+        detection = self.model(frame , conf = 0.1,verbose = False) #BADR MIDO
         return detection
 
     def get_object_track(self, frame):

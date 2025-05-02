@@ -27,7 +27,7 @@ class KeypointsTransformer():
 
     def detect_keypoints(self, image):
         # Use the YOLO model to detect keypoints in the image
-        results = self.keypoint_detector.predict(image, conf=0.5, show=False)
+        results = self.keypoint_detector(image, conf=0.5, show=False,verbose=False)
         keypoints = []
         results = results[0].keypoints.xy[0]
 

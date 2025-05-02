@@ -178,13 +178,13 @@ class ComputerVision:
         print("DONEEEEEE" , time.time() - start_time)
 
         # Draw output
-        output_video_frames = self.tracker.draw_annotations(
-            video_frames, all_tracks
-        )
+        # output_video_frames = self.tracker.draw_annotations(
+        #     video_frames, all_tracks
+        # )
         # save_video(output_video_frames, "output_videos/points.mp4")
 
         # # Save video
-        save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
+        # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
         return frame_tracks, hasBall

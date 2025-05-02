@@ -293,6 +293,8 @@ class Controller:
                 # Extract OCR results for logging
                 ocr_results = self.ocr_extractor.extract_points_and_attempts(frame)
                 
+                if ocr_results['points'] is not None:
+                    self.last_points = ocr_results['points']
                 # Skip frames if counter is active (e.g., after pausing)
 
                 if True:
@@ -349,7 +351,7 @@ class Controller:
                             self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False)
                             self.rl_agent.prev_state = cur_state #OUDA
 
-                        if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 1024 and len(self.rl_agent.memory) % 4 == 0):
+                        if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 750 and len(self.rl_agent.memory) % 4 == 0):
                             self.rl_agent.replay(64)  # Train on batch of 32 experiences
                    
                         print("ACTION TAKEN:", action_taken)
@@ -362,6 +364,9 @@ class Controller:
                     
                     # Resume game and continue
                     # is_action = True if (self.action_taken is not None and has_ball) else False
+                    # wait for key d pressed
+                    # self.logger.info("Waiting for 'd' key press to resume game...")
+                    keyboard.wait('l')
                     resume_process()
                     self.is_paused = False
                     if self.action_taken is not None:
@@ -407,6 +412,7 @@ class Controller:
                     self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
                     self.first_time = True
                     self.action_shoot= False
+                    self.computer_vision.tracker.reset_tracker()
                     continue
 
                 # Track attempts and handle attempt transitions
@@ -476,6 +482,7 @@ class Controller:
 if __name__ == "__main__":
     # Create and run the controller with optional video recording
     controller = Controller(
+        "soccer_dqn_trained.pth",
         )
     rl_model = controller.rl_agent
     try:

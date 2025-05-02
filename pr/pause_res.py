@@ -29,6 +29,7 @@ class THREADENTRY32(ctypes.Structure):
 def pause_process(process_name = "FC25.exe"):
     """Pause a process by suspending all its threads."""
     # Find the process by name
+    print(f"Searching for process: {process_name}")
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == process_name:
             pid = proc.info['pid']
@@ -79,6 +80,7 @@ def pause_process(process_name = "FC25.exe"):
 def resume_process(process_name = "FC25.exe"):
     """Resume a process by resuming all its threads."""
     # Find the process by name
+    print(f"Resuming {process_name}...")
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == process_name:
             pid = proc.info['pid']
