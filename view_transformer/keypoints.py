@@ -13,7 +13,7 @@ class KeypointsTransformer():
         [39.85, 45],       # ARC_CURVE
         [43.5,52.31]      # ARC_DOWN
         ], dtype=np.float32)
-        self.keypoint_detector = YOLO('../drive/MyDrive/models/keypoints.pt')
+        self.keypoint_detector = YOLO('D:/Computer_Vision_Fifa/models/keypoints.pt')
         # self.keypoint_detector.to('cuda') 
         
         self.last_valid_keypoints = np.array([

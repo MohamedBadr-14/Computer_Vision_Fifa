@@ -7,11 +7,12 @@ from view_transformer import  KeypointsTransformer
 import cv2
 import os
 import time
+import json
 
 class ComputerVision:
     def __init__(self):
         print(os.getcwd())
-        self.tracker = Tracker("../drive/MyDrive/models/best_new.pt")
+        self.tracker = Tracker("D:/Computer_Vision_Fifa/models/best_new.pt")
         self.team_assigner = TeamAssigner()
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
@@ -164,20 +165,25 @@ class ComputerVision:
 
             
 
-            all_tracks["players"].append(frame_tracks["players"])
-            all_tracks["ball"].append(frame_tracks["ball"])
-            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            all_tracks["goalpost"].append(frame_tracks["goalpost"])
+        all_tracks["players"].append(frame_tracks["players"])
+        all_tracks["ball"].append(frame_tracks["ball"])
+        all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+        all_tracks["goalpost"].append(frame_tracks["goalpost"])
+        
+        # Save all_tracks to a JSON file
+        output_path = "output_tracks.json"
+        with open(output_path, "w") as json_file:
+            json.dump(all_tracks, json_file, indent=4)
         print("DONEEEEEE" , time.time() - start_time)
 
-        # Draw output
-        output_video_frames = self.tracker.draw_annotations(
-            video_frames, all_tracks
-        )
+        # # Draw output
+        # output_video_frames = self.tracker.draw_annotations(
+        #     video_frames, all_tracks
+        # )
         # save_video(output_video_frames, "output_videos/points.mp4")
 
         # # Save video
-        save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
+        # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
         return frame_tracks, hasBall
