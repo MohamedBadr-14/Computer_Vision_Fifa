@@ -23,8 +23,8 @@ class TeamAssigner:
             self.SIGLIP_MODEL_PATH, 
             use_fast=True  # Enable fast tokenizer if available
         )
-        self.reducer = joblib.load('../drive/MyDrive/models/reducer_model_gpu.pkl')
-        self.kmeans = joblib.load('../drive/MyDrive/models/kmeans_trained_gpu.pkl')
+        self.reducer = joblib.load('./models/reducer_model_cpu.pkl')
+        self.kmeans = joblib.load('./models/kmeans_trained_cpu.pkl')
     
     def extract_crops(self, tracks, frame):
         crops = []

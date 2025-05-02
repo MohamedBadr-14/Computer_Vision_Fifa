@@ -57,6 +57,7 @@ class Tracker:
                 "position": frame_tracks["players"][goalkeeper]["position"],
                 "position_transformed": frame_tracks["players"][goalkeeper]["position_transformed"],
             }
+            print("GOALKEEPER ID" , goalkeeper)
             del frame_tracks["players"][goalkeeper] 
         return frame_tracks
     
@@ -100,7 +101,7 @@ class Tracker:
 
     def detect_frame(self, frame):
         # Process a single frame
-        detection = self.model.predict(frame , conf = 0.1) #BADR MIDO
+        detection = self.model(frame , conf = 0.1 ) #BADR MIDO
         return detection
 
     def get_object_track(self, frame):
@@ -164,9 +165,10 @@ class Tracker:
                 distance = np.linalg.norm(
                     np.array(position[0:2]) - np.array(self.last_valid_position)
                 )
-                # #print("distance", distance)
+                print("distance", distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
+                    print("\nDistance exceeded threshold\n" , distance)
                     return {}
                 else:
                     self.last_valid_position = position[0:2]

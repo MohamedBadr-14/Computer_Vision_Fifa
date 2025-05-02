@@ -4,6 +4,7 @@ import numpy as np
 from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from view_transformer import  KeypointsTransformer
+import json
 import cv2
 import os
 import time
@@ -11,7 +12,7 @@ import time
 class ComputerVision:
     def __init__(self):
         print(os.getcwd())
-        self.tracker = Tracker("../drive/MyDrive/models/best_new.pt")
+        self.tracker = Tracker("./models/best_new.pt")
         self.team_assigner = TeamAssigner()
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
@@ -27,8 +28,7 @@ class ComputerVision:
                 frame_path = os.path.join(frames_path, filename)
                 frame = cv2.imread(frame_path)
                 frames.append(frame)
-                if count == 100:
-                    break
+
                 count += 1
         return frames
         
@@ -45,11 +45,8 @@ class ComputerVision:
         # print("Reading video..." , track_stubs)
         # video_frames = read_video("input_videos/general_small.mp4")
         all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
-        to_be_sent = {}
 
-        # if track_stubs and os.path.exists("stubs/tracks.pkl"):
-        #     with open("stubs/tracks.pkl", "rb") as f:
-        #         loaded_tracks = pickle.load(f)
+        # video_frames = video_frames[:7]
 
         print(len(video_frames))
         for test,frame in enumerate(video_frames):
@@ -62,12 +59,17 @@ class ComputerVision:
             test += 1  # test
 
             self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
+            print("Frame: ", test, "Tracks:")
+            for id, tracks in frame_tracks['players'].items():
+                print("ID: ", id, "CONF: ", tracks["conf"])
             #adjust goalkeeper detections
 
             # Replace Outliers
-            if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.2 :
+            # if frame_tracks["ball"]:
+            #     print("Before outliers: ", frame_tracks["ball"][1]["conf"])
+            if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.25 :
                 frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
-                    frame_tracks["ball"], 120
+                    frame_tracks["ball"], 170
                 )
 
             # interpolate again
@@ -144,7 +146,7 @@ class ComputerVision:
 
             # Remove duplicate players
             for player_id in merged_players:
-                # print("Removing player ID:", player_id)
+                print("Removing player ID:", player_id)
                 del frame_tracks["players"][player_id]
             
         
@@ -168,8 +170,9 @@ class ComputerVision:
             all_tracks["ball"].append(frame_tracks["ball"])
             all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
             all_tracks["goalpost"].append(frame_tracks["goalpost"])
+        # print("ALL TRACKS" , all_tracks)
         print("DONEEEEEE" , time.time() - start_time)
-
+        
         # Draw output
         output_video_frames = self.tracker.draw_annotations(
             video_frames, all_tracks
@@ -177,7 +180,7 @@ class ComputerVision:
         # save_video(output_video_frames, "output_videos/points.mp4")
 
         # # Save video
-        save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
+        save_video(output_video_frames, "output_videos/test_new_kebeer_001.mp4")
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
         return frame_tracks, hasBall

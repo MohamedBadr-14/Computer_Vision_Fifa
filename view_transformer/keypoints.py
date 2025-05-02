@@ -13,7 +13,7 @@ class KeypointsTransformer():
         [39.85, 45],       # ARC_CURVE
         [43.5,52.31]      # ARC_DOWN
         ], dtype=np.float32)
-        self.keypoint_detector = YOLO('../drive/MyDrive/models/keypoints.pt')
+        self.keypoint_detector = YOLO('./models/keypoints.pt')
         # self.keypoint_detector.to('cuda') 
         
         self.last_valid_keypoints = np.array([
@@ -27,7 +27,7 @@ class KeypointsTransformer():
 
     def detect_keypoints(self, image):
         # Use the YOLO model to detect keypoints in the image
-        results = self.keypoint_detector.predict(image, conf=0.5, show=False)
+        results = self.keypoint_detector(image, conf=0.5, show=False,verbose=False)
         keypoints = []
         results = results[0].keypoints.xy[0]
 
