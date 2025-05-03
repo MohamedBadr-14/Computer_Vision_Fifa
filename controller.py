@@ -59,8 +59,9 @@ class Controller:
         self.trainNN_counter = 0        # Counter for neural network training
         self.action_taken = None        # Current action
         self.prev_action = None         # Previous action
-        self.last_action_time = None    # Time when last action was taken
         self.action_shoot=False
+
+        
 
         
         # Default scene state when data is unavailable
@@ -94,6 +95,63 @@ class Controller:
         # self.skip_counter = self.pause_frames_skip
         # self.temp_flag = False
         # self.logger.debug(f"Reset skip_counter to {self.pause_frames_skip}")
+    def movement_action(self, action):
+        match action:
+            case 8:
+                keyboard.press('w')
+                keyboard.press('d')
+            case 9:
+                keyboard.press('w')
+                keyboard.press('d')
+            case 10:
+                keyboard.press('d')
+            case 11:
+                keyboard.press('s')
+                keyboard.press('d')
+            case 12:
+                keyboard.press('s')
+
+            case 13:
+                keyboard.press('s')
+                keyboard.press('a')
+
+            case 14:
+                keyboard.press('a')
+
+            case 15:
+                keyboard.press('w')
+                keyboard.press('a')
+
+
+    def stop_movement_action(self, action):
+        match action:
+            case 8:
+                keyboard.release('w')
+                keyboard.release('d')
+            case 9:
+                keyboard.release('w')
+                keyboard.release('d')
+            case 10:
+                keyboard.release('d')
+            case 11:
+                keyboard.release('s')
+                keyboard.release('d')
+            case 12:
+                keyboard.release('s')
+
+            case 13:
+                keyboard.release('s')
+                keyboard.release('a')
+
+            case 14:
+                keyboard.release('a')
+
+            case 15:
+                keyboard.release('w')
+                keyboard.release('a')
+            case _:
+                print(f"Unknown action: {action}")
+                # self.logger.warning(f"Unknown action: {action}")           
 
     def make_action(self, action, pass_duration=0.5, dribble_duration=0.5, shoot_duration=0.2):
         """
@@ -123,9 +181,8 @@ class Controller:
             16: "Shooting the ball"
         }
         
-        action_description = action_descriptions.get(action, f"Unknown action: {action}")
+        # action_description = action_descriptions.get(action, f"Unknown action: {action}")
         # self.logger.info(f"Making action [{action}]: {action_description}")
-        self.last_action_time = time.time()
         
         match action:
             case 0:
@@ -292,6 +349,12 @@ class Controller:
                 
                 # Extract OCR results for logging
                 ocr_results = self.ocr_extractor.extract_points_and_attempts(frame)
+
+                if self.prev_action is not None:
+                    if self.prev_action in range(8,16):
+                        self.movement_action(self.prev_action)
+                    else: 
+                        self.movement_action(10)
                 
                 if ocr_results['points'] is not None:
                     self.last_points = ocr_results['points']
@@ -328,6 +391,8 @@ class Controller:
                     gc.collect()
                     
                     if has_ball and not self.action_shoot:
+                        if self.prev_action is not None:
+                            self.stop_movement_action(self.prev_action)
                         # Reinforcement learning decision making
                         scene_toRL = scene.copy()
                         scene_toRL['Attemps'] = self.last_attempt
@@ -366,12 +431,17 @@ class Controller:
                     # is_action = True if (self.action_taken is not None and has_ball) else False
                     # wait for key d pressed
                     # self.logger.info("Waiting for 'd' key press to resume game...")
-                    keyboard.wait('l')
-                    resume_process()
-                    self.is_paused = False
+                    # keyboard.wait('l')
+                    
                     if self.action_taken is not None:
+                        self.is_paused = False
+                        resume_process()
+                        # self.make_action(10)
                         self.make_action(self.action_taken)
                         self.action_taken = None
+                    else:
+                        self.is_paused = False
+                        resume_process()
                     continue
                 
 
@@ -389,6 +459,7 @@ class Controller:
                 # Handle game restart condition
                 if self.last_attempt == '0' and ocr_results['attempts'] is None:
                     # self.logger.info(f"No attempts detected at frame {frame_count}, attempting restart")
+                    self.stop_movement_action(self.prev_action)
                     time.sleep(3)
                     keyboard.press('enter')
                     time.sleep(0.1)
@@ -413,6 +484,7 @@ class Controller:
                     self.first_time = True
                     self.action_shoot= False
                     self.computer_vision.tracker.reset_tracker()
+                    self.prev_action = None
                     continue
 
                 # Track attempts and handle attempt transitions
@@ -423,6 +495,7 @@ class Controller:
                 else: 
                     if ocr_results['attempts'] != self.last_attempt and ocr_results['attempts'] is not None:
                         # New attempt detected - process end of previous attempt
+                        self.stop_movement_action(self.prev_action)
                         self.computer_vision.tracker.reset_tracker()
                         self.last_attempt = ocr_results['attempts']
                         self.last_points = ocr_results['points']
@@ -443,7 +516,7 @@ class Controller:
                         self.temp_flag = False
                         frame_count += 1
                         self.action_shoot= False
-
+                        self.prev_action = None
                         continue
 
 
@@ -455,11 +528,15 @@ class Controller:
                     model_save_path = "soccer_dqn_trained.pth"
                     # self.logger.info(f"Saving DQN model to {model_save_path}")
                     self.rl_agent.save(model_save_path)
+                    
+                    for i in range(8,16):
+                        self.stop_movement_action(i) 
                     # save self.to_be_sent to a file
 
                     if self.is_paused:
                         resume_process()
                         self.is_paused = False
+                    
                     
                     # to_be_sent_array = np.array(self.to_be_sent)
                     # to_be_sent_path = "to_be_sent.npy"

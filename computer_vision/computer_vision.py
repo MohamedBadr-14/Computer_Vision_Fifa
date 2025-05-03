@@ -10,7 +10,9 @@ import time
 
 class ComputerVision:
     def __init__(self):
-        self.tracker = Tracker("models/best_new.pt")
+        # self.tracker = Tracker("models/best_new.pt")
+        
+        self.tracker = Tracker("models/best_initial.pt")
         self.team_assigner = TeamAssigner()
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
@@ -175,7 +177,8 @@ class ComputerVision:
             all_tracks["ball"].append(frame_tracks["ball"])
             all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
             all_tracks["goalpost"].append(frame_tracks["goalpost"])
-        print("DONEEEEEE" , time.time() - start_time)
+        # print("DONEEEEEE" , time.time() - start_time)
+        # print("all tracks: ", all_tracks)
 
         # Draw output
         # output_video_frames = self.tracker.draw_annotations(
