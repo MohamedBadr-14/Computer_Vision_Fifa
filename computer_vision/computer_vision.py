@@ -4,9 +4,11 @@ import numpy as np
 from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from view_transformer import  KeypointsTransformer
+import json
 import cv2
 import os
 import time
+from offside_detector import OffsideDetector
 
 class ComputerVision:
     def __init__(self):
@@ -17,6 +19,8 @@ class ComputerVision:
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
         self.attempts = None
+        self.offside_detector = OffsideDetector(gpu=True)
+        self.offside_detector.warmup()
         
     
     def read_frames(self,frames_path):
@@ -28,8 +32,7 @@ class ComputerVision:
                 frame_path = os.path.join(frames_path, filename)
                 frame = cv2.imread(frame_path)
                 frames.append(frame)
-                if count == 100:
-                    break
+
                 count += 1
         return frames
         
@@ -54,11 +57,8 @@ class ComputerVision:
         # print("Reading video..." , track_stubs)
         # video_frames = read_video("input_videos/general_small.mp4")
         all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
-        to_be_sent = {}
 
-        # if track_stubs and os.path.exists("stubs/tracks.pkl"):
-        #     with open("stubs/tracks.pkl", "rb") as f:
-        #         loaded_tracks = pickle.load(f)
+        # video_frames = video_frames[:7]
 
         print(len(video_frames))
         for test,frame in enumerate(video_frames):
@@ -74,9 +74,11 @@ class ComputerVision:
             #adjust goalkeeper detections
 
             # Replace Outliers
-            if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.2 :
+            # if frame_tracks["ball"]:
+            #     print("Before outliers: ", frame_tracks["ball"][1]["conf"])
+            if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.25 :
                 frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
-                    frame_tracks["ball"], 120
+                    frame_tracks["ball"], 170
                 )
 
             # interpolate again
@@ -153,7 +155,6 @@ class ComputerVision:
 
             # Remove duplicate players
             for player_id in merged_players:
-                # print("Removing player ID:", player_id)
                 del frame_tracks["players"][player_id]
             
         
@@ -170,6 +171,32 @@ class ComputerVision:
                         # print("assigned player:" , assigned_player)
                         # print("ball position:" , ball_position)
                         frame_tracks["players"][assigned_player]["has_ball"] = True
+                        # save the bounding box of the player having the ball save it as new image 
+
+                        # Convert bbox coordinates to integers before using for image cropping
+                        # Convert bbox coordinates to integers and expand by 300px in each direction
+                        time_before = time.time()
+                        bbox = frame_tracks["players"][assigned_player]["bbox"]
+                        height, width, _ = frame.shape
+
+                        # Calculate expanded coordinates with bounds checking
+                        x1 = max(0, int(bbox[0]) - 500)
+                        y1 = max(0, int(bbox[1]) - 500)
+                        x2 = min(width, int(bbox[2]) + 500)
+                        y2 = min(height, int(bbox[3]) + 500)
+
+                        # Save the expanded crop
+                        # time_stamp = time.time()
+                        # cv2.imwrite(f"output_videos/ball_{time_stamp}.jpg", 
+                        #             frame[y1:y2, x1:x2])
+                        isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
+                        time_after = time.time()
+                        print("Offside detection time: ", time_after - time_before)
+                        print("Is offside: ", isOffside)
+                        if isOffside:
+                            return None, None
+                        
+
 
             
 
@@ -190,6 +217,15 @@ class ComputerVision:
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
+        # return also the biggest x for team 1 and biggest x for team 2 using frame_tracks["players"]
+
+        # farthest player in team 1 without has_ball = true
+        # farthest player in team 2 without has_ball = true
+
+        # all_tracks["players"]
+
+        
+
         return frame_tracks, hasBall
 
 

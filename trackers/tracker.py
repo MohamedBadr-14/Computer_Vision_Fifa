@@ -62,6 +62,7 @@ class Tracker:
                 "position": frame_tracks["players"][goalkeeper]["position"],
                 "position_transformed": frame_tracks["players"][goalkeeper]["position_transformed"],
             }
+            print("GOALKEEPER ID" , goalkeeper)
             del frame_tracks["players"][goalkeeper] 
         return frame_tracks
     
@@ -169,9 +170,10 @@ class Tracker:
                 distance = np.linalg.norm(
                     np.array(position[0:2]) - np.array(self.last_valid_position)
                 )
-                # #print("distance", distance)
+                print("distance", distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
+                    print("\nDistance exceeded threshold\n" , distance)
                     return {}
                 else:
                     self.last_valid_position = position[0:2]

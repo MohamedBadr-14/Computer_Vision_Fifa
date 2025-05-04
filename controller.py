@@ -61,7 +61,6 @@ class Controller:
         self.prev_action = None         # Previous action
         self.action_shoot=False
 
-        
 
         
         # Default scene state when data is unavailable
@@ -381,8 +380,20 @@ class Controller:
                     pause_process()
                     time.sleep(0.1)
                     self.is_paused = True
-                    
-                    scene, has_ball = self.computer_vision.run(self.frames_to_send, self.last_attempt)
+
+                    time_before_processing = time.time()
+                    scene, has_ball= self.computer_vision.run(self.frames_to_send, self.last_attempt)
+                    time_after_processing = time.time()
+                    elapsed_time = time_after_processing - time_before_processing
+                    print(f"Processing time: {elapsed_time:.2f} seconds")
+                    if scene is None and has_ball is None:
+                        print("OFFSIDE DETECTED")
+                        self.frames_to_send.clear()
+                        gc.collect()
+                        self.is_paused = False
+                        resume_process()    
+                        continue
+
                     print("HAS BALL:", has_ball)
 
 
@@ -485,6 +496,9 @@ class Controller:
                     self.action_shoot= False
                     self.computer_vision.tracker.reset_tracker()
                     self.prev_action = None
+                    self.prev_farthest_team_1 = None
+                    self.prev_farthest_team_2 = None
+                    self.prev_ball_pos = None
                     continue
 
                 # Track attempts and handle attempt transitions
@@ -517,6 +531,9 @@ class Controller:
                         frame_count += 1
                         self.action_shoot= False
                         self.prev_action = None
+                        self.prev_farthest_team_1 = None
+                        self.prev_farthest_team_2 = None
+                        self.prev_ball_pos = None
                         continue
 
 

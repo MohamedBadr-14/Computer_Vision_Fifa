@@ -6,7 +6,7 @@ from easyocr import Reader
 
 class OCRExtractor:
     def __init__(self):
-        self.reader = Reader(['en'], gpu=True) #BADR
+        self.reader = Reader(['en'], gpu=True,quantize=True) #BADR OUDA
         
     def enhance_image(self, img ):
             # Convert to grayscale if not already

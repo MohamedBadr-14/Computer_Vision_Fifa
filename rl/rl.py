@@ -775,9 +775,12 @@ class DQNAgent:
     def act(self, state):
         if np.random.rand() <= self.epsilon:
             if np.random.rand() < 0.2:
+                print("Random action")
+
                 return 16  # Shoot action
             else:
                 # 80% chance to choose other actions (0-15) uniformly
+                print("Random action")
                 return random.randrange(16)  # Actions 0-15 (pass or dribble)
             # return random.randrange(self.action_size)
 
@@ -787,7 +790,7 @@ class DQNAgent:
         state = torch.FloatTensor(state).unsqueeze(0)
         act_values = self.model(state)
         #print the probability for each action
-        print("OUDA")
+        print("neural network output")
         print(act_values)
 
         return torch.argmax(act_values).item()
