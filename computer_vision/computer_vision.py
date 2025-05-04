@@ -8,15 +8,19 @@ import json
 import cv2
 import os
 import time
+from offside_detector import OffsideDetector
 
 class ComputerVision:
     def __init__(self):
-        print(os.getcwd())
-        self.tracker = Tracker("./models/best_new.pt")
+        # self.tracker = Tracker("models/best_new.pt")
+        
+        self.tracker = Tracker("models/best_initial.pt")
         self.team_assigner = TeamAssigner()
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
         self.attempts = None
+        self.offside_detector = OffsideDetector(gpu=True)
+        self.offside_detector.warmup()
         
     
     def read_frames(self,frames_path):
@@ -35,12 +39,20 @@ class ComputerVision:
 
     def run(self,video_frames,attempts):
 
+        # for i, frame in enumerate(video_frames):
+        #             timestamp = time.time()
+        #             cv2.imwrite(f"D:/fifa-vision/all/frame_{timestamp}_{i}.jpg", frame)
         if self.attempts is None:
             self.attempts = attempts
 
+        print("Prev attempt: ", self.attempts)
+        print("Cur attempt: ", attempts)
         if self.attempts != attempts:
+            # print("New attempt detected, resetting tracker...")
             self.attempts = attempts
             self.tracker.reset_tracker()
+            # for i, frame in enumerate(video_frames):
+            #         cv2.imwrite(f"D:/fifa-vision/new_attempts/frame_{self.attempts}_{i}.jpg", frame)
         # Read Video
         # print("Reading video..." , track_stubs)
         # video_frames = read_video("input_videos/general_small.mp4")
@@ -59,9 +71,6 @@ class ComputerVision:
             test += 1  # test
 
             self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
-            print("Frame: ", test, "Tracks:")
-            for id, tracks in frame_tracks['players'].items():
-                print("ID: ", id, "CONF: ", tracks["conf"])
             #adjust goalkeeper detections
 
             # Replace Outliers
@@ -146,7 +155,6 @@ class ComputerVision:
 
             # Remove duplicate players
             for player_id in merged_players:
-                print("Removing player ID:", player_id)
                 del frame_tracks["players"][player_id]
             
         
@@ -163,6 +171,32 @@ class ComputerVision:
                         # print("assigned player:" , assigned_player)
                         # print("ball position:" , ball_position)
                         frame_tracks["players"][assigned_player]["has_ball"] = True
+                        # save the bounding box of the player having the ball save it as new image 
+
+                        # Convert bbox coordinates to integers before using for image cropping
+                        # Convert bbox coordinates to integers and expand by 300px in each direction
+                        time_before = time.time()
+                        bbox = frame_tracks["players"][assigned_player]["bbox"]
+                        height, width, _ = frame.shape
+
+                        # Calculate expanded coordinates with bounds checking
+                        x1 = max(0, int(bbox[0]) - 500)
+                        y1 = max(0, int(bbox[1]) - 500)
+                        x2 = min(width, int(bbox[2]) + 500)
+                        y2 = min(height, int(bbox[3]) + 500)
+
+                        # Save the expanded crop
+                        # time_stamp = time.time()
+                        # cv2.imwrite(f"output_videos/ball_{time_stamp}.jpg", 
+                        #             frame[y1:y2, x1:x2])
+                        isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
+                        time_after = time.time()
+                        print("Offside detection time: ", time_after - time_before)
+                        print("Is offside: ", isOffside)
+                        if isOffside:
+                            return None, None
+                        
+
 
             
 
@@ -170,19 +204,28 @@ class ComputerVision:
             all_tracks["ball"].append(frame_tracks["ball"])
             all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
             all_tracks["goalpost"].append(frame_tracks["goalpost"])
-        # print("ALL TRACKS" , all_tracks)
-        print("DONEEEEEE" , time.time() - start_time)
-        
+        # print("DONEEEEEE" , time.time() - start_time)
+        # print("all tracks: ", all_tracks)
+
         # Draw output
-        output_video_frames = self.tracker.draw_annotations(
-            video_frames, all_tracks
-        )
+        # output_video_frames = self.tracker.draw_annotations(
+        #     video_frames, all_tracks
+        # )
         # save_video(output_video_frames, "output_videos/points.mp4")
 
         # # Save video
-        save_video(output_video_frames, "output_videos/test_new_kebeer_001.mp4")
+        # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
+        # return also the biggest x for team 1 and biggest x for team 2 using frame_tracks["players"]
+
+        # farthest player in team 1 without has_ball = true
+        # farthest player in team 2 without has_ball = true
+
+        # all_tracks["players"]
+
+        
+
         return frame_tracks, hasBall
 
 
