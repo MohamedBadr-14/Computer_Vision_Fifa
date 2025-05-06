@@ -6,6 +6,75 @@ import torch.nn as nn
 import torch.optim as optim
 from collections import deque
 import matplotlib.pyplot as plt
+from typing import TypedDict, Tuple
+
+class Features(TypedDict):
+    no_opponent_in_front: bool
+    canPass_N: int
+    canPass_NE: int
+    canPass_E: int
+    canPass_SE: int
+    canPass_S: int
+    canPass_SW: int
+    canPass_W: int
+    canPass_NW: int
+    dist_goal: float
+    player_pos: Tuple[float, float]
+    team_has_ball: bool
+    num_of_opponents_in_player_zone: int
+    num_of_teammates_in_player_zone: int
+    attempts: int
+    score: int
+    danger: float
+    
+feature_dict = {
+    "no_opponent_in_front": 0,
+    "canPass_N": 1,
+    "canPass_NE": 2,
+    "canPass_E": 3,
+    "canPass_SE": 4,
+    "canPass_S": 5,
+    "canPass_SW": 6,
+    "canPass_W": 7,
+    "canPass_NW": 8,
+    "dist_goal": 9,
+    "player_pos": 10,
+    "team_has_ball": 11,
+    "num_of_opponents_in_player_zone": 12,
+    "num_of_teammates_in_player_zone": 13,
+    "attempts": 14,
+    "score": 15,
+    "danger": 16,
+}
+    
+def features_to_vector(features: Features) -> np.ndarray:
+    """
+    Converts the features dictionary into a fixed-size vector for DQN training.
+
+    :param features: A dictionary containing the extracted features.
+    :return: A NumPy array representing the feature vector.
+    """
+    vector = [
+        int(features["no_opponent_in_front"]),  # Convert boolean to int (0 or 1)
+        int(features["canPass_N"]),
+        int(features["canPass_NE"]),
+        int(features["canPass_E"]),
+        int(features["canPass_SE"]),
+        int(features["canPass_S"]),
+        int(features["canPass_SW"]),
+        int(features["canPass_W"]),
+        int(features["canPass_NW"]),
+        features["dist_goal"],
+        features["player_pos"][0],  # x-coordinate
+        features["player_pos"][1],  # y-coordinate
+        int(features["team_has_ball"]),  # Convert boolean to int (0 or 1)
+        features["num_of_opponents_in_player_zone"],
+        features["num_of_teammates_in_player_zone"],
+        features["attempts"],
+        features["score"],
+        features["danger"],
+    ]
+    return np.array(vector, dtype=np.float32)
 
 
 test = {
@@ -22,6 +91,7 @@ test = {
                 "position": [1031, 925],
                 "position_transformed": [40.253204345703125, 46.666656494140625],
                 "team": 1,
+                "has_ball": True,
             },
             "3": {
                 "bbox": [
@@ -34,6 +104,7 @@ test = {
                 "position": [1064, 694],
                 "position_transformed": [40.58443832397461, 37.976226806640625],
                 "team": 1,
+                # "has_ball": True,
             },
             "2": {
                 "bbox": [
@@ -44,58 +115,25 @@ test = {
                 ],
                 "conf": 0.6451548,
                 "position": [1064, 694],
-                "position_transformed": [38.58443832397461, 35.976226806640625],
-                "team": 1,
-            },
-            "1": {
-                "bbox": [
-                    1039.3731689453125,
-                    586.4225463867188,
-                    1089.8358154296875,
-                    694.4285278320312,
-                ],
-                "conf": 0.6451548,
-                "position": [1064, 694],
-                "position_transformed": [45.8443832397461, 35.976226806640625],
-                "team": 1,
-            },
-            "9": {
-                "bbox": [
-                    1039.3731689453125,
-                    586.4225463867188,
-                    1089.8358154296875,
-                    694.4285278320312,
-                ],
-                "conf": 0.6451548,
-                "position": [1064, 694],
-                "position_transformed": [20.58443832397461, 80.976226806640625],
-                "team": 1,
-            },
-            "7": {
-                "bbox": [
-                    1039.3731689453125,
-                    586.4225463867188,
-                    1089.8358154296875,
-                    694.4285278320312,
-                ],
-                "conf": 0.6451548,
-                "position": [1064, 694],
-                "position_transformed": [35.8443832397461, 55.976226806640625],
-                "team": 1,
-            },
-            "10": {
-                "bbox": [
-                    1039.3731689453125,
-                    586.4225463867188,
-                    1089.8358154296875,
-                    694.4285278320312,
-                ],
-                "conf": 0.6451548,
-                "position": [1064, 694],
-                "position_transformed": [38.8443832397461, 55.976226806640625],
+                "position_transformed": [43.58443832397461, 37.976226806640625],
                 "team": 2,
             },
-            "11": {
+        },
+        {
+            "0": {
+                "bbox": [
+                    1001.4005737304688,
+                    799.7320556640625,
+                    1062.396240234375,
+                    925.5164794921875,
+                ],
+                "conf": 0.8071421,
+                "position": [1031, 925],
+                "position_transformed": [47.253204345703125, 46.666656494140625],
+                "team": 1,
+                "has_ball": True,
+            },
+            "3": {
                 "bbox": [
                     1039.3731689453125,
                     586.4225463867188,
@@ -104,63 +142,61 @@ test = {
                 ],
                 "conf": 0.6451548,
                 "position": [1064, 694],
-                "position_transformed": [44.8443832397461, 55.976226806640625],
+                "position_transformed": [40.58443832397461, 37.976226806640625],
                 "team": 1,
-                "has_ball": True,
+                # "has_ball": True,
+            },
+            "2": {
+                "bbox": [
+                    1039.3731689453125,
+                    586.4225463867188,
+                    1089.8358154296875,
+                    694.4285278320312,
+                ],
+                "conf": 0.6451548,
+                "position": [1064, 694],
+                "position_transformed": [47.58443832397461, 45.976226806640625],
+                "team": 2,
             },
         },
         {
             "0": {
                 "bbox": [
-                    1000.3087158203125,
-                    819.2086181640625,
-                    1054.7247314453125,
-                    953.2657470703125,
+                    1001.4005737304688,
+                    799.7320556640625,
+                    1062.396240234375,
+                    925.5164794921875,
                 ],
-                "conf": 0.7896831,
-                "position": [1027, 953],
-                "position_transformed": [40.17107391357422, 47.09035873413086],
+                "conf": 0.8071421,
+                "position": [1031, 925],
+                "position_transformed": [47.253204345703125, 46.666656494140625],
                 "team": 1,
+                # "has_ball": True,
             },
-            "6": {
+            "3": {
                 "bbox": [
-                    1037.8121337890625,
-                    591.7083740234375,
-                    1087.9847412109375,
-                    714.015869140625,
+                    1039.3731689453125,
+                    586.4225463867188,
+                    1089.8358154296875,
+                    694.4285278320312,
                 ],
-                "conf": 0.39994213,
-                "position": [1062, 714],
-                "position_transformed": [40.53303909301758, 38.3753662109375],
+                "conf": 0.6451548,
+                "position": [1064, 694],
+                "position_transformed": [40.58443832397461, 37.976226806640625],
                 "team": 1,
-                "has_ball": True,
+                # "has_ball": True,
             },
-        },
-        {
-            "0": {
+            "2": {
                 "bbox": [
-                    989.3291015625,
-                    827.08544921875,
-                    1049.1044921875,
-                    978.5794677734375,
+                    1039.3731689453125,
+                    586.4225463867188,
+                    1089.8358154296875,
+                    694.4285278320312,
                 ],
-                "conf": 0.806077,
-                "position": [1019, 978],
-                "position_transformed": [40.107818603515625, 47.37126159667969],
-                "team": 1,
-            },
-            "5": {
-                "bbox": [
-                    1046.9359130859375,
-                    602.583740234375,
-                    1095.2481689453125,
-                    736.2244873046875,
-                ],
-                "conf": 0.5141418,
-                "position": [1071, 736],
-                "position_transformed": [40.72050476074219, 38.871307373046875],
-                "team": 1,
-                "has_ball": True,
+                "conf": 0.6451548,
+                "position": [1064, 694],
+                "position_transformed": [43.58443832397461, 37.976226806640625],
+                "team": 2,
             },
         },
         {
@@ -470,48 +506,13 @@ test = {
     ],
 }
 
-first_state = {
-    "players": test["players"][0],
-    "ball": test["ball"][0],
-    "goalkeeper": test["goalkeeper"][0],
-    "goalpost": test["goalpost"][0],
-    "referees": test["referees"],
-}
 
 
-feature_dict = {
-    "dist_goal": 0,
-    "angle_goal": 1,
-    "closest_opp_dist": 2,
-    "closest_opp_angle": 3,
-    "no_opponent_in_front": 4,
-    "closest_N": 5,
-    "closest_NE": 6,
-    "closest_E": 7,
-    "closest_SE": 8,
-    "closest_S": 9,
-    "closest_SW": 10,
-    "closest_W": 11,
-    "closest_NW": 12,
-    "pass_N_flag": 13,
-    "pass_NE_flag": 14,
-    "pass_E_flag": 15,
-    "pass_SE_flag": 16,
-    "pass_S_flag": 17,
-    "pass_SW_flag": 18,
-    "pass_W_flag": 19,
-    "pass_NW_flag": 20,
-    "attempts": 21,
-    "score": 22,
-    "top_box": 23,
-    "middle_box": 24,
-    "bottom_box": 25,
-    "goaldetected": 26,
-    "agent_box": 27,
-}
 
 FIELD_WIDTH = 50
 FIELD_HEIGHT = 90  # haytghyar
+BOX_WIDTH = 7.5  # Assuming a fixed width for the boxes
+BOX_HEIGHT = 20  # Assuming a fixed height for the boxes
 GOAL_POSITION = (105, 34)  # lama yerga3
 NUM_PLAYERS = 22  # 11 players per team
 NUM_ACTIONS = 17
@@ -536,14 +537,16 @@ action_list = {
     16: "shoot",
 }
 
+action_list_inv = {key: value for value, key in action_list.items()}
+
 
 boxes = {
-    1: {"name": "top_left_box", "top_left_pos": (35, 60)},
-    2: {"name": "middle_left_box", "top_left_pos": (35, 40)},
-    3: {"name": "bottom_left_box", "top_left_pos": (35, 20)},
-    4: {"name": "top_right_box", "top_left_pos": (42.5, 60)},
-    5: {"name": "middle_right_box", "top_left_pos": (42.5, 40)},
-    6: {"name": "bottom_right_box", "top_left_pos": (42.5, 20)},
+    1: {"name": "top_left_box", "top_left_pos": (35, 55)},
+    2: {"name": "middle_left_box", "top_left_pos": (35, 35)},
+    3: {"name": "bottom_left_box", "top_left_pos": (35, 15)},
+    4: {"name": "top_right_box", "top_left_pos": (42.5, 55)},
+    5: {"name": "middle_right_box", "top_left_pos": (42.5, 35)},
+    6: {"name": "bottom_right_box", "top_left_pos": (42.5, 15)},
 }
 
 boxes_danger = {
@@ -567,7 +570,8 @@ def get_box_danger(box):
         return boxes_danger[box]
     else:
         return 0  # Default to 0 if box is not recognized
-    
+
+
 def get_box_danger_from_position(position):
     """
     Returns the danger level of a box based on the position.
@@ -577,8 +581,10 @@ def get_box_danger_from_position(position):
     """
     for box_id, box in boxes.items():
         if (
-            box["top_left_pos"][0] <= position[0] <= box["top_left_pos"][0] + 7
-            and box["top_left_pos"][1] <= position[1] <= box["top_left_pos"][1] + 20
+            box["top_left_pos"][0] <= position[0] <= box["top_left_pos"][0] + BOX_WIDTH
+            and box["top_left_pos"][1]
+            <= position[1]
+            <= box["top_left_pos"][1] + BOX_HEIGHT
         ):
             return boxes_danger[box["name"]]
     return 0  # Default to 0 if no box matches
@@ -598,7 +604,7 @@ def get_danger_transition(prev_box, new_box):
         return 0  # Default to 0 if either box is not recognized
 
 
-def get_num_of_opponents_in_player_zone( opponents, player_x, player_y):
+def get_num_of_opponents_in_player_zone(opponents, player_x, player_y):
     """
     Counts the number of opponents in the player's zone.
 
@@ -652,88 +658,113 @@ def get_num_of_teammates_in_player_zone(teammates, player_x, player_y):
 
 def compute_reward(state, action, next_state):
     reward = 0.0
+    print("\n--- Compute Reward Debug ---")
+    print(f"State: {state}")
+    print(f"Action: {action} ({action_list[action]})")
+    print(f"Next State: {next_state}")
 
     # Basic event-based rewards
-    # goalll
-    if next_state[feature_dict["score"]] - state[feature_dict["score"]] > 700:
+    if next_state["score"] - state["score"] > 700:
         reward += 1.0
-    elif next_state[feature_dict["score"]] - state[feature_dict["score"]] > 0: # on target
+        print("Goal scored! Reward: +1.0")
+    elif next_state["score"] - state["score"] > 0:
         reward += 0.3
+        print("Shot on target! Reward: +0.3")
     elif action_list[action] != "shoot" and next_state["team_has_ball"]:
         reward += 0.05
-    elif next_state["opponent_has_ball"] or ( (
-        next_state[feature_dict["score"]] == state[feature_dict["score"]]
-    ) and next_state[feature_dict["attempts"]] != state[feature_dict["attempts"]]): #turnover
+        print("Team still has the ball. Reward: +0.05")
+    elif not next_state["team_has_ball"] or (
+        (next_state["score"] == state["score"])
+        and next_state["attempts"] != state["attempts"]
+    ):
         reward -= 0.4
-  
+        print("Turnover occurred. Penalty: -0.4")
 
     # Progress toward goal
-    distance_reward = (
-        state["distance_to_goal"] - next_state["distance_to_goal"]
-    ) * 0.05
-    reward += distance_reward
+    if next_state["team_has_ball"]:
+        distance_reward = (state["dist_goal"] - next_state["dist_goal"]) * 0.05
+        reward += distance_reward
+        print(f"Progress toward goal. Distance reward: {distance_reward:.2f}")
 
     # Encourage faster decisions
     reward -= 0.01
+    print("Time penalty applied. Penalty: -0.01")
 
     # Spatial danger transition reward
     prev_danger = state["danger"]
-    new_danger = next_state["danger"]
-    danger_delta = new_danger - prev_danger
-    reward += danger_delta * 0.2  # Scale this as needed
-
+    if next_state["team_has_ball"]:
+        new_danger = next_state["danger"]
+        danger_delta = new_danger - prev_danger
+        reward += danger_delta * 0.2
+        print(
+            f"Danger transition. Danger delta: {danger_delta:.2f}, Reward: {danger_delta * 0.2:.2f}"
+        )
 
     # Action-based encouragement based on danger
-    # Assume: action == "shoot", "pass", "dribble" as strings. Adjust if action is int.
-    if  "shoot" in  action_list[action]:
-        if new_danger >= 0.8:
-            reward += 0.3  # Encourage shooting in high-danger zones
+    if "shoot" in action_list[action]:
+        if prev_danger >= 0.8:
+            reward += 0.3
+            print("Shooting in high-danger zone. Reward: +0.3")
         else:
-            reward -= 0.2  # Discourage long shots from low-danger zones
+            reward -= 0.2
+            print("Shooting in low-danger zone. Penalty: -0.2")
     else:
+        new_danger = next_state["danger"]
         if new_danger < 0.8:
-            reward += 0.2  # Encourage safe progression in low-danger areas
+            reward += 0.2
+            print("Safe progression in low-danger zone. Reward: +0.2")
         else:
-            reward += 0.05  # Still reward but less in high-danger
+            reward += 0.05
+            print("Progression in high-danger zone. Reward: +0.05")
 
     # Zone congestion and support
     num_teammates = next_state["num_of_teammates_in_player_zone"]
     num_opponents = next_state["num_of_opponents_in_player_zone"]
 
-    
-
-    if num_opponents > 2:
-        reward -= 0.2 * (num_opponents - 2)
+    penalty = 0.2 * (num_opponents)
+    reward -= penalty
+    print(f"Zone congestion. Opponents: {num_opponents}, Penalty: -{penalty:.2f}")
 
     reward += 0.1 * num_teammates
-    
-    # Count available pass directions
-    pass_option_count = (
-        next_state["canPass_N"] +
-        next_state["canPass_NE"] +
-        next_state["canPass_E"] +
-        next_state["canPass_SE"] +
-        next_state["canPass_S"] +
-        next_state["canPass_SW"] +
-        next_state["canPass_W"] +
-        next_state["canPass_NW"]
+    print(
+        f"Teammates in zone. Teammates: {num_teammates}, Reward: +{0.1 * num_teammates:.2f}"
     )
 
-    # Reward for being in a favorable passing situation
-    reward += 0.05 * pass_option_count  # Tune the coefficient as needed
+    # Count available pass directions
+    pass_option_count = (
+        next_state["canPass_N"]
+        + next_state["canPass_NE"]
+        + next_state["canPass_E"]
+        + next_state["canPass_SE"]
+        + next_state["canPass_S"]
+        + next_state["canPass_SW"]
+        + next_state["canPass_W"]
+        + next_state["canPass_NW"]
+    )
+    reward += 0.05 * pass_option_count
+    print(
+        f"Pass options available. Count: {pass_option_count}, Reward: +{0.05 * pass_option_count:.2f}"
+    )
 
     if not next_state["no_opponent_in_front"]:
         if pass_option_count > 0:
-            reward += 0.1 * pass_option_count * (1 + new_danger)
+            bonus = 0.1 * pass_option_count * (1 + new_danger)
+            reward += bonus
+            print(f"Opponent in front but pass options available. Bonus: +{bonus:.2f}")
         else:
-            reward -= 0.2 * (1 + new_danger)  # No options and under pressure
-    
-    if next_state["no_opponent_in_front"]:
-        if "dribble" in  action_list[action]  or "shoot" in  action_list[action] :
-            reward += 0.3  # Encourages aggressive play when space is available
-        else:
-            reward -= 0.1  # Slight penalty for unnecessary pass when path is clear
-    if "pass" in  action_list[action]:
+            penalty = 0.2 * (1 + new_danger)
+            reward -= penalty
+            print(f"No pass options and under pressure. Penalty: -{penalty:.2f}")
+
+    if state["no_opponent_in_front"]:
+        if "dribble" in action_list[action] and "E" in action_list[action]:
+            reward += 0.3
+            print("Aggressive play with no opponent in front. Reward: +0.3")
+        elif "pass" in action_list[action]:
+            reward -= 0.1
+            print("Unnecessary pass with no opponent in front. Penalty: -0.1")
+
+    if "pass" in action_list[action]:
         pass_directions = {
             "N": state["canPass_N"],
             "NE": state["canPass_NE"],
@@ -742,15 +773,18 @@ def compute_reward(state, action, next_state):
             "S": state["canPass_S"],
             "SW": state["canPass_SW"],
             "W": state["canPass_W"],
-            "NW": state["canPass_NW"]
+            "NW": state["canPass_NW"],
         }
-        
-        pass_direction = action_list[action].split("_")[1]  # Extract direction from action
-        if pass_directions.get(pass_direction, 0) > 0:
-            reward += 0.1  # Reward for passing in a valid direction
-        else:
-            reward -= 0.1  # Penalty
 
+        pass_direction = action_list[action].split("_")[1]
+        if pass_directions.get(pass_direction, 0) > 0:
+            reward += 0.1
+            print(f"Valid pass direction ({pass_direction}). Reward: +0.1")
+        else:
+            reward -= 0.1
+            print(f"Invalid pass direction ({pass_direction}). Penalty: -0.1")
+
+    print(f"Total Reward: {reward:.2f}")
     return reward
 
 
@@ -958,7 +992,7 @@ class SoccerFeatureExtractor:
                 if opp_x > last_opp_x:
                     last_opp_x = opp_x
 
-                if agent_x <= opp_x:
+                if agent_x <= opp_x and agent_y - 2.5 < opp_y < agent_y + 2.5:
                     all_opp_behind = False
 
                 dist = math.hypot(opp_x - agent_x, opp_y - agent_y)
@@ -1053,77 +1087,36 @@ class SoccerFeatureExtractor:
         goalkeeper,
         agent_x=0,
         agent_y=0,
-    ):
+    )-> Features:
 
         # lama nozbot el points
 
         # max_dist = math.sqrt(FIELD_WIDTH**2 + FIELD_HEIGHT**2)
-        goaldetected = False
         dist_goal = 100
         if goalpost:
-            goaldetected = True
             goalpost[1] = FIELD_HEIGHT - goalpost[1]
             dist_goal = SoccerFeatureExtractor.get_distance(
                 agent_x, agent_y, goalpost[0], goalpost[1]
             )
 
-        # directions = SoccerFeatureExtractor.get_pass_directions(
-        #     (agent_x, agent_y), teammates, opponents
-        # )
-        features = SoccerFeatureExtractor.get_opponent_and_pass_data(
+        features: Features = SoccerFeatureExtractor.get_opponent_and_pass_data(
             agent_x, agent_y, teammates, opponents
         )
         features["dist_goal"] = dist_goal
         features["player_pos"] = (agent_x, agent_y)
-        num_opponents = get_num_of_opponents_in_player_zone( opponents, agent_x, agent_y)
+        features["team_has_ball"] = True if agent_x > 0 else False
+        num_opponents = get_num_of_opponents_in_player_zone(opponents, agent_x, agent_y)
         num_teammates = get_num_of_teammates_in_player_zone(teammates, agent_x, agent_y)
         features["num_of_opponents_in_player_zone"] = num_opponents
         features["num_of_teammates_in_player_zone"] = num_teammates
         features["attempts"] = attempts
         features["score"] = score
-        features['danger'] = get_box_danger_from_position((agent_x, agent_y))
+        features["danger"] = get_box_danger_from_position((agent_x, agent_y))
         print("features", features)
-        plot_pitch(
-            teammates,
-            opponents,
-            (agent_x, agent_y),
-        )
+       
         return features
-        
-        # print(feature_vector)
-        # return np.array(
-        #     [
-        #         dist_goal,
-        #         # angle_goal,
-        #         # closest_opp_dist,
-        #         # closest_opp_angle,
-        #         # no_opponent_in_front,
-        #         # closest_N,
-        #         # closest_NE,
-        #         # closest_E,
-        #         # closest_SE,
-        #         # closest_S,
-        #         # closest_SW,
-        #         # closest_W,
-        #         # closest_NW,
-        #         # pass_N_flag,
-        #         # pass_NE_flag,
-        #         # pass_E_flag,
-        #         # pass_SE_flag,
-        #         # pass_S_flag,
-        #         # pass_SW_flag,
-        #         # pass_W_flag,
-        #         # pass_NW_flag,
-        #         attempts,
-        #         score,
-        #         # top_box,
-        #         # middle_box,
-        #         # bottom_box,
-        #         goaldetected,
-        #         agent_box,
-        #     ],
-        #     dtype=np.float32,
-        # )
+
+       
 
 
 ######################################################################################################
@@ -1138,8 +1131,8 @@ def plot_pitch(teammates, opponets, me):
     plt.ylabel("Height")
     for box_id, box_info in boxes.items():
         top_left = box_info["top_left_pos"]
-        width = 7.5  # Assuming a fixed width for the boxes
-        height = 20  # Assuming a fixed height for the boxes
+        width = BOX_WIDTH  # Assuming a fixed width for the boxes
+        height = BOX_HEIGHT  # Assuming a fixed height for the boxes
         plt.gca().add_patch(
             plt.Rectangle(
                 top_left,
@@ -1356,7 +1349,7 @@ class DQNAgent:
             action_size (int): Number of possible actions
             load_path (str, optional): Path to load pre-trained model. If None, creates new model.
         """
-        self.state_size = len(feature_dict)
+        self.state_size = len(feature_dict) + 1
         self.action_size = len(action_list)
         self.memory = deque(maxlen=10000)
         self.gamma = 0.95
@@ -1391,13 +1384,16 @@ class DQNAgent:
         self.target_model.load_state_dict(self.model.state_dict())
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+        stateVector = features_to_vector(state)
+        next_stateVector = features_to_vector(next_state)
+        self.memory.append((stateVector, action, reward, next_stateVector, done))
 
     def act(self, state):
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
-        state = torch.FloatTensor(state).unsqueeze(0)
-        act_values = self.model(state)
+        stateVector = features_to_vector(state)
+        stateVector = torch.FloatTensor(stateVector).unsqueeze(0)
+        act_values = self.model(stateVector)
         return torch.argmax(act_values).item()
 
     def replay(self, batch_size):
@@ -1474,11 +1470,13 @@ class DQNAgent:
         """
         # Convert scene to state
         state = get_state_from_positions(scene)
+        # Convert state to vector
+        state_vector = features_to_vector(state)
 
         # Get action using the trained model
         self.model.eval()  # Set model to evaluation mode
         with torch.no_grad():
-            state_tensor = torch.FloatTensor(state).unsqueeze(0)
+            state_tensor = torch.FloatTensor(state_vector).unsqueeze(0)
             action_values = self.model(state_tensor)
             action_idx = torch.argmax(action_values).item()
 
@@ -1493,9 +1491,42 @@ if __name__ == "__main__":
     # first_time = True
     # prev_action = None
     # trainNN_counter = 0
+    scene1 = {
+        "players": test["players"][0],
+        "ball": test["ball"][0],
+        "goalkeeper": test["goalkeeper"][0],
+        "goalpost": test["goalpost"][0],
+        "referees": test["referees"],
+        "Score": 0,
+    }
+    scene2 = {
+        "players": test["players"][1],
+        "ball": test["ball"][1],
+        "goalkeeper": test["goalkeeper"][1],
+        "goalpost": test["goalpost"][1],
+        "referees": test["referees"],
+        "Score": 0,
+    }
+    scene3 = {
+        "players": test["players"][2],
+        "ball": test["ball"][2],
+        "goalkeeper": test["goalkeeper"][2],
+        "goalpost": test["goalpost"][2],
+        "referees": test["referees"],
+        "Score": 800,
+    }
 
-    state = get_state_from_positions(first_state)
-    print("Initial State:", state)
+    state = get_state_from_positions(scene1)
+    next_state = get_state_from_positions(scene2)
+    next_state2 = get_state_from_positions(scene3)
+    action = action_list_inv["dribble_E"]
+    reward = compute_reward(state, action, next_state)
+    shoot = action_list_inv["shoot"]
+    reward_shoot = compute_reward(state, shoot, next_state2)
+    # print("Initial State:", state)
+    # print("Next State:", next_state)
+    print("Reward:", reward)
+    print("Reward shoot:", reward_shoot)
     # while True:
     #     cur_state = [random.randint(1, 3) for _ in range(28)]  # Random integers between 1 and 3
 
