@@ -40,10 +40,17 @@ feature_dict = {
     'agent_box':27,
     'agent_x': 28,
     'agent_y': 29,
+    "team_has_ball": 30,
+    "num_of_opponents_in_player_zone": 31,
+    "num_of_teammates_in_player_zone": 32,
+    "danger": 33,
 }
 
-FIELD_WIDTH = 60 
-FIELD_HEIGHT = 90 # haytghyar
+
+FIELD_WIDTH = 60
+FIELD_HEIGHT = 90  # haytghyar
+BOX_WIDTH = 7.5  # Assuming a fixed width for the boxes
+BOX_HEIGHT = 20  # Assuming a fixed height for the boxes
 GOAL_POSITION = (105, 34)  # lama yerga3
 NUM_ACTIONS = 17 
 
@@ -73,6 +80,257 @@ boxes = {
     2: "middle_box",
     3: "bottom_box",
 }
+
+boxes_mido = {
+    1: {"name": "top_left_box", "top_left_pos": (35, 55)},
+    2: {"name": "middle_left_box", "top_left_pos": (35, 35)},
+    3: {"name": "bottom_left_box", "top_left_pos": (35, 15)},
+    4: {"name": "top_right_box", "top_left_pos": (42.5, 55)},
+    5: {"name": "middle_right_box", "top_left_pos": (42.5, 35)},
+    6: {"name": "bottom_right_box", "top_left_pos": (42.5, 15)},
+}
+
+boxes_danger = {
+    "top_left_box": 0,
+    "middle_left_box": 0.5,
+    "bottom_left_box": 0,
+    "top_right_box": 0.8,
+    "middle_right_box": 1,
+    "bottom_right_box": 0.8,
+}
+
+
+def get_box_danger(box):
+    """
+    Returns the danger level of a given box.
+
+    :param box: The box to evaluate.
+    :return: Danger level (0, 1, or 2).
+    """
+    if box in boxes_danger:
+        return boxes_danger[box]
+    else:
+        return 0  # Default to 0 if box is not recognized
+
+
+def get_box_danger_from_position(position):
+    """
+    Returns the danger level of a box based on the position.
+
+    :param position: The position to evaluate.
+    :return: Danger level (0, 1, or 2).
+    """
+    for box_id, box in boxes_mido.items():
+        if (
+            box["top_left_pos"][0] <= position[0] <= box["top_left_pos"][0] + BOX_WIDTH
+            and box["top_left_pos"][1]
+            <= position[1]
+            <= box["top_left_pos"][1] + BOX_HEIGHT
+        ):
+            return boxes_danger[box["name"]]
+    return 0  # Default to 0 if no box matches
+
+
+def get_danger_transition(prev_box, new_box):
+    """
+    Returns the danger transition level between two boxes.
+
+    :param prev_box: The previous box.
+    :param new_box: The new box.
+    :return: Danger transition level (0, 1, or 2).
+    """
+    if prev_box in boxes_danger and new_box in boxes_danger:
+        return boxes_danger[new_box] - boxes_danger[prev_box]
+    else:
+        return 0  # Default to 0 if either box is not recognized
+
+
+def get_num_of_opponents_in_player_zone(opponents, player_x, player_y):
+    """
+    Counts the number of opponents in the player's zone.
+
+    :param
+    teammates: List of teammate positions.
+    :param opponents: List of opponent positions.
+    :param player_x: Player's x-coordinate.
+    :param player_y: Player's y-coordinate.
+    :return: Number of opponents in the player's zone.
+    """
+    player_zone = [
+        (player_x - 5, player_y + 5),  # Top-left corner
+        (player_x + 5, player_y - 5),  # Bottom-right corner
+    ]
+
+    count = 0
+    for opp_x, opp_y in opponents:
+        if (
+            player_zone[0][0] <= opp_x <= player_zone[1][0]
+            and player_zone[0][1] >= opp_y >= player_zone[1][1]
+        ):
+            count += 1
+
+    return count
+
+
+def get_num_of_teammates_in_player_zone(teammates, player_x, player_y):
+    """
+    Counts the number of teammates in the player's zone.
+
+    :param teammates: List of teammate positions.
+    :param player_x: Player's x-coordinate.
+    :param player_y: Player's y-coordinate.
+    :return: Number of teammates in the player's zone.
+    """
+    player_zone = [
+        (player_x - 5, player_y + 5),  # Top-left corner
+        (player_x + 5, player_y - 5),  # Bottom-right corner
+    ]
+
+    count = 0
+    for mate_x, mate_y in teammates:
+        if (
+            player_zone[0][0] <= mate_x <= player_zone[1][0]
+            and player_zone[0][1] >= mate_y >= player_zone[1][1]
+        ):
+            count += 1
+
+    return count
+
+
+def compute_reward(state, action, next_state):
+    reward = 0.0
+    print("\n--- Compute Reward Debug ---")
+    print(f"State: {state}")
+    print(f"Action: {action} ({action_list[action]})")
+    print(f"Next State: {next_state}")
+
+    # Basic event-based rewards
+    if next_state[feature_dict["score"]] - state[feature_dict["score"]] > 700:
+        reward += 1.0
+        print("Goal scored! Reward: +1.0")
+    elif next_state[feature_dict["score"]] - state[feature_dict["score"]] > 0:
+        reward += 0.3
+        print("Shot on target! Reward: +0.3")
+    elif action_list[action] != "shoot" and next_state[feature_dict["team_has_ball"]]:
+        reward += 0.05
+        print("Team still has the ball. Reward: +0.05")
+    elif not next_state[feature_dict["team_has_ball"]] or (
+        (next_state[feature_dict["score"]] == state[feature_dict["score"]])
+        and next_state[feature_dict["attemps"]] != state[feature_dict["attemps"]]
+    ):
+        reward -= 0.4
+        print("Turnover occurred. Penalty: -0.4")
+
+    # Progress toward goal
+    if next_state[feature_dict["team_has_ball"]]:
+        distance_reward = (state[feature_dict["dist_goal"]] - next_state[feature_dict["dist_goal"]]) * 0.05
+        reward += distance_reward
+        print(f"Progress toward goal. Distance reward: {distance_reward:.2f}")
+
+    # Encourage faster decisions
+    reward -= 0.01
+    print("Time penalty applied. Penalty: -0.01")
+
+    # Spatial danger transition reward
+    prev_danger = state[feature_dict["danger"]]
+    if next_state[feature_dict["team_has_ball"]]:
+        new_danger = next_state[feature_dict["danger"]]
+        danger_delta = new_danger - prev_danger
+        reward += danger_delta * 0.2
+        print(
+            f"Danger transition. Danger delta: {danger_delta:.2f}, Reward: {danger_delta * 0.2:.2f}"
+        )
+
+    # Action-based encouragement based on danger
+    if "shoot" in action_list[action]:
+        if prev_danger >= 0.8:
+            reward += 0.3
+            print("Shooting in high-danger zone. Reward: +0.3")
+        else:
+            reward -= 0.2
+            print("Shooting in low-danger zone. Penalty: -0.2")
+    else:
+        new_danger = next_state[feature_dict["danger"]]
+        if new_danger < 0.8:
+            reward += 0.2
+            print("Safe progression in low-danger zone. Reward: +0.2")
+        else:
+            reward += 0.05
+            print("Progression in high-danger zone. Reward: +0.05")
+
+    # Zone congestion and support
+    num_teammates = next_state[feature_dict["num_of_teammates_in_player_zone"]]
+    num_opponents = next_state[feature_dict["num_of_opponents_in_player_zone"]]
+
+    penalty = 0.2 * (num_opponents)
+    reward -= penalty
+    print(f"Zone congestion. Opponents: {num_opponents}, Penalty: -{penalty:.2f}")
+
+    reward += 0.1 * num_teammates
+    print(
+        f"Teammates in zone. Teammates: {num_teammates}, Reward: +{0.1 * num_teammates:.2f}"
+    )
+
+    # Count available pass directions
+    pass_option_count = (
+        next_state[feature_dict["canPass_N"]]
+        + next_state[feature_dict["canPass_NE"]]
+        + next_state[feature_dict["canPass_E"]]
+        + next_state[feature_dict["canPass_SE"]]
+        + next_state[feature_dict["canPass_S"]]
+        + next_state[feature_dict["canPass_SW"]]
+        + next_state[feature_dict["canPass_W"]]
+        + next_state[feature_dict["canPass_NW"]]
+    )
+    reward += 0.05 * pass_option_count
+    print(
+        f"Pass options available. Count: {pass_option_count}, Reward: +{0.05 * pass_option_count:.2f}"
+    )
+
+    if not next_state[feature_dict["no_opponent_in_front"]]:
+        if pass_option_count > 0:
+            bonus = 0.1 * pass_option_count * (1 + new_danger)
+            reward += bonus
+            print(f"Opponent in front but pass options available. Bonus: +{bonus:.2f}")
+        else:
+            penalty = 0.2 * (1 + new_danger)
+            reward -= penalty
+            print(f"No pass options and under pressure. Penalty: -{penalty:.2f}")
+
+    if state[feature_dict["no_opponent_in_front"]]:
+        if "dribble" in action_list[action] and "E" in action_list[action]:
+            reward += 0.3
+            print("Aggressive play with no opponent in front. Reward: +0.3")
+        elif "pass" in action_list[action]:
+            reward -= 0.1
+            print("Unnecessary pass with no opponent in front. Penalty: -0.1")
+
+    if "pass" in action_list[action]:
+        pass_directions = {
+            "N": state[feature_dict["canPass_N"]],
+            "NE": state[feature_dict["canPass_NE"]],
+            "E": state[feature_dict["canPass_E"]],
+            "SE": state[feature_dict["canPass_SE"]],
+            "S": state[feature_dict["canPass_S"]],
+            "SW": state[feature_dict["canPass_SW"]],
+            "W": state[feature_dict["canPass_W"]],
+            "NW": state[feature_dict["canPass_NW"]],
+        }
+
+        pass_direction = action_list[action].split("_")[1]
+        if pass_directions.get(pass_direction, 0) > 0:
+            reward += 0.1
+            print(f"Valid pass direction ({pass_direction}). Reward: +0.1")
+        else:
+            reward -= 0.1
+            print(f"Invalid pass direction ({pass_direction}). Penalty: -0.1")
+
+    print(f"Total Reward: {reward:.2f}")
+    return reward
+
+
+
+
 
 def count_points_in_rectangle(teammates,opponents, rect_top_left, rect_bottom_right):
     """
@@ -334,6 +592,10 @@ class SoccerFeatureExtractor:
         bottom_box=count_points_in_rectangle(teammates,opponents,bottom_rect[0],bottom_rect[1])
         middle_box=count_points_in_rectangle(teammates,opponents,middle_rect[0],middle_rect[1])
         agent_box=count_agent_in_rectangle(agent_x, agent_y)
+        team_has_ball = True if agent_x > 0 else False
+        num_of_opponents_in_player_zone = get_num_of_opponents_in_player_zone(opponents, agent_x, agent_y)
+        num_of_teammates_in_player_zone = get_num_of_teammates_in_player_zone(teammates, agent_x, agent_y)
+        danger = get_box_danger_from_position((agent_x, agent_y))
         return np.array([
             (dist_goal/75),
             (angle_goal/180),
@@ -365,6 +627,10 @@ class SoccerFeatureExtractor:
             (agent_box/3),
             (agent_x/FIELD_WIDTH),
             (agent_y/FIELD_HEIGHT),
+            team_has_ball,
+            num_of_opponents_in_player_zone,
+            num_of_teammates_in_player_zone,
+            danger,
             
         ], dtype=np.float32)
 
@@ -372,6 +638,73 @@ class SoccerFeatureExtractor:
 
 
 ######################################################################################################
+
+def plot_pitch_mido(teammates, opponets, me):
+    plt.figure(figsize=(10, 6))
+    plt.xlim(0, 50)
+    plt.ylim(0, 90)
+    plt.title("Soccer Field")
+    plt.xlabel("Width")
+    plt.ylabel("Height")
+    for box_id, box_info in boxes.items():
+        top_left = box_info["top_left_pos"]
+        width = BOX_WIDTH  # Assuming a fixed width for the boxes
+        height = BOX_HEIGHT  # Assuming a fixed height for the boxes
+        plt.gca().add_patch(
+            plt.Rectangle(
+                top_left,
+                width,
+                height,
+                color={
+                    "top_left_box": "red",
+                    "middle_left_box": "orange",
+                    "bottom_left_box": "yellow",
+                    "top_right_box": "green",
+                    "middle_right_box": "blue",
+                    "bottom_right_box": "purple",
+                }.get(
+                    box_info["name"], "gray"
+                ),  # Default to gray if name not found
+                alpha=0.5,
+                label=box_info["name"],
+            )
+        )
+
+        # Draw rectangles
+    # plt.gca().add_patch(plt.Rectangle(
+    #     top_rect[0],  # Top-left corner
+    #     top_rect[1][0] - top_rect[0][0],  # Width (x2 - x1)
+    #     top_rect[1][1] - top_rect[0][1],  # Height (y2 - y1)
+    #     color='red', alpha=0.5, label='Top Rectangle'
+    # ))
+    # plt.gca().add_patch(plt.Rectangle(
+    #     middle_rect[0],
+    #     middle_rect[1][0] - middle_rect[0][0],
+    #     middle_rect[1][1] - middle_rect[0][1],
+    #     color='blue', alpha=0.5, label='Middle Rectangle'
+    # ))
+    # plt.gca().add_patch(plt.Rectangle(
+    #     bottom_rect[0],
+    #     bottom_rect[1][0] - bottom_rect[0][0],
+    #     bottom_rect[1][1] - bottom_rect[0][1],
+    #     color='green', alpha=0.5, label='Bottom Rectangle'
+    # ))
+
+    plt.scatter(me[0], me[1], color="blue", label="Agent")
+    for mate_x, mate_y in teammates:
+        plt.scatter(mate_x, mate_y, color="yellow", label="Teammate")
+
+    # Plot opponents
+    for opp_x, opp_y in opponets:
+        plt.scatter(opp_x, opp_y, color="red", label="Opponent")
+
+    # for printing scene
+    plt.grid()
+    plt.show()
+
+
+
+
 
 
 def plot_pitch(teammates,opponets,me):
