@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 import cv2
 import os
 
-model = YOLO('models/keypoints.pt')
+model = YOLO('models/ball_best.pt')
 
 def read_frames(frames_path):
         # Read the frames from the specified path
@@ -14,17 +14,18 @@ def read_frames(frames_path):
                 frame_path = os.path.join(frames_path, filename)
                 frame = cv2.imread(frame_path)
                 frames.append(frame)
-                if count == 100:
+                if count == 50:
                     break
                 count += 1
         return frames
 
 # Perform prediction
 frames = read_frames('./badr/all')
-results = model.predict('./input_videos/test_offside.png', save=True , conf = 0.1)
+results = model.predict(frames, save=True , conf = 0.1)
 
 # Load the image
-# image_path = 'frame_buffer_000175.jpg'
+# image_path = 'frame_buffer
+# _000175.jpg'
 # image = cv2.imread(image_path)
 
 # Draw the boxes on the image

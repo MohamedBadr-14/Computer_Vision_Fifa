@@ -35,6 +35,8 @@ class ComputerVision:
                 frames.append(frame)
 
                 count += 1
+                if count == 100:
+                    break
         return frames
         
 
@@ -74,7 +76,7 @@ class ComputerVision:
 
             # Replace Outliers
             # if frame_tracks["ball"]:
-            #     print("Before outliers: ", frame_tracks["ball"][1]["conf"])
+            # print("Before outliers: ", frame_tracks["ball"][1]["conf"] if frame_tracks["ball"] else None)
             if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.25 :
                 frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
                     frame_tracks["ball"], 170
@@ -113,6 +115,17 @@ class ComputerVision:
             }
             
             frame_tracks = self.tracker.adjust_goalkeeper_detection(frame_tracks)
+            
+            # handle penalty detections
+            frame_tracks["ball"],changed = self.tracker.handle_penalty_detection(frame_tracks["ball"])
+            if changed:
+                position = np.array(frame_tracks["ball"][1]["position"])
+                position_trasnformed = self.view_transformer.pixel_to_real_world(position)
+                if position_trasnformed is not None:
+                    position_trasnformed = position_trasnformed.squeeze().tolist()
+                # print("HANDLED" , position_trasnformed)
+                frame_tracks['ball'][1]['position_transformed'] = position_trasnformed    
+            
 
             # Assign Player Teams
             crops,crop_ids = self.team_assigner.extract_crops(frame_tracks["players"], frame)
@@ -174,7 +187,6 @@ class ComputerVision:
 
                         # Convert bbox coordinates to integers before using for image cropping
                         # Convert bbox coordinates to integers and expand by 300px in each direction
-                        time_before = time.time()
                         bbox = frame_tracks["players"][assigned_player]["bbox"]
                         height, width, _ = frame.shape
 
@@ -196,10 +208,10 @@ class ComputerVision:
 
             
 
-            all_tracks["players"].append(frame_tracks["players"])
-            all_tracks["ball"].append(frame_tracks["ball"])
-            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            all_tracks["goalpost"].append(frame_tracks["goalpost"])
+            # all_tracks["players"].append(frame_tracks["players"])
+            # all_tracks["ball"].append(frame_tracks["ball"])
+            # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            # all_tracks["goalpost"].append(frame_tracks["goalpost"])
         # print("DONEEEEEE" , time.time() - start_time)
         # print("all tracks: ", all_tracks)
 
@@ -207,7 +219,7 @@ class ComputerVision:
         # output_video_frames = self.tracker.draw_annotations(
         #     video_frames, all_tracks
         # )
-        # save_video(output_video_frames, "output_videos/points.mp4")
+        # save_video(output_video_frames, "output_videos/ballll.mp4")
 
         # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
