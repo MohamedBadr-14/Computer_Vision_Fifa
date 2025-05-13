@@ -39,11 +39,11 @@ feature_dict = {
     'goaldetected': 26,
     'agent_box':27,
     'agent_x': 28,
-    'agent_y': 29,
-    "team_has_ball": 30,
-    "num_of_opponents_in_player_zone": 31,
-    "num_of_teammates_in_player_zone": 32,
-    "danger": 33,
+    'agent_y': 29
+    # "team_has_ball": 30,
+    # "num_of_opponents_in_player_zone": 31,
+    # "num_of_teammates_in_player_zone": 32,
+    # "danger": 33,
 }
 
 
@@ -197,7 +197,7 @@ def get_num_of_teammates_in_player_zone(teammates, player_x, player_y):
     return count
 
 
-def compute_reward(state, action, next_state):
+def compute_reward(state, next_state,action ):
     reward = 0.0
     print("\n--- Compute Reward Debug ---")
     print(f"State: {state}")
@@ -273,14 +273,15 @@ def compute_reward(state, action, next_state):
 
     # Count available pass directions
     pass_option_count = (
-        next_state[feature_dict["canPass_N"]]
-        + next_state[feature_dict["canPass_NE"]]
-        + next_state[feature_dict["canPass_E"]]
-        + next_state[feature_dict["canPass_SE"]]
-        + next_state[feature_dict["canPass_S"]]
-        + next_state[feature_dict["canPass_SW"]]
-        + next_state[feature_dict["canPass_W"]]
-        + next_state[feature_dict["canPass_NW"]]
+        next_state[feature_dict["pass_N_flag"]]
+        + next_state[feature_dict["pass_NE_flag"]]
+        + next_state[feature_dict["pass_E_flag"]]
+        + next_state[feature_dict["pass_SE_flag"]]
+        + next_state[feature_dict["pass_S_flag"]]
+        + next_state[feature_dict["pass_SW_flag"]]
+        + next_state[feature_dict["pass_W_flag"]]
+        + next_state[feature_dict["pass_NW_flag"]]
+       
     )
     reward += 0.05 * pass_option_count
     print(
@@ -307,14 +308,16 @@ def compute_reward(state, action, next_state):
 
     if "pass" in action_list[action]:
         pass_directions = {
-            "N": state[feature_dict["canPass_N"]],
-            "NE": state[feature_dict["canPass_NE"]],
-            "E": state[feature_dict["canPass_E"]],
-            "SE": state[feature_dict["canPass_SE"]],
-            "S": state[feature_dict["canPass_S"]],
-            "SW": state[feature_dict["canPass_SW"]],
-            "W": state[feature_dict["canPass_W"]],
-            "NW": state[feature_dict["canPass_NW"]],
+            "N": next_state[feature_dict["pass_N_flag"]],
+            "NE": next_state[feature_dict["pass_NE_flag"]],
+            "E": next_state[feature_dict["pass_E_flag"]],
+            "SE": next_state[feature_dict["pass_SE_flag"]],
+            "S": next_state[feature_dict["pass_S_flag"]],
+            "SW": next_state[feature_dict["pass_SW_flag"]],
+            "W": next_state[feature_dict["pass_W_flag"]],
+            "NW": next_state[feature_dict["pass_NW_flag"]],
+            
+      
         }
 
         pass_direction = action_list[action].split("_")[1]
@@ -627,10 +630,10 @@ class SoccerFeatureExtractor:
             (agent_box/3),
             (agent_x/FIELD_WIDTH),
             (agent_y/FIELD_HEIGHT),
-            team_has_ball,
-            num_of_opponents_in_player_zone,
-            num_of_teammates_in_player_zone,
-            danger,
+            # team_has_ball,
+            # num_of_opponents_in_player_zone,
+            # num_of_teammates_in_player_zone,
+            # danger,
             
         ], dtype=np.float32)
 
@@ -758,9 +761,7 @@ def get_state_from_positions(scene):
     player_pos = (0,0)
     attemps=scene['Attemps'] if scene.get('Attemps', False) else 0
     score=scene['Score'] if scene.get('Score', False) else  0
-    print("ATTEMPS IN RL ",attemps)
-    print("SCORE IN RL ",score)
-    print("SCENE IN RL ",scene)
+
     goalpost=[60,45]
     goalkeeper=None
  
@@ -798,18 +799,16 @@ logger.setLevel(logging.INFO)
 file_handler = logging.FileHandler("reward_log.log")
 file_handler.setLevel(logging.INFO)
 
-# Create a console handler and set level
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-
 # Create formatter
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 file_handler.setFormatter(formatter)
-console_handler.setFormatter(formatter)
 
-# Add handlers to logger
+# Add only the file handler to logger
 logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+
+# Remove any existing handlers (important if the logger might have been configured elsewhere)
+# and prevent logs from propagating to the root logger
+logger.propagate = False
 
 def calculate_reward(prev_state, new_state, action):
     """
@@ -821,8 +820,8 @@ def calculate_reward(prev_state, new_state, action):
     logger.info("\n========== REWARD CALCULATION ==========")
     logger.info(f"ACTION TAKEN: {action} ({action_list.get(action, 'Unknown')})")
     logger.info("\n--- STATE COMPARISON ---")
-    logger.debug(f"PREV STATE: {prev_state}")
-    logger.debug(f"NEW STATE: {new_state}")
+    logger.info(f"PREV STATE: {prev_state}")
+    logger.info(f"NEW STATE: {new_state}")
     
     # Check for None or invalid states
     if prev_state is None or new_state is None or action is None:
@@ -845,27 +844,29 @@ def calculate_reward(prev_state, new_state, action):
     elif score_change > 0:  # Shot on target
         # Reward based on distance - shooting from closer is better
         agent_x = prev_state[feature_dict['agent_x']] * 60  # Unnormalize position
-        if agent_x > 45:  # Close to goal shot
+        if agent_x > 45 and action==16:  # Close to goal shot
             shot_reward = 5
             reward_components['close_shot_on_target'] = shot_reward
             logger.info(f"\n[CLOSE SHOT ON TARGET]")
             logger.info(f"  Position: {agent_x:.2f}")
             logger.info(f"  Reward: +5.00")
             return 5
-        elif agent_x > 35:  # Medium distance shot
+        elif agent_x > 35 and action==16:  # Medium distance shot
             shot_reward = 3
             reward_components['medium_shot_on_target'] = shot_reward
             logger.info(f"\n[MEDIUM SHOT ON TARGET]")
             logger.info(f"  Position: {agent_x:.2f}")
-            logger.info(f"  Reward: +3.00")
-            return 3
+            logger.info(f"  Reward: -0.50")
+            return -0.5
         else:  # Long distance shot
-            shot_reward = 0.5
-            reward_components['long_shot_on_target'] = shot_reward
-            logger.info(f"\n[LONG SHOT ON TARGET]")
-            logger.info(f"  Position: {agent_x:.2f}")
-            logger.info(f"  Reward: +0.50")
-            return 0.5
+
+            if action==16:
+                shot_reward = 0.5
+                reward_components['long_shot_on_target'] = shot_reward
+                logger.info(f"\n[LONG SHOT ON TARGET]")
+                logger.info(f"  Position: {agent_x:.2f}")
+                logger.info(f"  Reward: -3.00")
+                return -3
 
     # Check for turnover - significant negative reward
     if (new_score == prev_score) and new_state[feature_dict['attemps']] != prev_state[feature_dict['attemps']]:
@@ -916,7 +917,14 @@ def calculate_reward(prev_state, new_state, action):
         prev_dist = prev_state[feature_dict['dist_goal']] * 75  # Unnormalize
         new_dist = new_state[feature_dict['dist_goal']] * 75    # Unnormalize
         dist_change = prev_dist - new_dist
-        normalized_dist_change = max(min(dist_change, 2), -2)  # Clamp between -2 and 2
+        normalized_dist_change = max(min(dist_change, 2), -3)  # Clamp between -5 and 2
+        if normalized_dist_change > 1:
+            delta_x = new_state[feature_dict['agent_x']] - prev_state[feature_dict['agent_x']] 
+            if delta_x > 0:
+                normalized_dist_change = normalized_dist_change
+            else :
+                normalized_dist_change = normalized_dist_change - 1
+
         reward += normalized_dist_change
         reward_components['distance_to_goal'] = normalized_dist_change
         logger.info(f"\n[DISTANCE TO GOAL]")
@@ -951,11 +959,11 @@ def calculate_reward(prev_state, new_state, action):
     
     # Clear path vs opponent in front (normalized to +3/-0.1)
     if new_state[feature_dict['no_opponent_in_front']] and prev_state[feature_dict['no_opponent_in_front']] == 0:
-        path_reward = 3
-        reward += 3
+        path_reward = 1.5
+        reward += 1.5
         logger.info(f"\n[CLEAR PATH]")
         logger.info(f"  Clear path ahead: YES (improved)")
-        logger.info(f"  Reward: +3.00")
+        logger.info(f"  Reward: +1.50")
     elif new_state[feature_dict['no_opponent_in_front']]:
         path_reward = 0.5
         reward += 0.5
@@ -991,13 +999,24 @@ def calculate_reward(prev_state, new_state, action):
         
         logger.info(f"\n[PASS DECISION]")
         logger.info(f"  Direction: {action_list[action]}")
+
+
+        # direction index if 0 and 1 same direction 
+        isGoodPass = False
+        if direction_idx == 13 or direction_idx == 14:
+            if prev_state[feature_dict['pass_N_flag']] == 1 or prev_state[feature_dict['pass_NE_flag']] == 1:
+                isGoodPass = True
+        elif direction_idx == 16 or direction_idx == 17:
+            if prev_state[feature_dict['pass_SE_flag']] == 1 or prev_state[feature_dict['pass_S_flag']] == 1:
+                isGoodPass = True
         
-        if prev_state[direction_idx] == 0:
+        if not isGoodPass:
             pass_reward = -1  # Bad pass decision
             reward -= 1
             reward_components['bad_pass'] = pass_reward
-            logger.info(f"  No teammate available in that direction")
+            logger.info(f"  No teammate available in that direction return -1")
             logger.info(f"  Penalty: -1.00")
+            return -1
         else:
             pass_reward = 2  # Good pass
             reward += 2
@@ -1070,7 +1089,7 @@ class DQNAgent:
             action_size (int): Number of possible actions
             load_path (str, optional): Path to load pre-trained model. If None, creates new model.
         """
-        self.state_size = len(feature_dict) - 2 
+        self.state_size = len(feature_dict) -2
         self.action_size = len(action_list)
         self.memory = deque(maxlen=10000)
         self.gamma = 0.95
@@ -1106,16 +1125,26 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
     
     def act(self, state):
-        if np.random.rand() <= self.epsilon:
-            if np.random.rand() < 0.2:
-                print("Random action")
+        # if np.random.rand() <= self.epsilon:
+        # if True:
+        #     print("\033[1;33;40m" +  # Yellow text on black background (instead of red on white)
+        #     "════════════════════════\n" +
+        #     "   RANDOM CHOICE   \n" +
+        #     "════════════════════════" +
+        #     "\033[0m")
+        #     if np.random.rand() < 0.15:
+                
 
-                return 16  # Shoot action
-            else:
-                # 80% chance to choose other actions (0-15) uniformly
-                print("Random action")
-                return random.randrange(16)  # Actions 0-15 (pass or dribble)
-            # return random.randrange(self.action_size)
+        #         return 16  # Shoot action
+        #     else:
+        #         # 80% chance to choose other actions (0-15) uniformly
+        #         # pass only from 0 to 7 inclusive
+        #         # random from 0 to 4 except 2
+        #         return random.choice([3,4])
+        #         # return random.choice([0, 1, 3,4])  # Actions 0-3 (pass)
+        #         # return random.randrange(4)  # Actions 0-7 (pass)
+        #         # return random.randrange(16)  # Actions 0-15 (pass or dribble)
+        # #     # return random.randrange(self.action_size)
 
 
         # drop score and attemps from the state before passing it to the model
@@ -1123,7 +1152,11 @@ class DQNAgent:
         state = torch.FloatTensor(state).unsqueeze(0)
         act_values = self.model(state)
         #print the probability for each action
-        print("neural network output")
+        print("\033[1;32;40m" +  # Yellow text on black background (instead of red on white)
+            "════════════════════════\n" +
+            "   TRAINED CHOICE   \n" +
+            "════════════════════════" +
+            "\033[0m")
         print(act_values)
 
         return torch.argmax(act_values).item()
@@ -1188,6 +1221,7 @@ class DQNAgent:
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.memory = deque(checkpoint['memory'], maxlen=10000)
         self.epsilon = checkpoint['epsilon']
+        # self.epsilon = 0.9
     
     def get_action(self, scene):
         """
@@ -1213,3 +1247,16 @@ class DQNAgent:
         
         # Return the corresponding action string
         return action_list[action_idx]
+    
+    def delete_specific_memory(self, index):
+        """
+        Delete a specific memory entry from the replay memory.
+        
+        Args:
+            index (int): Index of the memory entry to delete.
+        """
+        if 0 <= index < len(self.memory):
+            del self.memory[index]
+        else:
+            print(f"Index {index} is out of range for memory.")
+

@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import time
 import threading
+import keyboard
 
 class OffsideDetector:
     """
@@ -82,16 +83,32 @@ class OffsideDetector:
                 preprocessed, 
                 detail=0,
                 paragraph=False,
-                allowlist='OFSIDEofside',
+                # allowlist='OFSIDEofside',
                 batch_size=1
             )
+            
             print(f"Detected text: {result}")
-            print("ANA HENAAAAAAAAA")
+            # keyboard.wait('l')
+            # print("ANA HENAAAAAAAAA")
             # Check if "Offside" is in the results (case insensitive)
             for text in result:
-                if 'offside' in text.lower():
-                    print("Offside detected!")
+                text_cleaned = text.replace(" ", "").replace("0", "O")
+                text_lower = text_cleaned.lower()
+                if ('offside' in text_lower or
+                    'off'in text_lower or
+                    'side' in text_lower or
+                    'ofside' in text_lower or
+                    'offsice' in text_lower or
+                    'offcide' in text_lower or
+                    'ofcide' in text_lower or
+                    'offcide' in text_lower or
+                    'offcice' in text_lower 
+                    ):
+                    # print("Offside detected!")
                     return True
+                # if 'offside' in text.lower():
+                #     print("Offside detected!")
+                #     return True
                     
             return False
             
@@ -114,16 +131,16 @@ class OffsideDetector:
         print("OCR warm-up complete")
 
 # Usage example
-if __name__ == "__main__":
-    detector = OffsideDetector(gpu=True)
-    detector.warmup()  # Optional: pre-warm the model
+# if __name__ == "__main__":
+#     detector = OffsideDetector(gpu=True)
+#     detector.warmup()  # Optional: pre-warm the model
     
-    # Test on sample image
-    image = cv2.imread("off2.png")
-    if image is not None:
-        start_time = time.time()
-        result = detector.detect_offside(image)
-        elapsed = time.time() - start_time
-        print(f"Detection result: {result} (took {elapsed:.3f} seconds)")
-    else:
-        print("Failed to load test image")
+#     # Test on sample image
+#     image = cv2.imread("off2.png")
+#     if image is not None:
+#         start_time = time.time()
+#         result = detector.detect_offside(image)
+#         elapsed = time.time() - start_time
+#         print(f"Detection result: {result} (took {elapsed:.3f} seconds)")
+#     else:
+#         print("Failed to load test image")

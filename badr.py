@@ -231,7 +231,7 @@ try:
     # Save the result
     output_path = "D:/fifa-vision/annotated_frame.jpg"
     cv2.imwrite(output_path, annotated_image)
-    print(f"Annotated image saved to {output_path}")
+
     
     # Display the result (optional - comment out if running in a non-interactive environment)
     plt.figure(figsize=(15, 12))
@@ -241,4 +241,4 @@ try:
     plt.show()
     
 except Exception as e:
-    print(f"Error processing image: {e}")
+    x = 1

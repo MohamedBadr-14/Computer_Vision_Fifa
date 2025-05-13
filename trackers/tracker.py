@@ -62,7 +62,6 @@ class Tracker:
                 "position": frame_tracks["players"][goalkeeper]["position"],
                 "position_transformed": frame_tracks["players"][goalkeeper]["position_transformed"],
             }
-            print("GOALKEEPER ID" , goalkeeper)
             del frame_tracks["players"][goalkeeper] 
         return frame_tracks
     

@@ -860,7 +860,6 @@ class Controller:
             # Close video recording if enabled
             self.close_video_recording()
             
-            # Print summary when finished
             total_time = time.time() - self.start_time
             self.logger.info("FIFA Vision has stopped.")
             self.logger.info("\n===== SUMMARY =====")

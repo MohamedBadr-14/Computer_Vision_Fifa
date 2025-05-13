@@ -5,6 +5,7 @@ from utils import get_center_of_bbox, measure_distance,get_foot_position
 class PlayerBallAssigner():
     def __init__(self):
         self.max_player_ball_distance = 165
+        # self.max_player_ball_distance = 125
     
     def assign_ball_to_player(self,players,ball_bbox):
         ball_position = get_center_of_bbox(ball_bbox)
@@ -19,7 +20,6 @@ class PlayerBallAssigner():
             distance = measure_distance(ball_position, foot_position)
 
             if distance < miniumum_distance:
-                # print("BALL DISTANCE" , distance , "PLAYER ID" , player_id)
                 if distance < self.max_player_ball_distance:
                     miniumum_distance = distance
                     assigned_player = player_id

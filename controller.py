@@ -8,10 +8,33 @@ from datetime import datetime
 from mss import mss
 from ocr_extractor import OCRExtractor
 from computer_vision import ComputerVision
-from rl import DQNAgent, get_state_from_positions, calculate_reward
+from rl import DQNAgent, get_state_from_positions, calculate_reward,compute_reward
 from pr import pause_process, resume_process
 import gc
 
+
+file_name="MODEL_5_11.pth"
+
+
+action_descriptions = {
+            0: "Passing the ball to the north",
+            1: "Passing the ball to the northeast",
+            2: "Passing the ball to the east",
+            3: "Passing the ball to the southeast",
+            4: "Passing the ball to the south",
+            5: "Passing the ball to the southwest",
+            6: "Passing the ball to the west",
+            7: "Passing the ball to the northwest",
+            8: "Dribbling the ball to the north",
+            9: "Dribbling the ball to the northeast",
+            10: "Dribbling the ball to the east",
+            11: "Dribbling the ball to the southeast",
+            12: "Dribbling the ball to the south",
+            13: "Dribbling the ball to the southwest",
+            14: "Dribbling the ball to the west",
+            15: "Dribbling the ball to the northwest",
+            16: "Shooting the ball"
+        }
 class Controller:
     """
     Main controller class for an AI-powered soccer game automation system.
@@ -48,6 +71,7 @@ class Controller:
         self.first_time = True          # Flag for first action
         self.is_paused = False          # Flag for game pause state
 
+        self.is_offside = False        # Flag for offside detection
         
 
         self.to_be_sent = []
@@ -61,13 +85,18 @@ class Controller:
         self.prev_action = None         # Previous action
         self.action_shoot=False
 
-
-        
+        self.hb_counter = 0
+    
         # Default scene state when data is unavailable
         self.dummy_scene = {
             "Attemps": None,
             "Score": None,
         }
+        self.agent_y = None
+        self.agent_x = None
+
+        self.skip_2_frames = False
+
     def pause_game(self):
         """
         Pause the game by simulating ESC key press.
@@ -124,6 +153,12 @@ class Controller:
 
     def stop_movement_action(self, action):
         match action:
+            case 0:
+                # release all keys
+                keyboard.release('w')
+                keyboard.release('d')
+                keyboard.release('s')
+                keyboard.release('a')
             case 8:
                 keyboard.release('w')
                 keyboard.release('d')
@@ -149,10 +184,10 @@ class Controller:
                 keyboard.release('w')
                 keyboard.release('a')
             case _:
-                print(f"Unknown action: {action}")
+                x = 1
                 # self.logger.warning(f"Unknown action: {action}")           
 
-    def make_action(self, action, pass_duration=0.5, dribble_duration=0.5, shoot_duration=0.2):
+    def make_action(self, action, pass_duration=0.25, dribble_duration=0.5, shoot_duration=0.225):
         """
         Execute the specified game action.
         This method is to be implemented based on the specific game controls.
@@ -182,7 +217,7 @@ class Controller:
         
         # action_description = action_descriptions.get(action, f"Unknown action: {action}")
         # self.logger.info(f"Making action [{action}]: {action_description}")
-        
+        self.stop_movement_action(0)
         match action:
             case 0:
                 keyboard.press('w')
@@ -283,13 +318,91 @@ class Controller:
                 keyboard.release('a')
                 keyboard.release('w')
             case 16:
-                keyboard.press('d')
-                keyboard.press('k')
-                time.sleep(shoot_duration)
-                keyboard.release('k')
-                keyboard.release('d')
+                # we have agent_y from 0 to 90 
+                # we have the far post @ 49 and the near post @ 41
+                # self.stop_movement_action(0)
+                if self.agent_y > 49:
+                    print("SHOOTING FROM THE FAR POST")
+                    # shoot from above the far post
+                    # random between 2 directions
+                    if np.random.rand() > 0.5:
+                        print("SHOOTING DAY2A")
+                        keyboard.press('d')
+                        time.sleep(0.2)
+                        keyboard.press('k')
+                        time.sleep(shoot_duration)
+                        keyboard.release('k')
+                        time.sleep(0.2)
+                        keyboard.release('d')
+                    else:
+                        print("SHOOTING B3EEDA")
+                        keyboard.press('d')
+                        keyboard.press('s')
+                        time.sleep(0.2)
+                        keyboard.press('k')
+                        time.sleep(shoot_duration)
+                        keyboard.release('k')
+                        time.sleep(0.2)
+                        keyboard.release('s')
+                        keyboard.release('d')
+                elif self.agent_y < 41:
+                    print("SHOOTING FROM THE NEAR POST")
+                    if np.random.rand() > 0.5:
+                        print("SHOOTING DAY2A")
+                        keyboard.press('d')
+                        time.sleep(0.2)
+                        keyboard.press('k')
+                        time.sleep(shoot_duration)
+                        keyboard.release('k')
+                        time.sleep(0.2)
+                        keyboard.release('d')
+                    else:
+                        print("SHOOTING B3EEDA")
+                        keyboard.press('d')
+                        keyboard.press('w')
+                        time.sleep(0.2)
+                        keyboard.press('k')
+                        time.sleep(shoot_duration)
+                        keyboard.release('k')
+                        time.sleep(0.2)
+                        keyboard.release('w')
+                        keyboard.release('d')
+                    # shoot from below the near post
+                else:
+                    print("SHOOTING FROM THE MIDDLE")
+                    if np.random.rand() > 0.5:
+                        print("SHOOTING B3EEDA")
+                        keyboard.press('d')
+                        keyboard.press('w')
+                        time.sleep(0.2)
+                        keyboard.press('k')
+                        time.sleep(shoot_duration)
+                        keyboard.release('k')
+                        time.sleep(0.2)
+                        keyboard.release('w')
+                        keyboard.release('d')
+
+
+                    else:
+                        print("SHOOTING DAY2A")
+                        keyboard.press('d')
+                        keyboard.press('s')
+                        time.sleep(0.2)
+                        keyboard.press('k')
+                        time.sleep(shoot_duration)
+                        keyboard.release('k')
+                        time.sleep(0.2)
+                        keyboard.release('s')
+                        keyboard.release('d')
+                    # shoot from the middle
+                # keyboard.press('d')
+                # keyboard.press('k')
+                # time.sleep(shoot_duration)
+                # keyboard.release('k')
+                # keyboard.release('d')
+                # keyboard.wait('l')
             case _:
-                print(f"Unknown action: {action}")
+                x = 1
                 # self.logger.warning(f"Unknown action: {action}")
                 
         # self.logger.debug(f"Action {action} completed")
@@ -336,7 +449,6 @@ class Controller:
                 # if self.is_paused:
                 #         resume_process()
                 #         self.is_paused = False
-                #         print("RESUME FOOOOO2")
                 try:
                     frame = np.array(sct.grab(monitor))
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
@@ -355,7 +467,12 @@ class Controller:
                     else: 
                         self.movement_action(10)
                 
-                if ocr_results['points'] is not None:
+
+                if ocr_results['points'] is not None and self.last_attempt is not None and self.last_attempt != '0':
+                    self.last_points = ocr_results['points']
+                # if ocr_results['points'] is not None and self.last_attempt is not 0:
+                #     self.last_points = ocr_results['points']
+                if ocr_results['points'] is not None and self.last_points is not None and (ocr_results['points'] > self.last_points) and self.last_attempt == '0':
                     self.last_points = ocr_results['points']
                 # Skip frames if counter is active (e.g., after pausing)
 
@@ -374,42 +491,87 @@ class Controller:
                         continue
                
                 # Process accumulated frames when buffer is full
-                if len(self.frames_to_send) == 5:
+                if len(self.frames_to_send) == 3:
                     self.to_be_sent.append(self.frames_to_send.copy())
 
                     pause_process()
                     time.sleep(0.1)
                     self.is_paused = True
 
-                    time_before_processing = time.time()
                     scene, has_ball= self.computer_vision.run(self.frames_to_send, self.last_attempt)
-                    time_after_processing = time.time()
-                    elapsed_time = time_after_processing - time_before_processing
-                    print(f"Processing time: {elapsed_time:.2f} seconds")
+                    if not has_ball:
+                        if self.prev_action is not None and self.prev_action in range(0,8):
+                            self.skip_2_frames = False
+                        self.hb_counter += 1
+                        if self.hb_counter == 2:
+                            self.hb_counter = 0
+                            self.stop_movement_action(self.prev_action)
+                            self.movement_action(10)
+                    else:
+                        self.hb_counter = 0
+
                     if scene is None and has_ball is None:
-                        print("OFFSIDE DETECTED")
+                        
+                        print("\033[1;31;7m" + 
+                                "################################\n" +
+                                "#                              #\n" +
+                                "#      OFFSIDE DETECTED        #\n" +
+                                "#                              #\n" +
+                                "################################" +
+                                "\033[0m")
                         self.frames_to_send.clear()
                         gc.collect()
                         self.is_paused = False
+                        self.is_offside = True
+                        # self.rl_agent.memory.pop()
                         resume_process()    
                         continue
 
-                    print("HAS BALL:", has_ball)
+                    print("\nHAS BALL:", has_ball,"\n")
 
 
-                    
+                    tmp_store = self.frames_to_send[-1].copy()
+
                     self.frames_to_send.clear()
                     gc.collect()
                     
                     if has_ball and not self.action_shoot:
                         if self.prev_action is not None:
                             self.stop_movement_action(self.prev_action)
+                        else:
+                            self.stop_movement_action(10)    
                         # Reinforcement learning decision making
                         scene_toRL = scene.copy()
                         scene_toRL['Attemps'] = self.last_attempt
                         scene_toRL['Score'] = self.last_points
                         self.rlstates.append(scene_toRL)
                         cur_state = get_state_from_positions(scene_toRL)
+                        # print("\n Prev x:", self.agent_x,"\n")
+                        # print("\n Prev y:", self.agent_y,"\n")
+                        # print("\n Cur x:", cur_state[-2]*60,"\n")
+                        # print("\n Cur y:", cur_state[-1]*90,"\n")
+                        if self.prev_action is not None and self.prev_action in range(0,8) and self.skip_2_frames:
+                            # keyboard.wait('l')
+                            # prev_x = self.agent_x
+                            # prev_y = self.agent_y
+                            # curr_x = cur_state[-2] * 60
+                            # curr_y = cur_state[-1] * 90
+                            # # if the distance is less than 10, we are in the same position
+                            # if abs(prev_x - curr_x) < 5 and abs(prev_y - curr_y) < 2.5:
+                            #     print("\033[1;33;40m" +  # Bold yellow text on black background
+                            #         "╔═════════════════════════════════╗\n" +
+                            #         "║   WE ARE IN THE SAME POSITION   ║\n" +
+                            #         "╚═════════════════════════════════╝" +
+                            #         "\033[0m") 
+                            self.frames_to_send.append(tmp_store)
+                            self.is_paused = False
+                            self.skip_2_frames = False
+                            resume_process()
+                            continue
+                        self.agent_y = cur_state[-1] * 90
+                        self.agent_x = cur_state[-2] * 60
+                        print("\nAGENT Y:", self.agent_y,"\n")
+
                         prev_state = self.rl_agent.prev_state 
                         action_taken = None
                         
@@ -422,16 +584,34 @@ class Controller:
                         else:
                             action_taken = self.rl_agent.act(state=cur_state)
                             # self.logger.info(f"Action taken: {action_taken}")
+                            # compute=compute_reward(prev_state, cur_state, self.prev_action)
                             reward = calculate_reward(prev_state, cur_state, self.prev_action)
+                            # action mapped using action_descriptions
+                            action_description = action_descriptions.get(self.prev_action, f"Unknown action: {self.prev_action}")
+                            print("\nREWARD NEW ACT:", reward," action: ",action_description,"\n")
+                            # print("\033[1;31;7m" + 
+                            #     "################################\n" +
+                            #     "#                              #\n" +
+                            #     f'#      {compute}        #\n' +
+                            #     "#                              #\n" +
+                            #     "################################" +
+                            #     "\033[0m")
                             # self.logger.info(f"Calculated reward: {reward}")
-                            self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False)
+                            if self.is_offside:
+                                self.is_offside = False
+                            else:
+                                if self.prev_action is not None:
+                                    self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False)
+                                # self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False) OUDSAA
                             self.rl_agent.prev_state = cur_state #OUDA
 
-                        if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 750 and len(self.rl_agent.memory) % 4 == 0):
+                        if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 1000 and len(self.rl_agent.memory) % 16 == 0):
                             self.rl_agent.replay(64)  # Train on batch of 32 experiences
                    
-                        print("ACTION TAKEN:", action_taken)
+                        print("\nACTION TAKEN:", action_taken,"\n")
                         self.action_taken = action_taken
+                        if action_taken in range(0,8):
+                            self.skip_2_frames = True
                         if action_taken == 16:
                             self.action_shoot = True
                         self.prev_action = action_taken
@@ -489,9 +669,25 @@ class Controller:
                     frame_count += 1
                     
                     # Store terminal state transition for learning
+                    # compute=compute_reward(prev_state, cur_state, self.prev_action)
+                    # print("\033[1;31;7m" + 
+                    #             "################################\n" +
+                    #             "#                              #\n" +
+                    #             f'#      {compute}        #\n' +
+                    #             "#                              #\n" +
+                    #             "################################" +
+                    #             "\033[0m")
+
                     reward = calculate_reward(prev_state, cur_state, self.prev_action)
+                    action_description = action_descriptions.get(self.prev_action, f"Unknown action: {self.prev_action}")
+                    print("\nREWARD NEW GAME:", reward," ",action_description,"\n")
                     # self.logger.info(f"End of episode reward: {reward}")
-                    self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
+                    if self.is_offside:
+                        self.is_offside = False
+                    else:
+                        if self.prev_action is not None:
+                            self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
+                        # self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
                     self.first_time = True
                     self.action_shoot= False
                     self.computer_vision.tracker.reset_tracker()
@@ -499,6 +695,7 @@ class Controller:
                     self.prev_farthest_team_1 = None
                     self.prev_farthest_team_2 = None
                     self.prev_ball_pos = None
+                    self.hb_counter = 0
                     continue
 
                 # Track attempts and handle attempt transitions
@@ -520,9 +717,25 @@ class Controller:
                         # Store transition with terminal state
                         cur_state = get_state_from_positions(scene_toRL)
                         prev_state = self.rl_agent.prev_state
+                        # compute=compute_reward(prev_state, cur_state, self.prev_action)
+                        # print("\033[1;31;7m" + 
+                        #         "################################\n" +
+                        #         "#                              #\n" +
+                        #         f'#      {compute}        #\n' +
+                        #         "#                              #\n" +
+                        #         "################################" +
+                        #         "\033[0m")
+
                         reward = calculate_reward(prev_state, cur_state, self.prev_action)
+                        action_description = action_descriptions.get(self.prev_action, f"Unknown action: {self.prev_action}")
+                        print("\nREWARD NEW ATTEM:", reward," ",action_description,"\n")
                         # self.logger.info(f"End of attempt reward: {reward}")
-                        self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
+                        if self.is_offside:
+                            self.is_offside = False
+                        else:
+                            if self.prev_action is not None:
+                                self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
+                            # self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=True)
                         self.first_time = True
                         
                         # self.logger.info(f"Skipping {self.between_attacks_skip} frames between attempts")
@@ -534,6 +747,7 @@ class Controller:
                         self.prev_farthest_team_1 = None
                         self.prev_farthest_team_2 = None
                         self.prev_ball_pos = None
+                        self.hb_counter = 0
                         continue
 
 
@@ -542,7 +756,7 @@ class Controller:
                 if keyboard.is_pressed('q'):
                     # self.logger.info("Quit command detected at elapsed time: {:.2f}s".format(elapsed))
                     running = False
-                    model_save_path = "soccer_dqn_trained.pth"
+                    model_save_path = file_name
                     # self.logger.info(f"Saving DQN model to {model_save_path}")
                     self.rl_agent.save(model_save_path)
                     
@@ -558,7 +772,6 @@ class Controller:
                     # to_be_sent_array = np.array(self.to_be_sent)
                     # to_be_sent_path = "to_be_sent.npy"
                     # np.save(to_be_sent_path, to_be_sent_array)
-                    # print(self.rlstates)
 
                     
                     
@@ -576,13 +789,14 @@ class Controller:
 if __name__ == "__main__":
     # Create and run the controller with optional video recording
     controller = Controller(
-        "soccer_dqn_trained.pth",
+        file_name
         )
     rl_model = controller.rl_agent
+    # controller.run()
     try:
         controller.run()
     except Exception as e:
-        model_save_path = "soccer_dqn_trained.pth"
+        model_save_path = file_name
         rl_model.save(model_save_path)
         print("Saved model to", model_save_path)
 

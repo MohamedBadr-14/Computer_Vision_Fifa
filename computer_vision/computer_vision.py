@@ -9,6 +9,7 @@ import cv2
 import os
 import time
 from offside_detector import OffsideDetector
+import keyboard
 
 class ComputerVision:
     def __init__(self):
@@ -45,8 +46,7 @@ class ComputerVision:
         if self.attempts is None:
             self.attempts = attempts
 
-        print("Prev attempt: ", self.attempts)
-        print("Cur attempt: ", attempts)
+        
         if self.attempts != attempts:
             # print("New attempt detected, resetting tracker...")
             self.attempts = attempts
@@ -60,7 +60,6 @@ class ComputerVision:
 
         # video_frames = video_frames[:7]
 
-        print(len(video_frames))
         for test,frame in enumerate(video_frames):
             start_time = time.time()
             frame = video_frames[test]
@@ -180,20 +179,17 @@ class ComputerVision:
                         height, width, _ = frame.shape
 
                         # Calculate expanded coordinates with bounds checking
-                        x1 = max(0, int(bbox[0]) - 500)
-                        y1 = max(0, int(bbox[1]) - 500)
-                        x2 = min(width, int(bbox[2]) + 500)
-                        y2 = min(height, int(bbox[3]) + 500)
+                        x1 = max(0, int(bbox[0]) - 600)
+                        y1 = max(0, int(bbox[1]) - 300)
+                        x2 = min(width, int(bbox[2]) + 600)
+                        y2 = min(height, int(bbox[3]) + 300)
 
                         # Save the expanded crop
-                        # time_stamp = time.time()
-                        # cv2.imwrite(f"output_videos/ball_{time_stamp}.jpg", 
-                        #             frame[y1:y2, x1:x2])
+                      
                         isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
-                        time_after = time.time()
-                        print("Offside detection time: ", time_after - time_before)
-                        print("Is offside: ", isOffside)
+                        
                         if isOffside:
+
                             return None, None
                         
 

@@ -29,11 +29,10 @@ class THREADENTRY32(ctypes.Structure):
 def pause_process(process_name = "FC25.exe"):
     """Pause a process by suspending all its threads."""
     # Find the process by name
-    print(f"Searching for process: {process_name}")
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == process_name:
             pid = proc.info['pid']
-            print(f"Found {process_name} with PID: {pid}")
+            # print(f"Found {process_name} with PID: {pid}")
             
             # Create a snapshot of all threads
             h_snapshot = ctypes.windll.kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0)
@@ -72,19 +71,16 @@ def pause_process(process_name = "FC25.exe"):
             
             # Close the snapshot handle
             ctypes.windll.kernel32.CloseHandle(h_snapshot)
-            print(f"Suspended {suspended_count} threads in {process_name} (PID: {pid})")
             return
     
-    print(f"Process {process_name} not found")
 
 def resume_process(process_name = "FC25.exe"):
     """Resume a process by resuming all its threads."""
     # Find the process by name
-    print(f"Resuming {process_name}...")
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == process_name:
             pid = proc.info['pid']
-            print(f"Found {process_name} with PID: {pid}")
+            # print(f"Found {process_name} with PID: {pid}")
             
             # Create a snapshot of all threads
             h_snapshot = ctypes.windll.kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0)
@@ -125,36 +121,4 @@ def resume_process(process_name = "FC25.exe"):
             
             # Close the snapshot handle
             ctypes.windll.kernel32.CloseHandle(h_snapshot)
-            print(f"Resumed {resumed_count} thread suspensions in {process_name} (PID: {pid})")
             return
-    
-    print(f"Process {process_name} not found")
-
-# def main():
-#     process_name = "FC25.exe"  # Change this to the name of the process you want to pause/resume
-
-#     print("Press 'b' to pause the process.")
-#     print("Press 'r' to resume the process.")
-#     print("Press 'q' to quit.")
-
-#     is_paused = False
-    
-#     while True:
-#         if keyboard.is_pressed('b') and not is_paused:
-#             pause_process(process_name)
-#             is_paused = True
-#             time.sleep(0.5)  # Prevent multiple pauses
-#         elif keyboard.is_pressed('r') and is_paused:
-#             resume_process(process_name)
-#             is_paused = False
-#             time.sleep(0.5)  # Prevent multiple resumes
-#         elif keyboard.is_pressed('q'):
-#             # Make sure process is resumed before quitting
-#             if is_paused:
-#                 resume_process(process_name)
-#             break
-        
-#         time.sleep(0.1)  # Reduce CPU usage
-
-# if __name__ == "__main__":
-#     main()
