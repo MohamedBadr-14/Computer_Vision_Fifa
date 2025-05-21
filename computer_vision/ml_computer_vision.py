@@ -9,19 +9,21 @@ import cv2
 import os
 import time
 from offside_detector import OffsideDetector
+from classical_ml.player_detection import ClassicalML
 import keyboard
 
-class ComputerVision:
+class ML_ComputerVision:
     def __init__(self):
-        # self.tracker = Tracker("models/best_new.pt")
         
-        self.tracker = Tracker("models/best_initial.pt")
-        self.team_assigner = TeamAssigner()
+        self.tracker = Tracker('./models/best_new.pt')
+        # self.team_assigner = TeamAssigner()
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
         self.attempts = None
-        self.offside_detector = OffsideDetector(gpu=True)
-        self.offside_detector.warmup()
+        self.new_attempt = False
+        self.classical_ml = ClassicalML()
+        # self.offside_detector = OffsideDetector(gpu=True)
+        # self.offside_detector.warmup()
         
     
     def read_frames(self,frames_path):
@@ -32,11 +34,11 @@ class ComputerVision:
             if filename.endswith(".jpg") or filename.endswith(".png"):
                 frame_path = os.path.join(frames_path, filename)
                 frame = cv2.imread(frame_path)
+                # new_frame = cv2.resize(frame, (640, 640))
                 frames.append(frame)
-
-                count += 1
-                if count == 100:
+                if count == 55:
                     break
+                count += 1
         return frames
         
 
@@ -47,29 +49,30 @@ class ComputerVision:
         #             cv2.imwrite(f"D:/fifa-vision/all/frame_{timestamp}_{i}.jpg", frame)
         if self.attempts is None:
             self.attempts = attempts
+            self.new_attempt = True
+        else:
+            self.new_attempt = False
 
         
         if self.attempts != attempts:
             # print("New attempt detected, resetting tracker...")
             self.attempts = attempts
             self.tracker.reset_tracker()
+            self.new_attempt = True
+        else:
+            self.new_attempt = False
             # for i, frame in enumerate(video_frames):
             #         cv2.imwrite(f"D:/fifa-vision/new_attempts/frame_{self.attempts}_{i}.jpg", frame)
-        # Read Video
-        # print("Reading video..." , track_stubs)
-        # video_frames = read_video("input_videos/general_small.mp4")
-        all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
-        # video_frames = video_frames[:7]
+        all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
 
         for test,frame in enumerate(video_frames):
             start_time = time.time()
-            frame = video_frames[test]
             height, width, _ = frame.shape
 
-            
-            frame_tracks = self.tracker.get_object_track(frame)
-            test += 1  # test
+            frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {}}
+            frame_tracks['ball'] = self.tracker.get_ball_tracks(frame)
+            frame_tracks["players"] = self.classical_ml.run(frame)
 
             self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
             #adjust goalkeeper detections
@@ -77,10 +80,10 @@ class ComputerVision:
             # Replace Outliers
             # if frame_tracks["ball"]:
             # print("Before outliers: ", frame_tracks["ball"][1]["conf"] if frame_tracks["ball"] else None)
-            if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.25 :
-                frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
-                    frame_tracks["ball"], 170
-                )
+            # if frame_tracks["ball"] and not self.new_attempt: 
+            #     frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
+            #         frame_tracks["ball"], 170
+            #     )
 
             # interpolate again
 
@@ -97,13 +100,14 @@ class ComputerVision:
                             "conf": 0.11
                         }
                     }
+                else:
+                    print("NO BALL DETECTED OR INTERPOLATED")
                     
 
             # Get object positions
             self.tracker.add_position_to_tracks(frame_tracks)
 
             # # View Trasnformer
-            # view_transformer.add_transformed_position_to_tracks(frame_tracks)
             self.view_transformer.get_matrix_transform(frame)
             self.view_transformer.add_transformed_position_to_tracks(frame_tracks)
             goal_post = self.view_transformer.real_world_to_pixel(self.tracker.goal_position)
@@ -126,48 +130,6 @@ class ComputerVision:
                 # print("HANDLED" , position_trasnformed)
                 frame_tracks['ball'][1]['position_transformed'] = position_trasnformed    
             
-
-            # Assign Player Teams
-            crops,crop_ids = self.team_assigner.extract_crops(frame_tracks["players"], frame)
-            embedings = self.team_assigner.extract_embeddings(crops)
-            clusters = self.team_assigner.predict_kmeans(embedings)
-            self.team_assigner.assign_clusters_to_players(clusters, crop_ids, frame_tracks["players"])
-            # Merge players from the same team who are very close to each other
-            merged_players = {}
-            distance_threshold = 75  # Adjust this threshold based on your use case
-
-            for player_id, track in list(frame_tracks["players"].items()):
-                if player_id in merged_players:
-                    continue  # Skip already merged players
-                # print('one track: ', track)
-                position1 = track["position"]
-                team1 = track["team"]
-                conf1 = track["conf"]  # Confidence of the first player
-
-                for other_player_id, other_track in list(frame_tracks["players"].items()):
-                    if player_id == other_player_id or other_player_id in merged_players:
-                        continue
-
-                    position2 = other_track["position"]
-                    team2 = other_track["team"]
-                    conf2 = other_track["conf"]  # Confidence of the second player
-
-                    # Check if players are from the same team and very close
-                    if team1 == team2:
-                        distance = np.linalg.norm(np.array(position1) - np.array(position2))
-                        if distance < distance_threshold:
-                            # Keep the player with the highest confidence
-                            if conf1 >= conf2:
-                                merged_players[other_player_id] = True
-                            else:
-                                merged_players[player_id] = True
-                                # Update the current player's data with the other player's data
-                                # frame_tracks["players"][player_id] = other_track
-                                break  # Stop checking further for this player
-
-            # Remove duplicate players
-            for player_id in merged_players:
-                del frame_tracks["players"][player_id]
             
         
 
@@ -198,28 +160,27 @@ class ComputerVision:
 
                         # Save the expanded crop
                       
-                        isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
+                        # isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
                         
-                        if isOffside:
+                        # if isOffside:
 
-                            return None, None
+                        #     return None, None
                         
 
 
             
 
-            # all_tracks["players"].append(frame_tracks["players"])
-            # all_tracks["ball"].append(frame_tracks["ball"])
-            # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            # all_tracks["goalpost"].append(frame_tracks["goalpost"])
-        # print("DONEEEEEE" , time.time() - start_time)
-        # print("all tracks: ", all_tracks)
+            all_tracks["players"].append(frame_tracks["players"])
+            all_tracks["ball"].append(frame_tracks["ball"])
+            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            all_tracks["goalpost"].append(frame_tracks["goalpost"])
+        print("DONEEEEEE" , time.time() - start_time)
 
         # Draw output
-        # output_video_frames = self.tracker.draw_annotations(
-        #     video_frames, all_tracks
-        # )
-        # save_video(output_video_frames, "output_videos/ballll.mp4")
+        output_video_frames = self.tracker.draw_annotations(
+            video_frames, all_tracks
+        )
+        save_video(output_video_frames, "output_videos/test_alwan_fouda.mp4")
 
         # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")

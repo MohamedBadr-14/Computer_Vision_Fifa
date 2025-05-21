@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import cv2
 import sys
+from ball_detector.ball_detect import BallDetect
 
 sys.path.append("../")
 from utils import get_center_of_bbox, get_bbox_width, get_foot_position,measure_distance
@@ -12,14 +13,13 @@ from utils import get_center_of_bbox, get_bbox_width, get_foot_position,measure_
 class Tracker:
     def __init__(self, model_path):
         self.model = YOLO(model_path)
-        self.ball_model = YOLO('../models/ball_best.pt')
+        self.ball_model = BallDetect()
         self.tracker = sv.ByteTrack()
         self.ball_positions_history = []
         self.last_valid_position = None
         self.frame_num = 0
         self.max_player_post_distance = 1000
         self.goal_position = (60,42)
-        # self.previously_interpolated_ids = []
 
     def reset_tracker(self):
         self.ball_positions_history = []
@@ -107,28 +107,27 @@ class Tracker:
     def detect_frame(self, frame):
         # Process a single frame
         detection = self.model(frame , conf = 0.1,verbose = False) #BADR MIDO
-        detection_ball = self.ball_model(frame , conf = 0.1,verbose = False) #BADR MIDO
-        return detection,detection_ball
+        # ball_frame = cv2.resize(frame, (640, 640))
+        return detection
 
     def get_object_track(self, frame):
 
         # Detect objects in the current frame+
-        detection,detection_ball = self.detect_frame(frame)
+        detection = self.detect_frame(frame)
         ball_count = 0
-        goal_count = 0
 
         # Initialize tracks for the current frame
         frame_tracks = {"players": {},"ball": {} , "goalkeeper": {} , "goalpost": {}}
 
         cls_names = detection[0].names
-        cls_names_ball = detection_ball[0].names
+        # cls_names_ball = detection_ball[0].names
         cls_names_inv = {v: k for k, v in cls_names.items()}
-        cls_names_inv_ball = {v: k for k, v in cls_names_ball.items()}
+        # cls_names_inv_ball = {v: k for k, v in cls_names_ball.items()}
 
         # Convert to supervision Detection format
         detection_supervision = sv.Detections.from_ultralytics(detection[0])
         detections_nms = detection_supervision.with_nms(threshold=0.5, class_agnostic=True)
-        detection_supervision_ball = sv.Detections.from_ultralytics(detection_ball[0])
+        # detection_supervision_ball = sv.Detections.from_ultralytics(detection_ball[0])
 
         for i,frame_detection in enumerate(detections_nms):
             bbox = frame_detection[0].tolist()
@@ -141,35 +140,60 @@ class Tracker:
                 if conf >=0.25:
                     frame_tracks["players"][track_id] = {"bbox": bbox, "conf": conf}
                 
-            # if cls_id == cls_names_inv["ball"]:
-            #     if (
-            #         ball_count > 0
-            #         and frame_detection[2] < frame_tracks["ball"][1]["conf"]
-            #     ):
-            #         # If the ball is already detected, skip adding it again
-            #         continue
-            #     frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
-            #     # print("BALLLL CONFFF" , frame_detection[2])
-            #     ball_count += 1
-        for i,frame_detection in enumerate(detection_supervision_ball):
-            bbox = frame_detection[0].tolist()
-            cls_id = frame_detection[3]
-            track_id = i
-            conf = frame_detection[2]
-            if cls_id == cls_names_inv_ball["ball"]:
-                if (
-                    ball_count > 0
-                    and frame_detection[2] < frame_tracks["ball"][1]["conf"]
-                ):
-                    # If the ball is already detected, skip adding it again
-                    continue
-                frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
-                # print("BALLLL CONFFF" , frame_detection[2])
-                ball_count += 1
+        # for i,frame_detection in enumerate(detection_supervision_ball):
+        #     bbox = frame_detection[0].tolist()
+        #     cls_id = frame_detection[3]
+        #     track_id = i
+        #     conf = frame_detection[2]
+            
+        #     if cls_id == cls_names_inv_ball["ball"]:
+        #         if (
+        #             ball_count > 0
+        #             and frame_detection[2] < frame_tracks["ball"][1]["conf"]
+        #         ):
+        #             # If the ball is already detected, skip adding it again
+        #             continue
+                
+        #         frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": self.scale_bouding_box(bbox)}
+        #         # print("BALLLL CONFFF" , frame_detection[2])
+        #         ball_count += 1
+        # ball_bbox = self.ball_model.svm_predict(frame)
+        # if ball_bbox is not None:
+        #     frame_tracks["ball"][1] = {
+        #         "conf": 0.11,
+        #         "bbox": ball_bbox,
+        #     }
+        # else:
+        #     frame_tracks["ball"] = {}
 
            
-        return frame_tracks
+        # return frame_tracks
+    def get_ball_tracks(self,frame):
+        ball_tracks = {}
+        ball_bbox = self.ball_model.svm_predict(frame)
+        if ball_bbox is not None:
+            ball_tracks[1] = {
+                "conf": 0.11,
+                "bbox": ball_bbox,
+            }
+        else:
+            ball_tracks = {}
+
+           
+        return ball_tracks
     
+    # def scale_bouding_box(self, bbox):
+    #     scale_x = 2560 / 640  
+    #     scale_y = 1600 / 640
+    #     x_min, y_min, x_max, y_max = bbox
+    #     scaled_box = [
+    #         x_min * scale_x,
+    #         y_min * scale_y,
+    #         x_max * scale_x,
+    #         y_max * scale_y
+    #     ]
+    #     return scaled_box
+        
                     
     def replace_outliers_based_on_distance(self, ball_track, distance_threshold: float):
         position = ball_track.get(1, {}).get("bbox", [])
@@ -189,31 +213,31 @@ class Tracker:
                 distance = np.linalg.norm(
                     np.array(position[0:2]) - np.array(self.last_valid_position)
                 )
-                print("distance", distance)
+                print('distance' , distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
-                    print("\nDistance exceeded threshold\n" , distance)
                     return {}
                 else:
                     self.last_valid_position = position[0:2]
                     return ball_track
                 
     def handle_penalty_detection(self, ball_tracks):
-        x,y = ball_tracks[1]['position_transformed'][0], ball_tracks[1]['position_transformed'][1]
         changed = False
-        if 48 <= x <= 50 and 44 <= y <= 46:
-            ball_tracks = {}
-            self.ball_positions_history.pop() if self.ball_positions_history else None
-            bbox = self.interpolate_ball_positions(ball_tracks)
-            if bbox:
-                ball_tracks = {
-                    1: {
-                        "bbox": bbox,
-                        "conf": 0.11
-                    }
-                }
-            ball_tracks[1]["position"] = get_center_of_bbox(bbox)
-            changed = True
+        if ball_tracks and 1 in ball_tracks:
+            x,y = ball_tracks[1]['position_transformed'][0], ball_tracks[1]['position_transformed'][1]
+            if 48 <= x <= 50 and 44 <= y <= 46:
+                ball_tracks = {}
+                self.ball_positions_history.pop() if self.ball_positions_history else None
+                bbox = self.interpolate_ball_positions(ball_tracks)
+                if bbox:
+                    ball_tracks = {
+                        1: {
+                            "bbox": bbox,
+                            "conf": 0.11
+                        }
+                    }  
+                    ball_tracks[1]["position"] = get_center_of_bbox(bbox)
+                    changed = True
         return ball_tracks,changed
             
 
@@ -369,35 +393,4 @@ class Tracker:
 
         return output_video_frames
 
-    def test_draw_annotation(self, video_path, output_path):
-        video = cv2.VideoCapture(video_path)
-        fps = video.get(cv2.CAP_PROP_FPS)
-        width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-
-        while True:
-            ret, frame = video.read()
-            if not ret:
-                break
-
-            # Perform detection and tracking
-            frame_tracks = self.get_object_track(frame)
-
-            # Draw annotations
-            annotated_frame = self.draw_annotations(frame, frame_tracks)
-
-            # Write the frame to the output video
-            out.write(annotated_frame)
-
-        video.release()
-        out.release()
-
-if __name__ == "__main__":
-    model_path = "../models/best_new.pt"
-    video_path = "../gameplay_recording_20250420_134441.mp4"
-    output_path = "output_video.avi"
-
-    tracker = Tracker(model_path)
-    tracker.test_draw_annotation(video_path, output_path)
+    

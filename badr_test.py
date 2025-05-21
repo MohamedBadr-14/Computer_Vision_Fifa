@@ -1,4 +1,4 @@
-from computer_vision import ComputerVision
+from computer_vision import ML_ComputerVision
 import cv2
 
 
@@ -18,9 +18,11 @@ if __name__ == "__main__":
     # attempts = 1
     # comp.run(video_frames, attempts)
 
-    comp = ComputerVision()
+    comp = ML_ComputerVision()
     frames = comp.read_frames("./badr/all")
-
+    print(len(frames))
+    frames = frames[0:50]
+    print(frames[0].shape)
     ft,hb = comp.run(frames, attempts=1)
 
 # import keyboard

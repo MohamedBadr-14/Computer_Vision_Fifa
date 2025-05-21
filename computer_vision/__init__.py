@@ -1,1 +1,1 @@
-from .computer_vision import ComputerVision
+from .ml_computer_vision import ML_ComputerVision
