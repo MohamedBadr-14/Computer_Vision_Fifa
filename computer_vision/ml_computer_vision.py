@@ -190,6 +190,5 @@ class ML_ComputerVision:
         # farthest player in team 2 without has_ball = true
 
 
-        
 
         return frame_tracks, hasBall
