@@ -11,6 +11,8 @@ from computer_vision import ComputerVision
 from rl import DQNAgent, get_state_from_positions, calculate_reward,compute_reward
 from pr import pause_process, resume_process
 import gc
+import traceback
+
 
 
 file_name="MODEL_5_11.pth"
@@ -605,8 +607,8 @@ class Controller:
                                 # self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False) OUDSAA
                             self.rl_agent.prev_state = cur_state #OUDA
 
-                        if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 1000 and len(self.rl_agent.memory) % 16 == 0):
-                            self.rl_agent.replay(64)  # Train on batch of 32 experiences
+                        # if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 1000 and len(self.rl_agent.memory) % 16 == 0):
+                        #     self.rl_agent.replay(64)  # Train on batch of 32 experiences
                    
                         print("\nACTION TAKEN:", action_taken,"\n")
                         self.action_taken = action_taken
@@ -801,9 +803,15 @@ if __name__ == "__main__":
         print("Saved model to", model_save_path)
 
         print(f"An error occurred: {e}")
+        print("\033[91m")  # Red text for error
+        traceback.print_exc()
+        print("\033[0m")
         try:
             resume_process()
         except Exception as e:
             print(f"An error occurred while resuming the process: {e}")
+            print("\033[91m")  # Red text for error
+            traceback.print_exc()
+            print("\033[0m")
 
 

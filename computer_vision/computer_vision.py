@@ -14,15 +14,17 @@ import keyboard
 class ComputerVision:
     def __init__(self):
         # self.tracker = Tracker("models/best_new.pt")
+
+        self.vid_num =0
         
-        self.tracker = Tracker("models/best_initial.pt")
+        self.tracker = Tracker("models/best_new.pt")
         self.team_assigner = TeamAssigner()
         self.player_assigner = PlayerBallAssigner()
         self.view_transformer = KeypointsTransformer()
         self.attempts = None
         self.offside_detector = OffsideDetector(gpu=True)
         self.offside_detector.warmup()
-        
+        self.new_attempt = False
     
     def read_frames(self,frames_path):
         # Read the frames from the specified path
@@ -53,6 +55,9 @@ class ComputerVision:
             # print("New attempt detected, resetting tracker...")
             self.attempts = attempts
             self.tracker.reset_tracker()
+            self.new_attempt = True
+        else:
+            self.new_attempt = False
             # for i, frame in enumerate(video_frames):
             #         cv2.imwrite(f"D:/fifa-vision/new_attempts/frame_{self.attempts}_{i}.jpg", frame)
         # Read Video
@@ -64,12 +69,9 @@ class ComputerVision:
 
         for test,frame in enumerate(video_frames):
             start_time = time.time()
-            frame = video_frames[test]
             height, width, _ = frame.shape
 
-            
             frame_tracks = self.tracker.get_object_track(frame)
-            test += 1  # test
 
             self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
             #adjust goalkeeper detections
@@ -77,7 +79,7 @@ class ComputerVision:
             # Replace Outliers
             # if frame_tracks["ball"]:
             # print("Before outliers: ", frame_tracks["ball"][1]["conf"] if frame_tracks["ball"] else None)
-            if frame_tracks["ball"] and frame_tracks["ball"][1]["conf"] < 0.25 :
+            if frame_tracks["ball"] and self.new_attempt :
                 frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
                     frame_tracks["ball"], 170
                 )
@@ -97,6 +99,8 @@ class ComputerVision:
                             "conf": 0.11
                         }
                     }
+                else:
+                    print("No ball detected and no interpolation available.")
                     
 
             # Get object positions
@@ -117,6 +121,7 @@ class ComputerVision:
             frame_tracks = self.tracker.adjust_goalkeeper_detection(frame_tracks)
             
             # handle penalty detections
+            
             frame_tracks["ball"],changed = self.tracker.handle_penalty_detection(frame_tracks["ball"])
             if changed:
                 position = np.array(frame_tracks["ball"][1]["position"])
@@ -175,7 +180,7 @@ class ComputerVision:
             if frame_tracks["ball"]:
                     ball_position = frame_tracks["ball"][1]["bbox"]
                     assigned_player = self.player_assigner.assign_ball_to_player(
-                        frame_tracks["players"], ball_position
+                        frame_tracks["players"], ball_position,frame_tracks["ball"][1],
                     )
 
                     if assigned_player != -1:
@@ -207,21 +212,29 @@ class ComputerVision:
 
 
             
+            if frame_tracks["ball"] and frame_tracks['ball'][1] == {}:
+                print("Ball not detected OUDA")
+            else:
+                print("Ball detected BADR")
+                # print ("Ball position: ", frame_tracks["ball"][1]["position_transformed"])
+                
+            all_tracks["players"].append(frame_tracks["players"])
+            all_tracks["ball"].append(frame_tracks["ball"])
+            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            all_tracks["goalpost"].append(frame_tracks["goalpost"])
+        # # print("DONEEEEEE" , time.time() - start_time)
+        # # print("all tracks: ", all_tracks)
 
-            # all_tracks["players"].append(frame_tracks["players"])
-            # all_tracks["ball"].append(frame_tracks["ball"])
-            # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            # all_tracks["goalpost"].append(frame_tracks["goalpost"])
-        # print("DONEEEEEE" , time.time() - start_time)
-        # print("all tracks: ", all_tracks)
+        output_video_frames = self.tracker.draw_annotations(
+            video_frames, all_tracks
+        )
+        print("ALOOOO" , len(output_video_frames))
+        cv2.imwrite(f"output_videos/ballll_{self.vid_num}.png", output_video_frames[-1])
+        # print("output video frames: ", len(output_video_frames))
+        # save_video(output_video_frames,f"output_videos/ballll{self.vid_num}.mp4")
+        self.vid_num += 1
 
-        # Draw output
-        # output_video_frames = self.tracker.draw_annotations(
-        #     video_frames, all_tracks
-        # )
-        # save_video(output_video_frames, "output_videos/ballll.mp4")
-
-        # # Save video
+        # # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
