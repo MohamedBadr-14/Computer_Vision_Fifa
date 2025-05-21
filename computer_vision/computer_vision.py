@@ -4,12 +4,10 @@ import numpy as np
 from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from view_transformer import  KeypointsTransformer
-import json
 import cv2
 import os
 import time
 from offside_detector import OffsideDetector
-import keyboard
 
 class ComputerVision:
     def __init__(self):
@@ -37,7 +35,7 @@ class ComputerVision:
                 frames.append(frame)
 
                 count += 1
-                if count == 100:
+                if count == 50:
                     break
         return frames
         
@@ -73,7 +71,8 @@ class ComputerVision:
 
             frame_tracks = self.tracker.get_object_track(frame)
 
-            self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
+            if frame_tracks['players']:
+                self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
             #adjust goalkeeper detections
 
             # Replace Outliers
@@ -210,29 +209,21 @@ class ComputerVision:
                             return None, None
                         
 
-
-            
-            if frame_tracks["ball"] and frame_tracks['ball'][1] == {}:
-                print("Ball not detected OUDA")
-            else:
-                print("Ball detected BADR")
                 # print ("Ball position: ", frame_tracks["ball"][1]["position_transformed"])
                 
-            all_tracks["players"].append(frame_tracks["players"])
-            all_tracks["ball"].append(frame_tracks["ball"])
-            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            all_tracks["goalpost"].append(frame_tracks["goalpost"])
+            # all_tracks["players"].append(frame_tracks["players"])
+            # all_tracks["ball"].append(frame_tracks["ball"])
+            # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            # all_tracks["goalpost"].append(frame_tracks["goalpost"])
         # # print("DONEEEEEE" , time.time() - start_time)
         # # print("all tracks: ", all_tracks)
 
-        output_video_frames = self.tracker.draw_annotations(
-            video_frames, all_tracks
-        )
-        print("ALOOOO" , len(output_video_frames))
-        cv2.imwrite(f"output_videos/ballll_{self.vid_num}.png", output_video_frames[-1])
-        # print("output video frames: ", len(output_video_frames))
+        # output_video_frames = self.tracker.draw_annotations(
+        #     video_frames, all_tracks
+        # )
+        # # print("output video frames: ", len(output_video_frames))
         # save_video(output_video_frames,f"output_videos/ballll{self.vid_num}.mp4")
-        self.vid_num += 1
+        # self.vid_num += 1
 
         # # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")

@@ -13,9 +13,8 @@ from utils import get_center_of_bbox, get_bbox_width, get_foot_position,measure_
 class Tracker:
     def __init__(self, model_path):
         self.model = YOLO(model_path)
-        # self.ball_model = YOLO('models/best_initial.pt')
+        self.deep_ball_model = YOLO('models/best_initial.pt')
         self.ball_model = BallDetect()
-        self.tracker = sv.ByteTrack()
         self.ball_positions_history = []
         self.last_valid_position = None
         self.frame_num = 0
@@ -109,13 +108,13 @@ class Tracker:
     def detect_frame(self, frame):
         # Process a single frame
         detection = self.model(frame , verbose = False) #BADR MIDO
-        # detection_ball = self.ball_model(frame , conf = 0.1,verbose = False) #BADR MIDO
-        return detection
+        detection_ball = self.deep_ball_model(frame , conf = 0.1,verbose = False) #BADR MIDO
+        return detection,detection_ball
 
     def get_object_track(self, frame):
 
         # Detect objects in the current frame+
-        detection = self.detect_frame(frame)
+        detection,detection_ball = self.detect_frame(frame)
         ball_count = 0
         goal_count = 0
 
@@ -123,14 +122,14 @@ class Tracker:
         frame_tracks = {"players": {},"ball": {} , "goalkeeper": {} , "goalpost": {}}
 
         cls_names = detection[0].names
-        # cls_names_ball = detection_ball[0].names
+        cls_names_ball = detection_ball[0].names
         cls_names_inv = {v: k for k, v in cls_names.items()}
-        # cls_names_inv_ball = {v: k for k, v in cls_names_ball.items()}
+        cls_names_inv_ball = {v: k for k, v in cls_names_ball.items()}
 
         # Convert to supervision Detection format
         detection_supervision = sv.Detections.from_ultralytics(detection[0])
         detections_nms = detection_supervision.with_nms(threshold=0.5, class_agnostic=True)
-        # detection_supervision_ball = sv.Detections.from_ultralytics(detection_ball[0])
+        detection_supervision_ball = sv.Detections.from_ultralytics(detection_ball[0])
 
         for i,frame_detection in enumerate(detections_nms):
             bbox = frame_detection[0].tolist()
@@ -143,40 +142,30 @@ class Tracker:
                 if conf >=0.25:
                     frame_tracks["players"][track_id] = {"bbox": bbox, "conf": conf}
                 
-            # if cls_id == cls_names_inv["ball"]:
-            #     if (
-            #         ball_count > 0
-            #         and frame_detection[2] < frame_tracks["ball"][1]["conf"]
-            #     ):
-            #         # If the ball is already detected, skip adding it again
-            #         continue
-            #     frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
-            #     # print("BALLLL CONFFF" , frame_detection[2])
-            #     ball_count += 1
-        # for i,frame_detection in enumerate(detection_supervision_ball):
-        #     bbox = frame_detection[0].tolist()
-        #     cls_id = frame_detection[3]
-        #     track_id = i
-        #     conf = frame_detection[2]
-        #     if cls_id == cls_names_inv_ball["ball"]:
-        #         if (
-        #             ball_count > 0
-        #             and frame_detection[2] < frame_tracks["ball"][1]["conf"]
-        #         ):
-        #             # If the ball is already detected, skip adding it again
-        #             continue
-        #         frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
-        #         # print("BALLLL CONFFF" , frame_detection[2])
-        #         ball_count += 1
-        ball_bbox = self.ball_model.svm_predict(frame)
-        if ball_bbox is not None:
-            frame_tracks["ball"][1] = {
-                # "conf": 0.15, #BADR HARD CODED
-                "conf": 0.6,
-                "bbox": ball_bbox,
-            }
-        else:
-            frame_tracks["ball"] = {}
+        for i,frame_detection in enumerate(detection_supervision_ball):
+            bbox = frame_detection[0].tolist()
+            cls_id = frame_detection[3]
+            track_id = i
+            conf = frame_detection[2]
+            if cls_id == cls_names_inv_ball["ball"]:
+                if (
+                    ball_count > 0
+                    and frame_detection[2] < frame_tracks["ball"][1]["conf"]
+                ):
+                    # If the ball is already detected, skip adding it again
+                    continue
+                frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
+                # print("BALLLL CONFFF" , frame_detection[2])
+                ball_count += 1
+        # ball_bbox = self.ball_model.svm_predict(frame)
+        # if ball_bbox is not None:
+        #     frame_tracks["ball"][1] = {
+        #         # "conf": 0.15, #BADR HARD CODED
+        #         "conf": 0.6,
+        #         "bbox": ball_bbox,
+        #     }
+        # else:
+        #     frame_tracks["ball"] = {}
 
            
         return frame_tracks

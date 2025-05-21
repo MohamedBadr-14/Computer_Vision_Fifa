@@ -21,9 +21,9 @@ class PlayerBallAssigner():
 
 
             if distance < miniumum_distance:
-                print(f"Player {player_id} is closer to the ball with distance {distance}")
-                print(f"Ball position: {ball['position_transformed']}")
-                print(f"con: {ball['conf']}")
+                # print(f"Player {player_id} is closer to the ball with distance {distance}")
+                # print(f"Ball position: {ball['position_transformed']}")
+                # print(f"con: {ball['conf']}")
                 if distance < self.max_player_ball_distance:
                     miniumum_distance = distance
                     assigned_player = player_id
