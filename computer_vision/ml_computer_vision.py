@@ -80,10 +80,10 @@ class ML_ComputerVision:
             # Replace Outliers
             # if frame_tracks["ball"]:
             # print("Before outliers: ", frame_tracks["ball"][1]["conf"] if frame_tracks["ball"] else None)
-            # if frame_tracks["ball"] and not self.new_attempt: 
-            #     frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
-            #         frame_tracks["ball"], 170
-            #     )
+            if frame_tracks["ball"] and not self.new_attempt: 
+                frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
+                    frame_tracks["ball"], 170
+                )
 
             # interpolate again
 
@@ -160,27 +160,27 @@ class ML_ComputerVision:
 
                         # Save the expanded crop
                       
-                        # isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
+                        isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
                         
-                        # if isOffside:
+                        if isOffside:
 
-                        #     return None, None
+                            return None, None
                         
 
 
             
 
-            all_tracks["players"].append(frame_tracks["players"])
-            all_tracks["ball"].append(frame_tracks["ball"])
-            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            all_tracks["goalpost"].append(frame_tracks["goalpost"])
+            # all_tracks["players"].append(frame_tracks["players"])
+            # all_tracks["ball"].append(frame_tracks["ball"])
+            # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            # all_tracks["goalpost"].append(frame_tracks["goalpost"])
         print("DONEEEEEE" , time.time() - start_time)
 
         # Draw output
-        output_video_frames = self.tracker.draw_annotations(
-            video_frames, all_tracks
-        )
-        save_video(output_video_frames, "output_videos/test_alwan_fouda.mp4")
+        # output_video_frames = self.tracker.draw_annotations(
+        #     video_frames, all_tracks
+        # )
+        # save_video(output_video_frames, "output_videos/test_alwan_fouda.mp4")
 
         # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
@@ -191,17 +191,7 @@ class ML_ComputerVision:
         # farthest player in team 1 without has_ball = true
         # farthest player in team 2 without has_ball = true
 
-        # all_tracks["players"]
 
         
 
         return frame_tracks, hasBall
-
-
-
-    # def voting_algo_frames (self,all_tracks):
-    #     # all tracks is a dictionary of lists of dictionaries
-    #     # all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
-    #     # i want to return single dictionary of players, referees, ball, goalkeeper, goalpost
-    #     # the problem if i take the last frame only is that it might not be the most accurate i want to make like voting algo and take average
-
