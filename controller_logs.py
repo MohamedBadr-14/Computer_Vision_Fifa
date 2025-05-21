@@ -288,8 +288,8 @@ class Controller:
         annotated_frame = self.add_logs_to_frame(frame, frame_count, ocr_results, scene, has_ball)
         
         # Save the annotated frame as an image for reference
-        timestamp = datetime.now().strftime("%H%M%S_%f")
-        cv2.imwrite(f"{self.output_folder}/annotated_frame_{frame_count:06d}_{timestamp}.jpg", annotated_frame)
+        # timestamp = datetime.now().strftime("%H%M%S_%f")
+        # cv2.imwrite(f"{self.output_folder}/annotated_frame_{frame_count:06d}_{timestamp}.jpg", annotated_frame)
         
         # Write the frame to video
         self.video_writer.write(annotated_frame)
@@ -533,8 +533,8 @@ class Controller:
                 frame_sequence += 1  # Additional sequence counter for accurate file naming
                 
                 # Save EVERY frame regardless of state
-                all_frame_filename = f"{all_frames_dir}/frame_all_{frame_sequence:06d}.jpg"
-                cv2.imwrite(all_frame_filename, frame)
+                # all_frame_filename = f"{all_frames_dir}/frame_all_{frame_sequence:06d}.jpg"
+                # cv2.imwrite(all_frame_filename, frame)
                 
                 # Extract OCR results for logging
                 ocr_results = self.ocr_extractor.extract_points_and_attempts(frame)
@@ -553,18 +553,19 @@ class Controller:
                     
                     # Track pause state for logging
                     if not paused:
-                        paused_frame_filename = f"{output_folder}/paused_frame_{frame_sequence:06d}.jpg"
-                        cv2.imwrite(paused_frame_filename, frame)
-                        self.logger.info(f"Game is being skipped at frame {self.frame_count}")
+                        pass
+                        # paused_frame_filename = f"{output_folder}/paused_frame_{frame_sequence:06d}.jpg"
+                        # cv2.imwrite(paused_frame_filename, frame)
+                        # self.logger.info(f"Game is being skipped at frame {self.frame_count}")
                     
                     continue
 
                 # Handle temporary state flag for frame processing control
                 if self.temp_flag == False:
                     # Log frame capture and save with accurate sequential numbering
-                    frame_filename = f"{output_folder}/frame_{frame_sequence:06d}.jpg"
-                    cv2.imwrite(frame_filename, frame)
-                    self.logger.debug(f"Saved frame {self.frame_count} (seq: {frame_sequence}) to {frame_filename}")
+                    # frame_filename = f"{output_folder}/frame_{frame_sequence:06d}.jpg"
+                    # cv2.imwrite(frame_filename, frame)
+                    # self.logger.debug(f"Saved frame {self.frame_count} (seq: {frame_sequence}) to {frame_filename}")
                     
                     self.temp_flag = True
                     self.processed_frames += 1
@@ -583,19 +584,19 @@ class Controller:
                     pause_frame = frame.copy()
                     
                     # Save special pause indicator frame
-                    pause_filename = f"{output_folder}/pause_start_{frame_sequence:06d}.jpg"
-                    cv2.putText(pause_frame, "GAME PAUSING", (frame.shape[1]//2 - 200, frame.shape[0]//2), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 4)
-                    cv2.imwrite(pause_filename, pause_frame)
+                    # pause_filename = f"{output_folder}/pause_start_{frame_sequence:06d}.jpg"
+                    # cv2.putText(pause_frame, "GAME PAUSING", (frame.shape[1]//2 - 200, frame.shape[0]//2), 
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 4)
+                    # cv2.imwrite(pause_filename, pause_frame)
                     
                     # Pause game to process frames
                     self.pause_game()
                     
-                    # Save frames for analysis with accurate sequence numbering
-                    for i, buffer_frame in enumerate(self.frames_to_send):
-                        buffer_frame_filename = f"{output_folder}/frame_buffer_{frame_sequence-len(self.frames_to_send)+i+1:06d}.jpg"
-                        cv2.imwrite(buffer_frame_filename, buffer_frame)
-                        self.logger.debug(f"Saved buffered frame {i+1}/5 to {buffer_frame_filename}")
+                    # # Save frames for analysis with accurate sequence numbering
+                    # for i, buffer_frame in enumerate(self.frames_to_send):
+                    #     buffer_frame_filename = f"{output_folder}/frame_buffer_{frame_sequence-len(self.frames_to_send)+i+1:06d}.jpg"
+                    #     cv2.imwrite(buffer_frame_filename, buffer_frame)
+                    #     self.logger.debug(f"Saved buffered frame {i+1}/5 to {buffer_frame_filename}")
                     
                     # Get scene information from computer vision module
                     self.logger.info("Running computer vision analysis on buffered frames")
@@ -614,14 +615,14 @@ class Controller:
                     frame_sequence += 1
                     
                     # Add analysis information to the frame
-                    pause_analysis_filename = f"{output_folder}/pause_analysis_{frame_sequence:06d}.jpg"
-                    analysis_text = f"CV Time: {cv_time:.2f}s | Ball: {has_ball}"
-                    cv2.putText(pause_analysis_frame, analysis_text, (10, frame.shape[0]//2), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
-                    cv2.imwrite(pause_analysis_filename, pause_analysis_frame)
+                    # pause_analysis_filename = f"{output_folder}/pause_analysis_{frame_sequence:06d}.jpg"
+                    # analysis_text = f"CV Time: {cv_time:.2f}s | Ball: {has_ball}"
+                    # cv2.putText(pause_analysis_frame, analysis_text, (10, frame.shape[0]//2), 
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
+                    # cv2.imwrite(pause_analysis_filename, pause_analysis_frame)
                     
-                    # Record the analysis frame
-                    self.write_frame_to_video(pause_analysis_frame, self.frame_count, ocr_results, scene, has_ball)
+                    # # Record the analysis frame
+                    # self.write_frame_to_video(pause_analysis_frame, self.frame_count, ocr_results, scene, has_ball)
                     
                     # Clear buffer and reset counter
                     self.frames_to_send.clear()
@@ -682,32 +683,32 @@ class Controller:
                     frame_sequence += 1
                     
                     # Add decision information to the frame
-                    decision_filename = f"{output_folder}/decision_{frame_sequence:06d}.jpg"
-                    decision_text = f"RL Time: {rl_time:.2f}s | Action: {action_log}"
-                    cv2.putText(decision_frame, decision_text, (10, frame.shape[0]//2 + 50), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
-                    cv2.imwrite(decision_filename, decision_frame)
+                    # decision_filename = f"{output_folder}/decision_{frame_sequence:06d}.jpg"
+                    # decision_text = f"RL Time: {rl_time:.2f}s | Action: {action_log}"
+                    # cv2.putText(decision_frame, decision_text, (10, frame.shape[0]//2 + 50), 
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
+                    # cv2.imwrite(decision_filename, decision_frame)
                     
-                    # Record the decision frame
-                    self.write_frame_to_video(decision_frame, self.frame_count, ocr_results, scene, has_ball)
+                    # # # Record the decision frame
+                    # self.write_frame_to_video(decision_frame, self.frame_count, ocr_results, scene, has_ball)
                     
                     # Capture unpausing
-                    unpause_frame = np.array(sct.grab(monitor))
-                    unpause_frame = cv2.cvtColor(unpause_frame, cv2.COLOR_BGRA2BGR)
+                    # unpause_frame = np.array(sct.grab(monitor))
+                    # unpause_frame = cv2.cvtColor(unpause_frame, cv2.COLOR_BGRA2BGR)
                     
                     self.frame_count += 1
                     frame_sequence += 1
                     
                     # Add unpausing information
-                    unpause_filename = f"{output_folder}/unpause_{frame_sequence:06d}.jpg"
-                    pause_duration = time.time() - pause_start_time
-                    unpause_text = f"GAME RESUMING | Pause duration: {pause_duration:.2f}s"
-                    cv2.putText(unpause_frame, unpause_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
-                    cv2.imwrite(unpause_filename, unpause_frame)
+                    # unpause_filename = f"{output_folder}/unpause_{frame_sequence:06d}.jpg"
+                    # pause_duration = time.time() - pause_start_time
+                    # unpause_text = f"GAME RESUMING | Pause duration: {pause_duration:.2f}s"
+                    # cv2.putText(unpause_frame, unpause_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+                    # cv2.imwrite(unpause_filename, unpause_frame)
                     
-                    # Record the unpause frame
-                    self.write_frame_to_video(unpause_frame, self.frame_count, ocr_results, scene, has_ball)
+                    # # Record the unpause frame
+                    # self.write_frame_to_video(unpause_frame, self.frame_count, ocr_results, scene, has_ball)
                     
                     # Resume game and continue
                     self.resume_game()
@@ -721,14 +722,14 @@ class Controller:
                         self.frame_count += 1
                         frame_sequence += 1
                         
-                        pre_action_filename = f"{output_folder}/pre_action_{frame_sequence:06d}.jpg"
-                        pre_action_text = f"ABOUT TO EXECUTE: {self._get_action_description(self.action_taken)}"
-                        cv2.putText(pre_action_frame, pre_action_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
-                                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 165, 0), 3)
-                        cv2.imwrite(pre_action_filename, pre_action_frame)
+                        # pre_action_filename = f"{output_folder}/pre_action_{frame_sequence:06d}.jpg"
+                        # pre_action_text = f"ABOUT TO EXECUTE: {self._get_action_description(self.action_taken)}"
+                        # cv2.putText(pre_action_frame, pre_action_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
+                        #             cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 165, 0), 3)
+                        # cv2.imwrite(pre_action_filename, pre_action_frame)
                         
-                        # Record the pre-action frame
-                        self.write_frame_to_video(pre_action_frame, self.frame_count, ocr_results, scene, has_ball)
+                        # # Record the pre-action frame
+                        # self.write_frame_to_video(pre_action_frame, self.frame_count, ocr_results, scene, has_ball)
                         
                         # Execute the action
                         self.make_action(self.action_taken)
@@ -751,15 +752,15 @@ class Controller:
                     self.logger.info(f"No attempts detected at frame {self.frame_count}, attempting restart")
                     
                     # Capture restart frame
-                    restart_frame = frame.copy()
-                    restart_filename = f"{output_folder}/game_restart_{frame_sequence:06d}.jpg"
-                    restart_text = "GAME RESTARTING"
-                    cv2.putText(restart_frame, restart_text, (frame.shape[1]//2 - 200, frame.shape[0]//2), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 4)
-                    cv2.imwrite(restart_filename, restart_frame)
+                    # restart_frame = frame.copy()
+                    # restart_filename = f"{output_folder}/game_restart_{frame_sequence:06d}.jpg"
+                    # restart_text = "GAME RESTARTING"
+                    # cv2.putText(restart_frame, restart_text, (frame.shape[1]//2 - 200, frame.shape[0]//2), 
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 255), 4)
+                    # cv2.imwrite(restart_filename, restart_frame)
                     
-                    # Record the restart frame
-                    self.write_frame_to_video(restart_frame, self.frame_count, ocr_results)
+                    # # Record the restart frame
+                    # self.write_frame_to_video(restart_frame, self.frame_count, ocr_results)
                     
                     time.sleep(3)
                     keyboard.press('enter')
@@ -796,15 +797,15 @@ class Controller:
                         self.logger.info(f"New attempt detected: {ocr_results['attempts']} (was {self.last_attempt})")
                         
                         # Capture attempt transition frame
-                        attempt_frame = frame.copy()
-                        attempt_filename = f"{output_folder}/new_attempt_{frame_sequence:06d}.jpg"
-                        attempt_text = f"NEW ATTEMPT: {ocr_results['attempts']} (was {self.last_attempt})"
-                        cv2.putText(attempt_frame, attempt_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
-                                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 0), 3)
-                        cv2.imwrite(attempt_filename, attempt_frame)
+                        # attempt_frame = frame.copy()
+                        # attempt_filename = f"{output_folder}/new_attempt_{frame_sequence:06d}.jpg"
+                        # attempt_text = f"NEW ATTEMPT: {ocr_results['attempts']} (was {self.last_attempt})"
+                        # cv2.putText(attempt_frame, attempt_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
+                        #             cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 0), 3)
+                        # cv2.imwrite(attempt_filename, attempt_frame)
                         
-                        # Record the attempt transition frame
-                        self.write_frame_to_video(attempt_frame, self.frame_count, ocr_results)
+                        # # Record the attempt transition frame
+                        # self.write_frame_to_video(attempt_frame, self.frame_count, ocr_results)
                         
                         self.last_attempt = ocr_results['attempts']
                         scene_toRL = self.dummy_scene.copy()
@@ -834,15 +835,15 @@ class Controller:
                         self.logger.info(f"Score changed: {ocr_results['points']} (was {self.last_points})")
                         
                         # Capture score change frame
-                        score_frame = frame.copy()
-                        score_filename = f"{output_folder}/score_change_{frame_sequence:06d}.jpg"
-                        score_text = f"SCORE CHANGED: {ocr_results['points']} (was {self.last_points})"
-                        cv2.putText(score_frame, score_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
-                                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
-                        cv2.imwrite(score_filename, score_frame)
+                        # score_frame = frame.copy()
+                        # score_filename = f"{output_folder}/score_change_{frame_sequence:06d}.jpg"
+                        # score_text = f"SCORE CHANGED: {ocr_results['points']} (was {self.last_points})"
+                        # cv2.putText(score_frame, score_text, (frame.shape[1]//2 - 300, frame.shape[0]//2), 
+                        #             cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+                        # cv2.imwrite(score_filename, score_frame)
                         
-                        # Record the score change frame
-                        self.write_frame_to_video(score_frame, self.frame_count, ocr_results)
+                        # # Record the score change frame
+                        # self.write_frame_to_video(score_frame, self.frame_count, ocr_results)
                         
                         self.last_points = ocr_results['points']
                         action_log = f"Score changed to {self.last_points}"

@@ -1,4 +1,9 @@
 def get_center_of_bbox(bbox):
+    if bbox is None:
+        return None #OUDA
+    if len(bbox) != 4:
+        print(f"Invalid bbox format: {bbox}")
+        return None #OUDA
     x1,y1,x2,y2 = bbox
     return int((x1+x2)/2),int((y1+y2)/2)
 

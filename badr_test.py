@@ -1,5 +1,6 @@
-from computer_vision import ML_ComputerVision
+from computer_vision import ML_ComputerVision , ComputerVision
 import cv2
+import time
 
 
 
@@ -18,12 +19,18 @@ if __name__ == "__main__":
     # attempts = 1
     # comp.run(video_frames, attempts)
 
-    comp = ML_ComputerVision()
-    frames = comp.read_frames("./badr/all")
+    ml_comp = ML_ComputerVision()
+    comp = ComputerVision()
+    frames = ml_comp.read_frames("./badr/all")
     print(len(frames))
-    frames = frames[0:50]
     print(frames[0].shape)
-    ft,hb = comp.run(frames, attempts=1)
+    start = time.time()
+    ft,hb = ml_comp.run(frames, attempts=1)
+    print("FINISHED ML" , time.time() - start)
+    start = time.time()
+    x = comp.run(frames, attempts=1)
+    print("FINISHED CV" , time.time() - start)
+    
 
 # import keyboard
 

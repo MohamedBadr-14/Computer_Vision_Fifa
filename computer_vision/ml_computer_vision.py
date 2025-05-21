@@ -1,16 +1,14 @@
 from utils import read_video, save_video
 from trackers import Tracker
 import numpy as np
-from team_assigner import TeamAssigner
+# from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from view_transformer import  KeypointsTransformer
-import json
 import cv2
 import os
 import time
 from offside_detector import OffsideDetector
 from classical_ml.player_detection import ClassicalML
-import keyboard
 
 class ML_ComputerVision:
     def __init__(self):
@@ -22,8 +20,8 @@ class ML_ComputerVision:
         self.attempts = None
         self.new_attempt = False
         self.classical_ml = ClassicalML()
-        # self.offside_detector = OffsideDetector(gpu=True)
-        # self.offside_detector.warmup()
+        self.offside_detector = OffsideDetector(gpu=True)
+        self.offside_detector.warmup()
         
     
     def read_frames(self,frames_path):
@@ -74,7 +72,8 @@ class ML_ComputerVision:
             frame_tracks['ball'] = self.tracker.get_ball_tracks(frame)
             frame_tracks["players"] = self.classical_ml.run(frame)
 
-            self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
+            if frame_tracks['players']:
+                self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
             #adjust goalkeeper detections
 
             # Replace Outliers
@@ -121,6 +120,7 @@ class ML_ComputerVision:
             frame_tracks = self.tracker.adjust_goalkeeper_detection(frame_tracks)
             
             # handle penalty detections
+            
             frame_tracks["ball"],changed = self.tracker.handle_penalty_detection(frame_tracks["ball"])
             if changed:
                 position = np.array(frame_tracks["ball"][1]["position"])
@@ -137,7 +137,7 @@ class ML_ComputerVision:
             if frame_tracks["ball"]:
                     ball_position = frame_tracks["ball"][1]["bbox"]
                     assigned_player = self.player_assigner.assign_ball_to_player(
-                        frame_tracks["players"], ball_position
+                        frame_tracks["players"], ball_position,frame_tracks["ball"][1],
                     )
 
                     if assigned_player != -1:
@@ -167,22 +167,20 @@ class ML_ComputerVision:
                             return None, None
                         
 
-
-            
-
+                # print ("Ball position: ", frame_tracks["ball"][1]["position_transformed"])
+                
             # all_tracks["players"].append(frame_tracks["players"])
             # all_tracks["ball"].append(frame_tracks["ball"])
             # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
             # all_tracks["goalpost"].append(frame_tracks["goalpost"])
-        print("DONEEEEEE" , time.time() - start_time)
+        # print("DONEEEEEE" , time.time() - start_time)
 
-        # Draw output
         # output_video_frames = self.tracker.draw_annotations(
         #     video_frames, all_tracks
         # )
-        # save_video(output_video_frames, "output_videos/test_alwan_fouda.mp4")
+        # save_video(output_video_frames, "output_videos/ML.mp4")
 
-        # # Save video
+        # # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
                 # Check if any player in team 1 has the ball
         hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
