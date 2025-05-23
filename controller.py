@@ -7,15 +7,17 @@ import logging
 from datetime import datetime
 from mss import mss
 from ocr_extractor import OCRExtractor
-from computer_vision import ComputerVision
+# from computer_vision import ComputerVision
 from rl import DQNAgent, get_state_from_positions, calculate_reward,compute_reward
 from pr import pause_process, resume_process
 import gc
 import traceback
+from computer_vision import ML_ComputerVision
 
 
 
-file_name="MODEL_5_11.pth"
+
+file_name="MODEL_21_5.pth"
 
 
 action_descriptions = {
@@ -55,7 +57,7 @@ class Controller:
         
         # Initialize OCR and computer vision modules
         self.ocr_extractor = OCRExtractor()
-        self.computer_vision = ComputerVision()
+        self.computer_vision = ML_ComputerVision()
         # self.logger.info("OCR and Computer Vision modules initialized")
         self.all_frames = []
         
@@ -457,11 +459,13 @@ class Controller:
                 except MemoryError:
                     print("MemoryError: Frame capture failed. Attempting to free up memory.")
                     gc.collect()  # Force garbage collection to free up memory
+                    exit(1)
                     continue
                 # self.all_frames.append(frame)
                 
                 # Extract OCR results for logging
                 ocr_results = self.ocr_extractor.extract_points_and_attempts(frame)
+                print(ocr_results)
 
                 if self.prev_action is not None:
                     if self.prev_action in range(8,16):
@@ -479,6 +483,7 @@ class Controller:
                 # Skip frames if counter is active (e.g., after pausing)
 
                 if True:
+                    
                     if self.skip_counter > 0:
                         self.skip_counter -= 1
                         frame_count += 1
@@ -486,21 +491,29 @@ class Controller:
 
                 # Handle temporary state flag for frame processing control
                 if True:
-                    if self.temp_flag == False:              
+                   
+                    if self.temp_flag == False:
+                        print("TEMP FLAG:",self.temp_flag)              
                         self.temp_flag = True
                         frame_count += 1
                         self.frames_to_send.clear()
                         continue
                
                 # Process accumulated frames when buffer is full
+                print("BUFFER SIZE:", len(self.frames_to_send))
                 if len(self.frames_to_send) == 3:
                     self.to_be_sent.append(self.frames_to_send.copy())
-
+                    print("PAUSE")
                     pause_process()
+                    print("PAUSEDDDD")
+                    
+                    time_before = time.time()
                     time.sleep(0.1)
                     self.is_paused = True
 
                     scene, has_ball= self.computer_vision.run(self.frames_to_send, self.last_attempt)
+                    time_after = time.time()
+                    print("Processing time: ", time_after - time_before)
                     if not has_ball:
                         if self.prev_action is not None and self.prev_action in range(0,8):
                             self.skip_2_frames = False
@@ -527,6 +540,7 @@ class Controller:
                         self.is_offside = True
                         # self.rl_agent.memory.pop()
                         resume_process()    
+                        print("RESUMING")
                         continue
 
                     print("\nHAS BALL:", has_ball,"\n")
@@ -569,6 +583,7 @@ class Controller:
                             self.is_paused = False
                             self.skip_2_frames = False
                             resume_process()
+                            print("RESUMING")
                             continue
                         self.agent_y = cur_state[-1] * 90
                         self.agent_x = cur_state[-2] * 60
@@ -625,7 +640,7 @@ class Controller:
                     # wait for key d pressed
                     # self.logger.info("Waiting for 'd' key press to resume game...")
                     # keyboard.wait('l')
-                    
+                    print("RESSSSUMING")
                     if self.action_taken is not None:
                         self.is_paused = False
                         resume_process()
@@ -791,7 +806,7 @@ class Controller:
 if __name__ == "__main__":
     # Create and run the controller with optional video recording
     controller = Controller(
-        file_name
+        # file_name
         )
     rl_model = controller.rl_agent
     # controller.run()

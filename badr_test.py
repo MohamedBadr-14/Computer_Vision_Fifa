@@ -1,8 +1,7 @@
 from computer_vision import ML_ComputerVision , ComputerVision
 import cv2
 import time
-
-
+import os
 
 # frames = comp.read_frames("./badr/all")
 # frames = [cv2.imread("off.png")]
@@ -10,26 +9,50 @@ import time
 # from computer_vision import ComputerVision
 # import cv2
 # from rl import DQNAgent, get_state_from_positions, calculate_reward
-
-
+def read_video(video_path):
+    cap = cv2.VideoCapture(video_path)
+    frames = []
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frames.append(frame)
+    return frames
+def read_frames(frames_path):
+        # Read the frames from the specified path
+        frames = []
+        count = 0
+        for filename in sorted(os.listdir(frames_path)):
+            if filename.endswith(".jpg") or filename.endswith(".png"):
+                frame_path = os.path.join(frames_path, filename)
+                frame = cv2.imread(frame_path)
+                # new_frame = cv2.resize(frame, (640, 640))
+                frames.append(frame)
+                if count == 55:
+                    break
+                count += 1
+        return frames
 
 if __name__ == "__main__":
     # Example usage
     # video_frames = comp.read_frames("input_videos/general_small.mp4")
     # attempts = 1
     # comp.run(video_frames, attempts)
+    frames = read_video("cropped_video.mp4")
 
     ml_comp = ML_ComputerVision()
-    comp = ComputerVision()
-    frames = ml_comp.read_frames("./badr/all")
+    # comp = ComputerVision()
+    # frames = read_frames("./all")
     print(len(frames))
+    # Create benchmark tool and run
+
     print(frames[0].shape)
     start = time.time()
     ft,hb = ml_comp.run(frames, attempts=1)
     print("FINISHED ML" , time.time() - start)
-    start = time.time()
-    x = comp.run(frames, attempts=1)
-    print("FINISHED CV" , time.time() - start)
+    # start = time.time()
+    # x = comp.run(frames, attempts=1)
+    # print("FINISHED CV" , time.time() - start)
     
 
 # import keyboard

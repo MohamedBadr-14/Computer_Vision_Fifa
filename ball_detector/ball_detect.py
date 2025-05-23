@@ -15,7 +15,7 @@ class BallDetect:
             self.kmeans = pickle.load(f)
         self.num_clusters = self.vocabulary.shape[0]
         self.sift = cv2.SIFT_create()
-        
+        self.last_ball_position = None        
         
     # Function to extract SIFT descriptors
     def extract_sift_descriptors(self,img):
@@ -72,7 +72,7 @@ class BallDetect:
         height, width = img.shape[:2]
 
         # Crop 20% of the height from the top
-        crop_height = int(height * 0.15)
+        crop_height = int(height * 0.2)
         # crop_width = int(width * 0.1)
         cropped_img = img.copy()
         cropped_img[0:crop_height] = 0 # Crop from top and left
@@ -105,12 +105,13 @@ class BallDetect:
         # print("TEST FRAME SHAPE:", frame.shape) 
         # found = False
         # count = 0
+        bounding_boxes = []
         
         y_min = 0  # Top of the image (farthest from camera)
         y_max = frame.shape[0]  # Bottom of the image (closest to camera)
-        area_min_at_y_min = 40  # Smallest area when the ball is farthest
-        area_max_at_y_min = 150
-        area_min_at_y_max = 160  # Largest area when the ball is closest
+        area_min_at_y_min = 20  # Smallest area when the ball is farthest
+        area_max_at_y_min = 120
+        area_min_at_y_max = 70  # Largest area when the ball is closest
         area_max_at_y_max = 600
         
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -150,8 +151,8 @@ class BallDetect:
                     # cv2.putText(test_frame, label, (text_x, text_y), font, font_scale, (0, 0, 0), thickness)
                     # cv2.imwrite(f'badr/output_koora/koora_{x}_{y}.jpg', test_frame)
                     if prediction == 1:
-                        cv2.rectangle(frame, (coor_x, coor_y), (coor_x + w, coor_y + h), (255, 0, 0), 2)
-                        return bbox
+                        # cv2.rectangle(frame, (coor_x, coor_y), (coor_x + w, coor_y + h), (255, 0, 0), 2)
+                        bounding_boxes.append([coor_x, coor_y, coor_x + w, coor_y + h])
                     # else:
                         # cv2.rectangle(frame, (coor_x, coor_y), (coor_x + w, coor_y + h), (0, 0, 255), 2)
                        
@@ -163,23 +164,38 @@ class BallDetect:
                     #     print("NAN " , (features is not None and not np.isnan(features).any()))
 
                     #     confidence = 0.0
-        return None
+        return bounding_boxes
 
     
-    def svm_predict(self, frame):
+    def svm_predict(self, frame ):
         mask = self.mask_on_white(frame)
-        bbox = self.find_ball(mask,frame)
-        if bbox is not None:
-            # Adjust the bounding box to the original image
-            return bbox
+        bboxes = self.find_ball(mask,frame)
+        if len(bboxes) > 0:
+            if self.last_ball_position is None:
+                return bboxes[0]
+            return self.get_closest_bbox(bboxes)
         return None
+    
+    def get_center_of_bbox(self,bbox):
+        if bbox is None:
+            return None #OUDA
+        if len(bbox) != 4:
+            print(f"Invalid bbox format: {bbox}")
+            return None #OUDA
+        x1,y1,x2,y2 = bbox
+        return int((x1+x2)/2),int((y1+y2)/2)
 
-
-
-
-
-
-
-        
-
- 
+    def measure_distance(self,p1,p2):
+        return ((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)**0.5
+    
+    def get_closest_bbox(self, bboxes):
+        if len(bboxes) == 0:
+            return None
+        min_distance = float('inf')
+        closest_bbox = None
+        for bbox in bboxes:
+            distance = self.measure_distance(self.get_center_of_bbox(bbox), self.last_ball_position)
+            if distance < min_distance:
+                min_distance = distance
+                closest_bbox = bbox
+        return closest_bbox

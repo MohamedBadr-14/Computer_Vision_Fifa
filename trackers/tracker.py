@@ -161,6 +161,8 @@ class Tracker:
    
     def get_ball_tracks(self,frame):
         ball_tracks = {}
+        if self.last_valid_position is not None:
+            self.ball_model.last_ball_position = self.last_valid_position   
         ball_bbox = self.ball_model.svm_predict(frame)
         if ball_bbox is not None:
             ball_tracks[1] = {

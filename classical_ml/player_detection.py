@@ -4,10 +4,10 @@ import numpy as np
 import pickle
 import sys
 from skimage.feature import hog
-from .players_contour import get_players_contours,read_frames,decide_contours
+from .players_contour import get_players_contours,decide_contours
 import matplotlib.pyplot as plt
 import os
-
+import time
 class ClassicalML:
     def __init__(self):
         with open('./models/svm_hog_model.pkl', 'rb') as f:
@@ -30,7 +30,12 @@ class ClassicalML:
         features= []
         player_tracks = {}
         id_counter = 0
+        before_getting_contours = time.time()
         image_cropped_new, contours_pic,contours = get_players_contours(frame)
+        after_getting_contours = time.time()
+        print("GETTING CONTOURS " , after_getting_contours - before_getting_contours)
+        
+        before_hog = time.time()
         for ids,contour in enumerate(contours_pic):
        
             feature_vector = self.extract_hog_features(contour)
@@ -38,9 +43,13 @@ class ClassicalML:
             if feature_vector is not None:
                     features.append(feature_vector)
 
+        after_hog = time.time()
+        print("HOG TIME " , after_hog - before_hog)
         features = np.array(features)
-
+        before_prediction = time.time()
         prediction = self.hog_svm.predict(features)
+        after_prediction = time.time()
+        print("PREDICTION TIME " , after_prediction - before_prediction)
         for pred, contour, contour_pic in zip(prediction, contours, contours_pic):
         
             if pred == 1:
@@ -50,21 +59,21 @@ class ClassicalML:
                 player_assign,contour_blue,contour_yellow = decide_contours(contour_pic)
           
                 if player_assign == 1:
-                    player_tracks[id_counter] = {"bbox": (x, y, x + w, y + h), "team": 1}
+                    player_tracks[id_counter] = {"bbox": (x, y + 240, x + w, y + h + 240), "team": 1}
                     id_counter += 1
-                    cv2.rectangle(image_cropped_new, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv2.rectangle(image_cropped_new, (x, y + 240), (x + w, y + h + 240), (0, 255, 0), 2)
                 elif player_assign == 0:
-                    player_tracks[id_counter] = {"bbox": (x, y, x + w, y + h), "team": 0}
+                    player_tracks[id_counter] = {"bbox": (x, y + 240, x + w, y + h + 240), "team": 0}
                     id_counter += 1
-                    cv2.rectangle(image_cropped_new, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    cv2.rectangle(image_cropped_new, (x, y +240), (x + w, y + h +240), (0, 0, 255), 2)
                 elif player_assign == 2:
                     x_initial, y_initial, w, h = cv2.boundingRect(contour)
                     if  type(contour_blue) == np.ndarray:
                         x, y, w, h = cv2.boundingRect(contour_blue)
                         x=x-7+x_initial
                         y=y-15+y_initial
-                        cv2.rectangle(image_cropped_new, (x, y), (x + w+10, y + h+70), (0, 0, 255), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y, x + w + 10, y + h + 70), "team": 0}
+                        cv2.rectangle(image_cropped_new, (x, y + 240), (x + w+10, y + h+70 +240), (0, 0, 255), 2)
+                        player_tracks[id_counter] = {"bbox": (x, y+240, x + w + 10, y + h + 70+240), "team": 0}
                         id_counter += 1
 
 
@@ -72,19 +81,8 @@ class ClassicalML:
                         x, y, w, h = cv2.boundingRect(contour_yellow)
                         x=x-7+x_initial
                         y=y-15+y_initial
-                        cv2.rectangle(image_cropped_new, (x, y), (x + w+10, y + h+70), (0,255,0), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y, x + w + 10, y + h+70), "team": 1}
+                        cv2.rectangle(image_cropped_new, (x, y+240), (x + w+10, y + h+70 +240), (0,255,0), 2)
+                        player_tracks[id_counter] = {"bbox": (x, y+240, x + w + 10, y + h+70+240), "team": 1}
                         id_counter += 1
                 
         return player_tracks
-        
-
-
-
-
-        
-
-  
-                
-            
-

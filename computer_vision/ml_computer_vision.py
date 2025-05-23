@@ -22,6 +22,7 @@ class ML_ComputerVision:
         self.classical_ml = ClassicalML()
         self.offside_detector = OffsideDetector(gpu=True)
         self.offside_detector.warmup()
+        self.vid_num = 0
         
     
     def read_frames(self,frames_path):
@@ -69,8 +70,15 @@ class ML_ComputerVision:
             height, width, _ = frame.shape
 
             frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {}}
+            before_ball = time.time()
             frame_tracks['ball'] = self.tracker.get_ball_tracks(frame)
+            after_ball = time.time()
+            print("Ball detection time: ", after_ball - before_ball)
+            before_player = time.time()
             frame_tracks["players"] = self.classical_ml.run(frame)
+            after_player = time.time()
+            print("Player detection time: ", after_player - before_player)
+
 
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
@@ -79,13 +87,13 @@ class ML_ComputerVision:
             # Replace Outliers
             # if frame_tracks["ball"]:
             # print("Before outliers: ", frame_tracks["ball"][1]["conf"] if frame_tracks["ball"] else None)
-            if frame_tracks["ball"] and not self.new_attempt: 
-                frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
-                    frame_tracks["ball"], 170
-                )
+            # if frame_tracks["ball"] and not self.new_attempt: 
+            #         frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
+            #             frame_tracks["ball"], 300
+            #         )
 
             # interpolate again
-
+            before_interpolate = time.time()
             if frame_tracks["ball"]:
                 frame_tracks["ball"][1]["bbox"] = self.tracker.interpolate_ball_positions(
                     frame_tracks["ball"]
@@ -102,11 +110,16 @@ class ML_ComputerVision:
                 else:
                     print("NO BALL DETECTED OR INTERPOLATED")
                     
-
+            after_interpolate = time.time()
+            print("Ball interpolation time: ", after_interpolate - before_interpolate)
             # Get object positions
+            before_get_positions = time.time()
             self.tracker.add_position_to_tracks(frame_tracks)
+            after_get_positions = time.time()
+            print("Get positions time: ", after_get_positions - before_get_positions)
 
             # # View Trasnformer
+            before_transform = time.time()
             self.view_transformer.get_matrix_transform(frame)
             self.view_transformer.add_transformed_position_to_tracks(frame_tracks)
             goal_post = self.view_transformer.real_world_to_pixel(self.tracker.goal_position)
@@ -118,11 +131,16 @@ class ML_ComputerVision:
             }
             
             frame_tracks = self.tracker.adjust_goalkeeper_detection(frame_tracks)
+            after_transform = time.time()
+            print("Transform time: ", after_transform - before_transform)
             
             # handle penalty detections
             
+            
+            before_penalty = time.time()
             frame_tracks["ball"],changed = self.tracker.handle_penalty_detection(frame_tracks["ball"])
             if changed:
+                print("PENALTY DETECTED")
                 position = np.array(frame_tracks["ball"][1]["position"])
                 position_trasnformed = self.view_transformer.pixel_to_real_world(position)
                 if position_trasnformed is not None:
@@ -131,8 +149,10 @@ class ML_ComputerVision:
                 frame_tracks['ball'][1]['position_transformed'] = position_trasnformed    
             
             
-        
+            after_penalty = time.time()
+            print("Penalty detection time: ", after_penalty - before_penalty)
 
+            before_assign = time.time()
             # Assign Ball to Player
             if frame_tracks["ball"]:
                     ball_position = frame_tracks["ball"][1]["bbox"]
@@ -159,26 +179,37 @@ class ML_ComputerVision:
                         y2 = min(height, int(bbox[3]) + 300)
 
                         # Save the expanded crop
-                      
+                        before_offside = time.time()
                         isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
+                        after_offside = time.time()
+                        print("Offside detection time: ", after_offside - before_offside)
                         
                         if isOffside:
 
                             return None, None
                         
-
+            after_assign = time.time()
+            print("Assign time: ", after_assign - before_assign)
+            print("-----------------------------------------------")
+            print("   ")
+            
                 # print ("Ball position: ", frame_tracks["ball"][1]["position_transformed"])
                 
-            # all_tracks["players"].append(frame_tracks["players"])
-            # all_tracks["ball"].append(frame_tracks["ball"])
-            # all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-            # all_tracks["goalpost"].append(frame_tracks["goalpost"])
+            all_tracks["players"].append(frame_tracks["players"])
+            all_tracks["ball"].append(frame_tracks["ball"])
+            all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            all_tracks["goalpost"].append(frame_tracks["goalpost"])
         # print("DONEEEEEE" , time.time() - start_time)
 
-        # output_video_frames = self.tracker.draw_annotations(
-        #     video_frames, all_tracks
-        # )
-        # save_video(output_video_frames, "output_videos/ML.mp4")
+        output_video_frames = self.tracker.draw_annotations(
+            video_frames, all_tracks
+        )
+        # if self.vid_num == 0:
+        #     cv2.imwrite(f"output_videos/BADR_{self.vid_num}.png" , video_frames[-1])
+        # cv2.imwrite(f"output_videos/ML_{self.vid_num}.png", output_video_frames[-1])
+        # cv2.imwrite(f"output_videos/ML_org_{self.vid_num}.jpg",video_frames[-1])
+        # self.vid_num += 1
+        save_video(output_video_frames, "output_videos/ML.mp4")
 
         # # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
