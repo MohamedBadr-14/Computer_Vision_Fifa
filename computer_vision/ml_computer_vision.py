@@ -20,8 +20,9 @@ class ML_ComputerVision:
         self.attempts = None
         self.new_attempt = False
         self.classical_ml = ClassicalML()
-        # self.offside_detector = OffsideDetector(gpu=True)
-        # self.offside_detector.warmup()
+        self.offside_detector = OffsideDetector(gpu=True)
+        self.offside_detector.warmup()
+        self.vid_num = 0
         
     
     def read_frames(self,frames_path):
@@ -41,8 +42,24 @@ class ML_ComputerVision:
         
 
     def run(self,video_frames,attempts):
-        with open("attempts.txt", "w") as f:
 
+        # for i, frame in enumerate(video_frames):
+        #             timestamp = time.time()
+        #             cv2.imwrite(f"D:/fifa-vision/all/frame_{timestamp}_{i}.jpg", frame)
+        if self.attempts is None:
+            self.attempts = attempts
+            self.new_attempt = True
+        else:
+            self.new_attempt = False
+
+        
+        if self.attempts != attempts:
+            # print("New attempt detected, resetting tracker...")
+            self.attempts = attempts
+            self.tracker.reset_tracker()
+            self.new_attempt = True
+        else:
+            self.new_attempt = False
             # for i, frame in enumerate(video_frames):
             #         cv2.imwrite(f"D:/fifa-vision/new_attempts/frame_{self.attempts}_{i}.jpg", frame)
 
@@ -145,7 +162,12 @@ class ML_ComputerVision:
                         frame_tracks["players"], ball_position,frame_tracks["ball"][1],
                     )
 
-                # interpolate again
+                    if assigned_player != -1:
+                        # print("frame_tracks:" , frame_tracks["players"])
+                        # print("assigned player:" , assigned_player)
+                        # print("ball position:" , ball_position)
+                        frame_tracks["players"][assigned_player]["has_ball"] = True
+                        # save the bounding box of the player having the ball save it as new image 
 
                         # Convert bbox coordinates to integers before using for image cropping
                         # Convert bbox coordinates to integers and expand by 300px in each direction
@@ -164,8 +186,7 @@ class ML_ComputerVision:
                         after_offside = time.time()
                         print("Offside detection time: ", after_offside - before_offside)
                         
-                # Get object positions
-                self.tracker.add_position_to_tracks(frame_tracks)
+                        if isOffside:
 
                             return None, None
                         
@@ -192,59 +213,15 @@ class ML_ComputerVision:
         # self.vid_num += 1
         save_video(output_video_frames, "output_videos/ML.mp4")
 
-                        if assigned_player != -1:
-                            # print("frame_tracks:" , frame_tracks["players"])
-                            # print("assigned player:" , assigned_player)
-                            # print("ball position:" , ball_position)
-                            frame_tracks["players"][assigned_player]["has_ball"] = True
-                            # save the bounding box of the player having the ball save it as new image 
+        # # # Save video
+        # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
+                # Check if any player in team 1 has the ball
+        hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
+        # return also the biggest x for team 1 and biggest x for team 2 using frame_tracks["players"]
 
-                            # Convert bbox coordinates to integers before using for image cropping
-                            # Convert bbox coordinates to integers and expand by 300px in each direction
-                            bbox = frame_tracks["players"][assigned_player]["bbox"]
-                            height, width, _ = frame.shape
-
-                            # Calculate expanded coordinates with bounds checking
-                            x1 = max(0, int(bbox[0]) - 600)
-                            y1 = max(0, int(bbox[1]) - 300)
-                            x2 = min(width, int(bbox[2]) + 600)
-                            y2 = min(height, int(bbox[3]) + 300)
-
-                            # Save the expanded crop
-                        
-                            # isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
-                            
-                            # if isOffside:
-
-                            #     return None, None
-                            
-
-                    # print ("Ball position: ", frame_tracks["ball"][1]["position_transformed"])
-                    
-                all_tracks["players"].append(frame_tracks["players"])
-                all_tracks["ball"].append(frame_tracks["ball"])
-                all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-                all_tracks["goalpost"].append(frame_tracks["goalpost"])
-                
-                if test % 6 == 0:
-                    cv2.imwrite(f"output_videos/frame_{self.attempts}_{test}.jpg", frame)
-                    f.write(f"{str(frame_tracks)}\n")
-            # print("DONEEEEEE" , time.time() - start_time)
-
-            output_video_frames = self.tracker.draw_annotations(
-                video_frames, all_tracks
-            )
-            save_video(output_video_frames, "output_videos/ML_ARAF.mp4")
-
-            # # # Save video
-            # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
-                    # Check if any player in team 1 has the ball
-            hasBall = any(player.get("has_ball", False) and player.get("team") == 1 for player in frame_tracks["players"].values())
-            # return also the biggest x for team 1 and biggest x for team 2 using frame_tracks["players"]
-
-            # farthest player in team 1 without has_ball = true
-            # farthest player in team 2 without has_ball = true
+        # farthest player in team 1 without has_ball = true
+        # farthest player in team 2 without has_ball = true
 
 
-            
-            return frame_tracks, hasBall
+
+        return frame_tracks, hasBall
