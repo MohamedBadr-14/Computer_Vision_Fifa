@@ -20,16 +20,17 @@ if __name__ == "__main__":
     # comp.run(video_frames, attempts)
 
     ml_comp = ML_ComputerVision()
-    comp = ComputerVision()
+    # comp = ComputerVision()
     frames = ml_comp.read_frames("./badr/all")
+    # frames = [cv2.imread("./badr/araf.jpg")]
     print(len(frames))
     print(frames[0].shape)
     start = time.time()
     ft,hb = ml_comp.run(frames, attempts=1)
     print("FINISHED ML" , time.time() - start)
-    start = time.time()
-    x = comp.run(frames, attempts=1)
-    print("FINISHED CV" , time.time() - start)
+    # start = time.time()
+    # x = comp.run(frames, attempts=1)
+    # print("FINISHED CV" , time.time() - start)
     
 
 # import keyboard
