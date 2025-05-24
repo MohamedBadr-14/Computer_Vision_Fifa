@@ -82,7 +82,9 @@ class ML_ComputerVision:
 
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
+                frame_tracks['players'] = self.tracker.ml_get_object_tracks(frame_tracks["players"], frame)
             #adjust goalkeeper detections
+            
 
             # Replace Outliers
             # if frame_tracks["ball"]:

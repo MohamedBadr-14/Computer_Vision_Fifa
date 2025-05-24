@@ -28,17 +28,17 @@ def read_frames(frames_path):
                 frame = cv2.imread(frame_path)
                 # new_frame = cv2.resize(frame, (640, 640))
                 frames.append(frame)
-                if count == 55:
-                    break
+                # if count == 55:
+                #     break
                 count += 1
         return frames
 
 if __name__ == "__main__":
     # Example usage
-    # video_frames = comp.read_frames("input_videos/general_small.mp4")
+    frames = read_frames("C:/Users/DELL/Downloads/wetransfer_frames_20250524_181705_2025-05-24_1521/frames_20250524_181705")
     # attempts = 1
     # comp.run(video_frames, attempts)
-    frames = read_video("cropped_video.mp4")
+    # frames = read_video("cropped_video.mp4")
 
     ml_comp = ML_ComputerVision()
     # comp = ComputerVision()
