@@ -183,21 +183,21 @@ def read_frames(frames_path):
         return frames
 
 #main
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    # Create an instance of the BallDetect class
-    ball_detector = BallDetect()
-    # Load a test image
-    frames = read_frames('../screenshots')
+#     # Create an instance of the BallDetect class
+#     ball_detector = BallDetect()
+#     # Load a test image
+#     frames = read_frames('../screenshots')
 
-    counter = 0
-    for i, frame in enumerate(frames):
-        # Detect the ball in the frame
-        bboxes, count = ball_detector.svm_predict(frame,i) 
-        counter += count if count else 0
+#     counter = 0
+#     for i, frame in enumerate(frames):
+#         # Detect the ball in the frame
+#         bboxes, count = ball_detector.svm_predict(frame,i) 
+#         counter += count if count else 0
 
 
-    print("Total number of balls detected:", counter)
+#     print("Total number of balls detected:", counter)
 
         
 

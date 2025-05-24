@@ -26,7 +26,7 @@ class THREADENTRY32(ctypes.Structure):
         ('dwFlags', wintypes.DWORD)
     ]
 
-def pause_process(process_name = "FC25.exe"):
+def pause_process(process_name = "FIFA22.exe"):
     """Pause a process by suspending all its threads."""
     # Find the process by name
     for proc in psutil.process_iter(['pid', 'name']):
@@ -74,7 +74,7 @@ def pause_process(process_name = "FC25.exe"):
             return
     
 
-def resume_process(process_name = "FC25.exe"):
+def resume_process(process_name = "FIFA22.exe"):
     """Resume a process by resuming all its threads."""
     # Find the process by name
     for proc in psutil.process_iter(['pid', 'name']):
@@ -122,3 +122,7 @@ def resume_process(process_name = "FC25.exe"):
             # Close the snapshot handle
             ctypes.windll.kernel32.CloseHandle(h_snapshot)
             return
+        
+if __name__ == "__main__":
+    # Example usage
+    resume_process()

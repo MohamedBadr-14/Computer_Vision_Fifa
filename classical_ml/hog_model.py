@@ -8,8 +8,8 @@ from sklearn.metrics import accuracy_score
 import pickle
 
 # Paths to class folders
-class_0_path = 'false_class'
-class_1_path = 'true_class'
+class_0_path = "D:/Computer_Vision_Fifa/dataset/false"
+class_1_path = "D:/Computer_Vision_Fifa/dataset/true"
 
 # Function to extract HOG descriptors from an image
 def extract_hog_features(image_path):
