@@ -18,7 +18,7 @@ def read_video(video_path):
             break
         frames.append(frame)
     return frames
-def read_frames(frames_path):
+def read_frames(frames_path , max_frames=60):
         # Read the frames from the specified path
         frames = []
         count = 0
@@ -28,21 +28,21 @@ def read_frames(frames_path):
                 frame = cv2.imread(frame_path)
                 # new_frame = cv2.resize(frame, (640, 640))
                 frames.append(frame)
-                # if count == 55:
-                #     break
+                if count == max_frames:
+                    break
                 count += 1
         return frames
 
 if __name__ == "__main__":
     # Example usage
-    frames = read_frames("C:/Users/DELL/Downloads/wetransfer_frames_20250524_181705_2025-05-24_1521/frames_20250524_181705")
+    # frames = read_frames("C:/Users/DELL/Downloads/wetransfer_frames_20250524_181705_2025-05-24_1521/frames_20250524_181705")
     # attempts = 1
     # comp.run(video_frames, attempts)
     # frames = read_video("cropped_video.mp4")
 
     ml_comp = ML_ComputerVision()
     # comp = ComputerVision()
-    # frames = read_frames("./all")
+    frames = read_frames("./badr/screenshots/" , max_frames=5)
     print(len(frames))
     # Create benchmark tool and run
 

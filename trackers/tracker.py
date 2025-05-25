@@ -2,6 +2,7 @@ from ultralytics import YOLO
 import supervision as sv
 from deep_sort_realtime.deepsort_tracker import DeepSort
 import numpy as np
+from scratch_tracker import MultiObjectTracker
 import pandas as pd
 import cv2
 import sys
@@ -16,6 +17,11 @@ class Tracker:
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
         self.ml_tracker = DeepSort(max_age=30)  # max_age: how many frames to keep a track alive without update
+        self.multi_object_tracker = MultiObjectTracker(
+            min_hits=0,
+            max_age=30,
+            iou_threshold=0.3,
+        )
         self.deep_ball_model = YOLO('models/best_initial.pt')
         self.ball_model = BallDetect()
         self.ball_positions_history = []
@@ -121,12 +127,13 @@ class Tracker:
         for player_id, player in players.items():
             bbox = player["bbox"]
             conf = player.get("conf", 0.99)
-            detections.append([bbox[0], bbox[1], bbox[2], bbox[3], conf, 0])
+            detections.append([bbox[0], bbox[1], bbox[2], bbox[3], conf, '0'])
             player_id_list.append(player_id)  # preserve detection order
 
         detections = np.array(detections)
 
-        tracks = self.ml_tracker.update_tracks(detections, frame)
+        tracks = self.multi_object_tracker.update(detections, frame)
+        print("TRACKS", tracks)
 
         new_players = {}
         for track in tracks:
@@ -163,6 +170,7 @@ class Tracker:
 
         # Convert to supervision Detection format
         detection_supervision = sv.Detections.from_ultralytics(detection[0])
+        
         detections_nms = detection_supervision.with_nms(threshold=0.5, class_agnostic=True)
         detection_supervision_ball = sv.Detections.from_ultralytics(detection_ball[0])
 
@@ -199,7 +207,7 @@ class Tracker:
         ball_tracks = {}
         if self.last_valid_position is not None:
             self.ball_model.last_ball_position = self.last_valid_position   
-        ball_bbox = self.ball_model.svm_predict(frame)
+        ball_bbox = self.ball_model.svm_predict(frame,1)
         if ball_bbox is not None:
             ball_tracks[1] = {
                 "conf": 0.11,
