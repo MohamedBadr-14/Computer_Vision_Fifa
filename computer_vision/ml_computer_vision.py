@@ -9,6 +9,7 @@ import os
 import time
 from offside_detector import OffsideDetector
 from classical_ml.player_detection import ClassicalML
+from trackers.players_interpolator import SimplePlayerInterpolator
 
 class ML_ComputerVision:
     def __init__(self):
@@ -20,6 +21,7 @@ class ML_ComputerVision:
         self.attempts = None
         self.new_attempt = False
         self.classical_ml = ClassicalML()
+        self.players_interpolator = SimplePlayerInterpolator()
         # self.offside_detector = OffsideDetector(gpu=True)
         # self.offside_detector.warmup()
         self.vid_num = 0
@@ -81,7 +83,6 @@ class ML_ComputerVision:
             # print("Player detection time: ", after_player - before_player)
 
             # print('frame tracks["playerss"]', frame_tracks["players"])
-            unmatched_ids = []
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
                 frame_tracks['players'] , unmatched_det_ids  = self.tracker.ml_get_object_tracks(frame_tracks["players"])
@@ -96,7 +97,8 @@ class ML_ComputerVision:
             #         frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
             #             frame_tracks["ball"], 218
             #         )
-
+            self.players_interpolator.remove_ids(unmatched_det_ids)
+            frame_tracks['players'] = self.players_interpolator.interpolate_player_positions(frame_tracks["players"])
             # interpolate again
             before_interpolate = time.time()
             if frame_tracks["ball"]:
@@ -208,6 +210,7 @@ class ML_ComputerVision:
         # print("ALL TRACKS: ", all_tracks)
         # Draw annotations on the video frames
             # print('all_tracks["players"]', all_tracks)
+        all_tracks["players"] = self.players_interpolator.cleanup_all_tracks(all_tracks["players"])
         output_video_frames = self.tracker.draw_annotations(
             video_frames, all_tracks
         )
