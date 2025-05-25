@@ -47,7 +47,8 @@ if __name__ == "__main__":
     # comp = ComputerVision()
     # path = r'D:\\att3_goal\\att3_goal'
     path = r'C:\\Users\\moham\\Desktop\\GP\\Computer_Vision_Fifa\\input_videos\\att3_goal'
-    frames = read_frames(path , max_frames=200)
+    frames = read_frames(path , max_frames=100)
+    # frames = frames[30:40]
     print(len(frames))
     # Create benchmark tool and run
 

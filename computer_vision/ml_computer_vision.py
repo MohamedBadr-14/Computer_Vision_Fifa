@@ -81,9 +81,11 @@ class ML_ComputerVision:
             # print("Player detection time: ", after_player - before_player)
 
             # print('frame tracks["playerss"]', frame_tracks["players"])
+            unmatched_ids = []
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
-                frame_tracks['players'] = self.tracker.ml_get_object_tracks(frame_tracks["players"])
+                frame_tracks['players'] , unmatched_det_ids  = self.tracker.ml_get_object_tracks(frame_tracks["players"])
+                print("UNMATCHED IDS: ", unmatched_det_ids)
             #adjust goalkeeper detections
             
 

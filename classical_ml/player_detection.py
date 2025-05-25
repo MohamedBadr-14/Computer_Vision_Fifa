@@ -96,7 +96,7 @@ class ClassicalML:
                         x=x-10+x_initial
                         y=y-15+y_initial
                         # cv2.rectangle(new_pic, (x, y +162), (x + w+10, y + h+162+50), (0, 0, 255), 2)
-                        player_tracks[id_counter] = {"bbox": (x-10, y+162, x + w+20, y + h+162+50), "team": 0}
+                        player_tracks[id_counter] = {"bbox": (x-10, y+162, x + w+15, y + h+162+50), "team": 0}
                         id_counter += 1
 
 
@@ -105,7 +105,7 @@ class ClassicalML:
                         x=x-10+x_initial
                         y=y-15+y_initial
                         # cv2.rectangle(new_pic, (x, y+162), (x + w+5, y + h+162+50), (0,255,0), 2)
-                        player_tracks[id_counter] = {"bbox": (x-10, y+162, x + w+20 , y + h+162+50), "team": 1}
+                        player_tracks[id_counter] = {"bbox": (x-10, y+162, x + w+15 , y + h+162+50), "team": 1}
                         id_counter += 1
         # cv2.imshow("Detection", new_pic)
         # cv2.waitKey(0)

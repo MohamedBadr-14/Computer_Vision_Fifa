@@ -261,6 +261,12 @@ class MultiObjectTracker:
 
         # Update matched
         mapping = {}
+        if not self.trackers:
+            # on the very first frame, consider everything matched (no true 'unmatched')
+            unmatched_det_ids = []
+        else:
+            unmatched_det_ids = [det_ids[i] for i in unmatched_dets]
+            
         track_ids = list(self.trackers.keys())
         for det_i, trk_i in matched:
             tid = track_ids[trk_i]
@@ -281,8 +287,11 @@ class MultiObjectTracker:
             if trk.time_since_update < 1 and (trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
                 x1, y1, x2, y2 = trk.get_state()
                 tracks.append([tid, int(x1), int(y1), int(x2), int(y2)])
+        
+        
 
-        return tracks, mapping
+
+        return tracks, mapping , unmatched_det_ids
     
     def _associate_detections_to_tracks(self, detections, trackers, iou_threshold=0.3):
         """

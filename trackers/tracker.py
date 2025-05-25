@@ -19,8 +19,8 @@ class Tracker:
         self.ml_tracker = DeepSort(max_age=30)  # max_age: how many frames to keep a track alive without update
         self.multi_object_tracker = MultiObjectTracker(
             min_hits=0,
-            max_disappeared=10,
-            iou_threshold=0.1,
+            max_disappeared= 10,
+            iou_threshold=0.2,
         )
         self.deep_ball_model = YOLO('models/best_initial.pt')
         self.ball_model = BallDetect()
@@ -134,7 +134,8 @@ class Tracker:
 
         # detections = np.array(detections)
         ## print("DETECTIONS", detections)
-        tracks,mapping = self.multi_object_tracker.update(detections)
+        unmacthed_ids = []
+        tracks,mapping,unmacthed_ids = self.multi_object_tracker.update(detections)
         reverse_map = {track_id: det_id  for det_id , track_id in mapping.items()}
 
         ## print("deep stracks", tracks)
@@ -167,7 +168,7 @@ class Tracker:
             new_players[track[0]]["track_id"] = track[0]  # Optional: store new ID
        # print("TRACKS", new_players)
 
-        return new_players
+        return new_players , unmacthed_ids
 
     
     
