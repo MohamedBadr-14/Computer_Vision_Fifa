@@ -136,8 +136,8 @@ def decide_contours(contour_img):
 
     # orange detection
     # try_orange_ranges(hsv)
-    lower_orange = np.array([5,100,100], dtype=np.uint8)
-    upper_orange = np.array([19,200,240], dtype=np.uint8)
+    lower_orange = np.array([5,150,100], dtype=np.uint8)
+    upper_orange = np.array([19,255,240], dtype=np.uint8)
     mask_orange = cv2.inRange(hsv, lower_orange, upper_orange)
     
     # cv2.imshow('real', contour_img)

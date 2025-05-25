@@ -21,6 +21,8 @@ def read_video(video_path):
 def read_frames(frames_path , max_frames=60):
         # Read the frames from the specified path
         frames = []
+        first= True
+        frame_first=0
         count = 0
         for filename in sorted(os.listdir(frames_path)):
             if filename.endswith(".jpg") or filename.endswith(".png"):
@@ -32,6 +34,7 @@ def read_frames(frames_path , max_frames=60):
                     break
                 count += 1
         return frames
+    
 
 if __name__ == "__main__":
     # Example usage
@@ -39,7 +42,7 @@ if __name__ == "__main__":
     # attempts = 1
     # comp.run(video_frames, attempts)
     # frames = read_video("cropped_video.mp4")
-
+    
     ml_comp = ML_ComputerVision()
     # comp = ComputerVision()
     frames = read_frames("./badr/screenshots/" , max_frames=5)

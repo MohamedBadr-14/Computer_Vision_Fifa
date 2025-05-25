@@ -18,7 +18,7 @@ class BallDetect:
         # self.num_clusters = self.vocabulary.shape[0]
         # self.sift = cv2.SIFT_create()
         with open('./models/ball_hog_model.pkl', 'rb') as f:
-            self.hog = pickle.load(f)
+            self.hog_model = pickle.load(f)
         self.last_ball_position = None        
     
     def extract_hog_features(self,img):
@@ -104,7 +104,7 @@ class BallDetect:
                     bbox = [coor_x, coor_y, coor_x + w, coor_y + h]
                     extrated_img = frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
                     features = self.extract_hog_features(extrated_img)
-                    prediction = self.hog.predict(features.reshape(1, -1))[0] if features is not None else 0
+                    prediction = self.hog_model.predict(features.reshape(1, -1))[0] if features is not None else 0
                     font = cv2.FONT_HERSHEY_SIMPLEX
                     font_scale = 1
                     thickness = 2
@@ -129,7 +129,7 @@ class BallDetect:
                     #     print("NAN " , (features is not None and not np.isnan(features).any()))
 
                     #     confidence = 0.0
-        return bounding_boxes , count
+        return bounding_boxes 
 
     
     def svm_predict(self, frame ,i):
@@ -137,9 +137,9 @@ class BallDetect:
         bboxes = self.find_ball(mask,frame,i)
         if len(bboxes) > 0:
             if self.last_ball_position is None:
-                return bboxes[0] , 1
-            return self.get_closest_bbox(bboxes),1
-        return None,None
+                return bboxes[0] 
+            return self.get_closest_bbox(bboxes)
+        return None
     
     def get_center_of_bbox(self,bbox):
         if bbox is None:
