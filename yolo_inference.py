@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 import cv2
 import os
 
-model = YOLO('models/ball_e7na.pt')
+model = YOLO('models/keypoints.pt')
 
 def read_frames(frames_path):
         # Read the frames from the specified path
@@ -13,7 +13,7 @@ def read_frames(frames_path):
             if filename.endswith(".jpg") or filename.endswith(".png"):
                 frame_path = os.path.join(frames_path, filename)
                 frame = cv2.imread(frame_path)
-                # frame = cv2.resize(frame, (640, 640))  
+                frame = cv2.resize(frame, (640, 640))  
                 frames.append(frame)
                 if count == 60:
                     break
@@ -21,6 +21,6 @@ def read_frames(frames_path):
         return frames
 
 # Perform prediction
-frames = read_frames('./badr/train/images')
-frames = frames[0:50]
-results = model.predict(frames, save=True , conf=0.25)
+frames = read_frames('./badr/screenshots/')
+frames = frames[0:10]
+results = model(frames , save=True )

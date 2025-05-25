@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import supervision as sv
+from deep_sort_realtime.deepsort_tracker import DeepSort
 import numpy as np
 import pandas as pd
 import cv2
@@ -14,6 +15,7 @@ class Tracker:
     def __init__(self, model_path):
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
+        self.ml_tracker = DeepSort(max_age=30)  # max_age: how many frames to keep a track alive without update
         self.deep_ball_model = YOLO('models/best_initial.pt')
         self.ball_model = BallDetect()
         self.ball_positions_history = []
@@ -110,7 +112,57 @@ class Tracker:
         detection = self.model(frame , verbose = False) #BADR MIDO
         detection_ball = self.deep_ball_model(frame , conf = 0.1,verbose = False) #BADR MIDO
         return detection,detection_ball
+    
+    def ml_get_object_tracks(self, players, frame):
 
+        detections = []
+        player_id_list = []  # to track which detection came from which player
+        # print("PLAYERS", players)
+        # ow("frame", frame)
+        # cv2.waitKey(1)  # Allow OpenCV to process the frame
+        # cv2.destroyAllWindocv2.imshws()
+        for player_id, player in players.items():
+            bbox = player["bbox"]
+            conf = player.get("conf", 0.99)
+            detections.append(([bbox[0], bbox[1], bbox[2], bbox[3]], conf, '0'))
+
+        # detections = np.array(detections)
+        print("DETECTIONS", detections)
+        tracks = self.ml_tracker.update_tracks(detections, frame=frame)
+        # print("deep stracks", tracks)
+
+        new_players = {}
+        for track in tracks:
+            # print(vars(track))
+            print("TRACK info", track.is_confirmed(), track.track_id,track.original_ltwh)
+            # if not track.is_confirmed():
+            #     continue
+            original_id = None
+            for id,player in players.items():
+                if track.original_ltwh is None:
+                    print("track.original_ltwh is None")
+                    continue
+                if tuple(player['bbox']) == tuple(track.original_ltwh):
+                    original_id = id
+                    break
+
+            # if det_idx >= len(player_id_list):
+            #     continue  # safety check
+            print("TRACK ID", track.track_id)
+            print("detidc", original_id)
+            if original_id is None:
+                print("Original ID not found for track", track.track_id)
+                continue
+            old_player = players[original_id]
+            new_players[track.track_id] = old_player
+            new_players[track.track_id]["track_id"] = track.track_id  # Optional: store new ID
+        print("TRACKS", new_players)
+
+        return new_players
+
+    
+    
+    
     def get_object_track(self, frame):
 
         # Detect objects in the current frame+
@@ -163,7 +215,7 @@ class Tracker:
         ball_tracks = {}
         if self.last_valid_position is not None:
             self.ball_model.last_ball_position = self.last_valid_position   
-        ball_bbox = self.ball_model.svm_predict(frame)
+        ball_bbox = self.ball_model.svm_predict(frame,1)
         if ball_bbox is not None:
             ball_tracks[1] = {
                 "conf": 0.11,
@@ -270,8 +322,8 @@ class Tracker:
             )
 
             x1_text = x1_rect + 12
-            if track_id > 99:
-                x1_text -= 10
+            # if track_id > 99:
+            #     x1_text -= 10
 
             cv2.putText(
                 frame,
