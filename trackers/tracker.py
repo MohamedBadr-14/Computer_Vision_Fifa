@@ -117,30 +117,46 @@ class Tracker:
 
         detections = []
         player_id_list = []  # to track which detection came from which player
-
+        # print("PLAYERS", players)
+        # ow("frame", frame)
+        # cv2.waitKey(1)  # Allow OpenCV to process the frame
+        # cv2.destroyAllWindocv2.imshws()
         for player_id, player in players.items():
             bbox = player["bbox"]
             conf = player.get("conf", 0.99)
-            detections.append([bbox[0], bbox[1], bbox[2], bbox[3], conf, 0])
-            player_id_list.append(player_id)  # preserve detection order
+            detections.append(([bbox[0], bbox[1], bbox[2], bbox[3]], conf, '0'))
 
-        detections = np.array(detections)
-
-        tracks = self.ml_tracker.update_tracks(detections, frame)
+        # detections = np.array(detections)
+        print("DETECTIONS", detections)
+        tracks = self.ml_tracker.update_tracks(detections, frame=frame)
+        # print("deep stracks", tracks)
 
         new_players = {}
         for track in tracks:
-            if not track.is_confirmed():
+            # print(vars(track))
+            print("TRACK info", track.is_confirmed(), track.track_id,track.original_ltwh)
+            # if not track.is_confirmed():
+            #     continue
+            original_id = None
+            for id,player in players.items():
+                if track.original_ltwh is None:
+                    print("track.original_ltwh is None")
+                    continue
+                if tuple(player['bbox']) == tuple(track.original_ltwh):
+                    original_id = id
+                    break
+
+            # if det_idx >= len(player_id_list):
+            #     continue  # safety check
+            print("TRACK ID", track.track_id)
+            print("detidc", original_id)
+            if original_id is None:
+                print("Original ID not found for track", track.track_id)
                 continue
-
-            det_idx = track.det_index
-            if det_idx >= len(player_id_list):
-                continue  # safety check
-
-            original_id = player_id_list[det_idx]
             old_player = players[original_id]
             new_players[track.track_id] = old_player
             new_players[track.track_id]["track_id"] = track.track_id  # Optional: store new ID
+        print("TRACKS", new_players)
 
         return new_players
 
@@ -199,7 +215,7 @@ class Tracker:
         ball_tracks = {}
         if self.last_valid_position is not None:
             self.ball_model.last_ball_position = self.last_valid_position   
-        ball_bbox = self.ball_model.svm_predict(frame)
+        ball_bbox = self.ball_model.svm_predict(frame,1)
         if ball_bbox is not None:
             ball_tracks[1] = {
                 "conf": 0.11,
@@ -306,8 +322,8 @@ class Tracker:
             )
 
             x1_text = x1_rect + 12
-            if track_id > 99:
-                x1_text -= 10
+            # if track_id > 99:
+            #     x1_text -= 10
 
             cv2.putText(
                 frame,

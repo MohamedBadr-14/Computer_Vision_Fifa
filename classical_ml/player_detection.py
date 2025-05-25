@@ -49,6 +49,9 @@ class ClassicalML:
         # print('contours_pic',contours_pic)
         before_hog = time.time()
         # print('contours_pic',contours_pic)
+        if len(contours_pic) == 0:
+            print("No contours found in the image.")
+            return player_tracks
         for ids,contour in enumerate(contours_pic):
        
             feature_vector = self.extract_hog_features(contour)
@@ -58,10 +61,11 @@ class ClassicalML:
 
         after_hog = time.time()
         print("HOG TIME " , after_hog - before_hog)
+        print('CONTOURS PIC', len(contours_pic))
         features = np.array(features)
         before_prediction = time.time()
         print(features,features.shape,'mido')
-        prediction = self.hog_svm.predict(features)
+        prediction = self.hog_svm.predict(features) 
         after_prediction = time.time()
         print("PREDICTION TIME " , after_prediction - before_prediction)
         print('predictions',prediction)
@@ -109,36 +113,36 @@ class ClassicalML:
         return player_tracks
     
     
-# def main(images_folder):
+def main(images_folder):
 
-#     # Initialize the model
-#     model = ClassicalML()
+    # Initialize the model
+    model = ClassicalML()
 
-#     # Get all image paths (jpg and png)
-#     image_paths = sorted(glob.glob(os.path.join(images_folder, "*.jpg")) + glob.glob(os.path.join(images_folder, "*.png")))
-#     i=0
-#     for img_path in image_paths:
-#         if i <128 :
-#             i+=1
-#             continue
-#         img = cv2.imread(img_path)
-#         if img is None:
-#             print(f"Failed to read {img_path}")
-#             continue
+    # Get all image paths (jpg and png)
+    image_paths = sorted(glob.glob(os.path.join(images_folder, "*.jpg")) + glob.glob(os.path.join(images_folder, "*.png")))
+    i=0
+    for img_path in image_paths:
+        if i <100 :
+            i+=1
+            continue
+        img = cv2.imread(img_path)
+        if img is None:
+            print(f"Failed to read {img_path}")
+            continue
         
-#         player_tracks = model.run(img)
-#         print(f"Results for {img_path}:")
-#         for pid, info in player_tracks.items():
-#             print(f"  Player {pid}: bbox={info['bbox']}, team={info['team']}")
+        player_tracks = model.run(img)
+        print(f"Results for {img_path}:")
+        for pid, info in player_tracks.items():
+            print(f"  Player {pid}: bbox={info['bbox']}, team={info['team']}")
 
-#         # Optionally, show the image with detections
-#         # cv2.imshow("Detection mido", img)
-#         # cv2.waitKey(0)
-#         break
+        # Optionally, show the image with detections
+        # cv2.imshow("Detection mido", img)
+        # cv2.waitKey(0)
+        # break
         
        
 
-#     # cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
 
-# if __name__ == "__main__":
-#     main("D:/wetransfer_screenshots_2025-05-23_1632/screenshots")
+if __name__ == "__main__":
+    main("C:/Users/DELL/Downloads/wetransfer_frames_20250524_181705_2025-05-24_1521/frames_20250524_181705")

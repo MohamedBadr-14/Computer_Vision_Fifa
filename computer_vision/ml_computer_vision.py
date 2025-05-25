@@ -20,8 +20,8 @@ class ML_ComputerVision:
         self.attempts = None
         self.new_attempt = False
         self.classical_ml = ClassicalML()
-        self.offside_detector = OffsideDetector(gpu=True)
-        self.offside_detector.warmup()
+        # self.offside_detector = OffsideDetector(gpu=True)
+        # self.offside_detector.warmup()
         self.vid_num = 0
         
     
@@ -72,6 +72,7 @@ class ML_ComputerVision:
             frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {}}
             before_ball = time.time()
             frame_tracks['ball'] = self.tracker.get_ball_tracks(frame)
+            print("BALL TRACKS: ", frame_tracks['ball'])
             after_ball = time.time()
             print("Ball detection time: ", after_ball - before_ball)
             before_player = time.time()
@@ -132,7 +133,7 @@ class ML_ComputerVision:
                 }
             }
             
-            frame_tracks = self.tracker.adjust_goalkeeper_detection(frame_tracks)
+            # frame_tracks = self.tracker.adjust_goalkeeper_detection(frame_tracks)
             after_transform = time.time()
             print("Transform time: ", after_transform - before_transform)
             
@@ -182,13 +183,13 @@ class ML_ComputerVision:
 
                         # Save the expanded crop
                         before_offside = time.time()
-                        isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
-                        after_offside = time.time()
-                        print("Offside detection time: ", after_offside - before_offside)
+                        # isOffside = self.offside_detector.detect_offside(frame[y1:y2, x1:x2])
+                        # after_offside = time.time()
+                        # print("Offside detection time: ", after_offside - before_offside)
                         
-                        if isOffside:
+                        # if isOffside:
 
-                            return None, None
+                        #     return None, None
                         
             after_assign = time.time()
             print("Assign time: ", after_assign - before_assign)
@@ -202,7 +203,9 @@ class ML_ComputerVision:
             all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
             all_tracks["goalpost"].append(frame_tracks["goalpost"])
         # print("DONEEEEEE" , time.time() - start_time)
-
+        # print("ALL TRACKS: ", all_tracks)
+        # Draw annotations on the video frames
+            print('all_tracks["players"]', all_tracks)
         output_video_frames = self.tracker.draw_annotations(
             video_frames, all_tracks
         )
@@ -211,7 +214,7 @@ class ML_ComputerVision:
         # cv2.imwrite(f"output_videos/ML_{self.vid_num}.png", output_video_frames[-1])
         # cv2.imwrite(f"output_videos/ML_org_{self.vid_num}.jpg",video_frames[-1])
         # self.vid_num += 1
-        save_video(output_video_frames, "output_videos/ML.mp4")
+        save_video(output_video_frames, "output_videos/ML_final.mp4")
 
         # # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
