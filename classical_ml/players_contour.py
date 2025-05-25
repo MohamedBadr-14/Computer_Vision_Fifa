@@ -16,7 +16,7 @@ def get_players_contours(img):
     # Crop 15% of the height from the top
     crop_height = int(height * 0.15)
     cropped_img = img[crop_height:, :, :].copy()  # Crop directly, avoid modifying top
-    print('cropped image shape', cropped_img.shape)
+    # print('cropped image shape', cropped_img.shape)
     # Define color bounds for non-green mask
     lower_bound = np.array([0, 0, 110], dtype=np.uint8)
     upper_bound = np.array([180, 50, 160], dtype=np.uint8)
@@ -114,7 +114,7 @@ def get_players_contours(img):
             # filename = f'dataset/player2{i}_{x}_{y}_{w}_{h}.png'
             # cv2.imwrite(filename, cropped_img[y:y + h, x:x + w])
             # i+=1
-    print('contours_cut', len(contours_cut))
+    # print('contours_cut', len(contours_cut))
     # Draw contours on the image
     for contour in correct_contours:
         x, y, w, h = cv2.boundingRect(contour)
@@ -290,7 +290,7 @@ def try_yellow_ranges(hsv_img):
                 lower = np.array([h_low, s_low, v_low], dtype=np.uint8)
                 upper = np.array([h_high, s_high, v_high], dtype=np.uint8)
                 mask = cv2.inRange(hsv_img, lower, upper)
-                print(f"Showing mask for lower={lower}, upper={upper}")
+                # print(f"Showing mask for lower={lower}, upper={upper}")
                 cv2.imshow(f"Mask H:{h_low}-{h_high} S:{s_low}-{s_high} V:{v_low}-{v_high}", mask)
                 key = cv2.waitKey(0)
                 cv2.destroyAllWindows()
@@ -303,7 +303,7 @@ def try_black_ranges(hsv_img):
     # Convert to HSV using OpenCV
     rgb_color = np.uint8([[[50, 50, 30]]])
     hsv_color = cv2.cvtColor(rgb_color, cv2.COLOR_RGB2HSV)[0][0]
-    print("HSV for (50,50,30):", hsv_color)
+    # print("HSV for (50,50,30):", hsv_color)
     # Example: [ 30 102  50] (may vary slightly)
     # Good ranges:
     h_lows = range(max(0, hsv_color[0] - 20), min(180, hsv_color[0] + 21), 10)
@@ -319,7 +319,7 @@ def try_black_ranges(hsv_img):
                 lower = np.array([h_low, s_low, v_low], dtype=np.uint8)
                 upper = np.array([h_high, s_high, v_high], dtype=np.uint8)
                 mask = cv2.inRange(hsv_img, lower, upper)
-                print(f"Showing mask for lower={lower}, upper={upper}")
+                # print(f"Showing mask for lower={lower}, upper={upper}")
                 cv2.imshow(f"Mask H:{h_low}-{h_high} S:{s_low}-{s_high} V:{v_low}-{v_high}", mask)
                 key = cv2.waitKey(0)
                 cv2.destroyAllWindows()

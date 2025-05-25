@@ -72,15 +72,15 @@ class ML_ComputerVision:
             frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {}}
             before_ball = time.time()
             frame_tracks['ball'] = self.tracker.get_ball_tracks(frame)
-            print("BALL TRACKS: ", frame_tracks['ball'])
+            # print("BALL TRACKS: ", frame_tracks['ball'])
             after_ball = time.time()
-            print("Ball detection time: ", after_ball - before_ball)
+            # print("Ball detection time: ", after_ball - before_ball)
             before_player = time.time()
             frame_tracks["players"] = self.classical_ml.run(frame)
             after_player = time.time()
-            print("Player detection time: ", after_player - before_player)
+            # print("Player detection time: ", after_player - before_player)
 
-            print('frame tracks["playerss"]', frame_tracks["players"])
+            # print('frame tracks["playerss"]', frame_tracks["players"])
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
                 frame_tracks['players'] = self.tracker.ml_get_object_tracks(frame_tracks["players"])
@@ -114,12 +114,12 @@ class ML_ComputerVision:
                     print("NO BALL DETECTED OR INTERPOLATED")
                     
             after_interpolate = time.time()
-            print("Ball interpolation time: ", after_interpolate - before_interpolate)
+            # print("Ball interpolation time: ", after_interpolate - before_interpolate)
             # Get object positions
             before_get_positions = time.time()
             self.tracker.add_position_to_tracks(frame_tracks)
             after_get_positions = time.time()
-            print("Get positions time: ", after_get_positions - before_get_positions)
+            # print("Get positions time: ", after_get_positions - before_get_positions)
 
             # # View Trasnformer
             before_transform = time.time()

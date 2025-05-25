@@ -48,7 +48,7 @@ class Tracker:
 
     def adjust_goalkeeper_detection(self, frame_tracks):
         # if frame_tracks["goalpost"][1]["position"][0] < 2560:
-            # print("DKHALT")
+            ## print("DKHALT")
             
         post_position = frame_tracks["goalpost"][1]["position"]
 
@@ -64,7 +64,7 @@ class Tracker:
                 if distance < self.max_player_post_distance:
                     miniumum_distance = distance
                     goalkeeper = player_id
-                    # print("FRAME_TRACKS" , frame_tracks["players"])
+                    ## print("FRAME_TRACKS" , frame_tracks["players"])
         if goalkeeper != -1:
             frame_tracks["goalkeeper"][goalkeeper] = {
                 "bbox": frame_tracks["players"][goalkeeper]["bbox"],
@@ -123,7 +123,7 @@ class Tracker:
 
         detections = []
         player_id_list = []  # to track which detection came from which player
-        # print("PLAYERS", players)
+        ## print("PLAYERS", players)
         # ow("frame", frame)
         # cv2.waitKey(1)  # Allow OpenCV to process the frame
         # cv2.destroyAllWindocv2.imshws()
@@ -133,39 +133,39 @@ class Tracker:
             detections.append([bbox[0], bbox[1], bbox[2], bbox[3], conf, '0' , player_id , player.get("team", 0)])
 
         # detections = np.array(detections)
-        print("DETECTIONS", detections)
+        ## print("DETECTIONS", detections)
         tracks,mapping = self.multi_object_tracker.update(detections)
         reverse_map = {track_id: det_id  for det_id , track_id in mapping.items()}
 
-        # print("deep stracks", tracks)
+        ## print("deep stracks", tracks)
         # [track_id, x1, y1, x2, y2],
         # [track_id, x1, y1, x2, y2],
 
         new_players = {}
         for track in tracks:
-            # print(vars(track))
-            # print("TRACK info", track.is_confirmed(), track[0],track.original_ltwh)
+            ## print(vars(track))
+            ## print("TRACK info", track.is_confirmed(), track[0],track.original_ltwh)
             # if not track.is_confirmed():
             #     continue
             original_id = None
             original_id = reverse_map.get(track[0], None)
             # for id,player in players.items():
             #     if track == []:
-            #         print("track.original_ltwh is None")
+            #        # print("track.original_ltwh is None")
             #         continue
-            #     # print("PLAYER BBOX", player['bbox'])
+            #     ## print("PLAYER BBOX", player['bbox'])
 
             # if det_idx >= len(player_id_list):
             #     continue  # safety check
-            print("TRACK ID", track)
-            print("detidc", original_id)
+           # print("TRACK ID", track)
+           # print("detidc", original_id)
             if original_id is None:
-                print("Original ID not found for track", track[0])
+               # print("Original ID not found for track", track[0])
                 continue
             old_player = players[original_id]
             new_players[track[0]] = old_player
             new_players[track[0]]["track_id"] = track[0]  # Optional: store new ID
-        print("TRACKS", new_players)
+       # print("TRACKS", new_players)
 
         return new_players
 
@@ -216,7 +216,7 @@ class Tracker:
                     # If the ball is already detected, skip adding it again
                     continue
                 frame_tracks["ball"][1] = {"conf": frame_detection[2], "bbox": bbox}
-                # print("BALLLL CONFFF" , frame_detection[2])
+                ## print("BALLLL CONFFF" , frame_detection[2])
                 ball_count += 1
  
         return frame_tracks
@@ -254,7 +254,7 @@ class Tracker:
         position = ball_track.get(1, {}).get("bbox", [])
         if not position:
             # If the current position is already empty, just add it to the cleaned positions
-            # print("Empty ball")
+            ## print("Empty ball")
             return {}
         else:
             if self.last_valid_position is None:
@@ -268,10 +268,10 @@ class Tracker:
                 distance = np.linalg.norm(
                     np.array(position[0:2]) - np.array(self.last_valid_position)
                 )
-                # print("distance", distance)
+                ## print("distance", distance)
                 if distance > distance_threshold:
                     # Replace with empty array if the distance exceeds the threshold
-                    print("Distance exceeded threshold\n" , distance)
+                   # print("Distance exceeded threshold\n" , distance)
                     return {}
                 else:
                     self.last_valid_position = position[0:2]
@@ -282,7 +282,7 @@ class Tracker:
         if ball_tracks and 1 in ball_tracks:
             x,y = ball_tracks[1]['position_transformed'][0], ball_tracks[1]['position_transformed'][1]
             if 48 <= x <= 50 and 44 <= y <= 46:
-                print("Penalty detected")
+               # print("Penalty detected")
                 ball_tracks = {}
                 self.ball_positions_history.pop() if self.ball_positions_history else None
                 bbox = self.interpolate_ball_positions(ball_tracks)
@@ -410,8 +410,8 @@ class Tracker:
     def draw_annotations(self, video_frames, tracks):
         output_video_frames = []
         # #print("len(video_frames)", len(video_frames))
-        # print("len(tracks['players'])", len(tracks['players']))
-        # print("len(tracks['ball'])", len(tracks['ball']))
+        ## print("len(tracks['players'])", len(tracks['players']))
+        ## print("len(tracks['ball'])", len(tracks['ball']))
         
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()

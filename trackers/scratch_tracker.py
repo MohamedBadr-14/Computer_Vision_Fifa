@@ -69,7 +69,7 @@ class KalmanTracker:
         
         # Process noise covariance (motion uncertainty)
         # Higher values = expect more erratic movement
-        process_noise = 4.0  # Tunable: increase for more erratic sports movement
+        process_noise = 6.0  # Tunable: increase for more erratic sports movement
         self.kf.processNoiseCov = process_noise * np.eye(4, dtype=np.float32)
         
         # Measurement noise covariance (detection uncertainty)
@@ -208,25 +208,54 @@ class MultiObjectTracker:
 
         # Associate
         if predicted and bboxes:
-            # Compute IoU cost
+            track_ids = list(self.trackers.keys())
+
+            print(f"\n--- Frame {self.frame_count} Debug ---")
+            print("Detections:")
+            for i, (bbox, det_id, team) in enumerate(zip(bboxes, det_ids, det_teams)):
+                print(f"  Det[{i}] id={det_id}, team={team}, box={bbox}")
+
+            print("Predictions:")
+            for j, (pbox, tid, team) in enumerate(zip(predicted, track_ids, pred_teams)):
+                print(f"  Pred[{j}] track={tid}, team={team}, box={pbox}")
+
+            # build your IoU matrix exactly as you do:
             iou_mat = np.zeros((len(bboxes), len(predicted)))
             for i, det in enumerate(bboxes):
                 for j, pr in enumerate(predicted):
-                    # enforce same team
+                    raw_iou = self._compute_iou(det, pr)
+                    # show when you zero it because of team mismatch
                     if det_teams[i] != pred_teams[j]:
-                        iou_mat[i, j] = 0
+                        print(f"    IoU[{i},{j}] team mismatch (det {det_teams[i]} vs pred {pred_teams[j]}), set to 0")
+                        iou_mat[i,j] = 0
                     else:
-                        iou_mat[i, j] = self._compute_iou(det, pr)
+                        iou_mat[i,j] = raw_iou
+                        print(f"    IoU[{i},{j}] = {raw_iou:.3f}")
+
             cost = 1 - iou_mat
+            # mimic your veto step:
             cost[iou_mat == 0] = 1e6
+
+            print("Cost matrix (1 - IoU, 1e6 vetoed):")
+            print(cost)
+
             row_ind, col_ind = linear_sum_assignment(cost)
+            print("Hungarian assignment results:")
+            print("  rows:", row_ind, "cols:", col_ind)
 
             matched, unmatched_d, unmatched_t = [], list(range(len(bboxes))), list(range(len(predicted)))
             for r, c in zip(row_ind, col_ind):
-                if cost[r, c] < 1e6:
-                    matched.append((r, c))
+                valid = cost[r,c] < 1e6
+                print(f"  Pair (Det {r}, Pred {c}) cost={cost[r,c]:.1f} -> {'MATCH' if valid else 'VETO'}")
+                if valid:
+                    matched.append((r,c))
                     unmatched_d.remove(r)
                     unmatched_t.remove(c)
+
+            print("Matched pairs:", matched)
+            print("Unmatched detections indices:", unmatched_d)
+            print("Unmatched tracker indices:", unmatched_t)
+            print("--- end debug ---\n")
             unmatched_dets, unmatched_trks = unmatched_d, unmatched_t
         else:
             matched, unmatched_dets, unmatched_trks = [], list(range(len(bboxes))), list(range(len(predicted)))
@@ -414,8 +443,8 @@ def visualize_tracking(video_path, yolo_detections_per_frame, output_path=None):
     # Initialize tracker
     tracker = MultiObjectTracker(
         max_disappeared=15,   # Shorter timeout for sports
-        min_hits=0,          # Faster track establishment
-        iou_threshold=0.25   # More permissive for fast movement
+        min_hits=1,          # Faster track establishment
+        iou_threshold=0.1   # More permissive for fast movement
     )
     
     # Open video

@@ -29,7 +29,7 @@ class ClassicalML:
         # Extract HOG features
         features = hog(gray, orientations=9, pixels_per_cell=(8, 8),
                     cells_per_block=(2, 2), block_norm='L2-Hys', visualize=False)
-        print(features,'midoooo')
+      # print(features,'midoooo')
         return features
     
     def run(self,frame):
@@ -50,7 +50,7 @@ class ClassicalML:
         before_hog = time.time()
         # print('contours_pic',contours_pic)
         if len(contours_pic) == 0:
-            print("No contours found in the image.")
+          # print("No contours found in the image.")
             return player_tracks
         for ids,contour in enumerate(contours_pic):
        
@@ -60,15 +60,15 @@ class ClassicalML:
                     features.append(feature_vector)
 
         after_hog = time.time()
-        print("HOG TIME " , after_hog - before_hog)
-        print('CONTOURS PIC', len(contours_pic))
+      # print("HOG TIME " , after_hog - before_hog)
+      # print('CONTOURS PIC', len(contours_pic))
         features = np.array(features)
         before_prediction = time.time()
-        print(features,features.shape,'mido')
+      # print(features,features.shape,'mido')
         prediction = self.hog_svm.predict(features) 
         after_prediction = time.time()
-        print("PREDICTION TIME " , after_prediction - before_prediction)
-        print('predictions',prediction)
+      # print("PREDICTION TIME " , after_prediction - before_prediction)
+      # print('predictions',prediction)
         new_pic = frame.copy()
         
         for pred, contour, contour_pic in zip(prediction, contours, contours_pic):
@@ -79,7 +79,7 @@ class ClassicalML:
                 
                 x, y, w, h = cv2.boundingRect(contour)
                 player_assign,contour_blue,contour_yellow = decide_contours(contour_pic,frame, x, y)
-                print(player_assign, 'player_assign')
+              # print(player_assign, 'player_assign')
           
                 if player_assign == 1:
                     player_tracks[id_counter] = {"bbox": (x, y+162, x + w, y + h+162 ), "team": 1}
@@ -96,7 +96,7 @@ class ClassicalML:
                         x=x-10+x_initial
                         y=y-15+y_initial
                         # cv2.rectangle(new_pic, (x, y +162), (x + w+10, y + h+162+50), (0, 0, 255), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w+10, y + h+162+50), "team": 0}
+                        player_tracks[id_counter] = {"bbox": (x-10, y+162, x + w+20, y + h+162+50), "team": 0}
                         id_counter += 1
 
 
@@ -105,7 +105,7 @@ class ClassicalML:
                         x=x-10+x_initial
                         y=y-15+y_initial
                         # cv2.rectangle(new_pic, (x, y+162), (x + w+5, y + h+162+50), (0,255,0), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w+10 , y + h+162+50), "team": 1}
+                        player_tracks[id_counter] = {"bbox": (x-10, y+162, x + w+20 , y + h+162+50), "team": 1}
                         id_counter += 1
         # cv2.imshow("Detection", new_pic)
         # cv2.waitKey(0)
@@ -127,13 +127,13 @@ def main(images_folder):
         #     continue
         img = cv2.imread(img_path)
         if img is None:
-            print(f"Failed to read {img_path}")
+          # print(f"Failed to read {img_path}")
             continue
         
         player_tracks = model.run(img)
-        print(f"Results for {img_path}:")
-        for pid, info in player_tracks.items():
-            print(f"  Player {pid}: bbox={info['bbox']}, team={info['team']}")
+      # print(f"Results for {img_path}:")
+        # for pid, info in player_tracks.items():
+          # print(f"  Player {pid}: bbox={info['bbox']}, team={info['team']}")
 
         # Optionally, show the image with detections
         # cv2.imshow("Detection mido", img)
