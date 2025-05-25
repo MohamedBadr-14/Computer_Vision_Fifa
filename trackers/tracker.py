@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import supervision as sv
 from deep_sort_realtime.deepsort_tracker import DeepSort
 import numpy as np
-from scratch_tracker import MultiObjectTracker
+from .scratch_tracker import MultiObjectTracker
 import pandas as pd
 import cv2
 import sys
@@ -19,8 +19,8 @@ class Tracker:
         self.ml_tracker = DeepSort(max_age=30)  # max_age: how many frames to keep a track alive without update
         self.multi_object_tracker = MultiObjectTracker(
             min_hits=0,
-            max_age=30,
-            iou_threshold=0.3,
+            max_disappeared=10,
+            iou_threshold=0.1,
         )
         self.deep_ball_model = YOLO('models/best_initial.pt')
         self.ball_model = BallDetect()
@@ -119,7 +119,7 @@ class Tracker:
         detection_ball = self.deep_ball_model(frame , conf = 0.1,verbose = False) #BADR MIDO
         return detection,detection_ball
     
-    def ml_get_object_tracks(self, players, frame):
+    def ml_get_object_tracks(self, players):
 
         detections = []
         player_id_list = []  # to track which detection came from which player
@@ -130,38 +130,41 @@ class Tracker:
         for player_id, player in players.items():
             bbox = player["bbox"]
             conf = player.get("conf", 0.99)
-            detections.append(([bbox[0], bbox[1], bbox[2], bbox[3]], conf, '0'))
+            detections.append([bbox[0], bbox[1], bbox[2], bbox[3], conf, '0' , player_id , player.get("team", 0)])
 
         # detections = np.array(detections)
         print("DETECTIONS", detections)
-        tracks = self.ml_tracker.update_tracks(detections, frame=frame)
+        tracks,mapping = self.multi_object_tracker.update(detections)
+        reverse_map = {track_id: det_id  for det_id , track_id in mapping.items()}
+
         # print("deep stracks", tracks)
+        # [track_id, x1, y1, x2, y2],
+        # [track_id, x1, y1, x2, y2],
 
         new_players = {}
         for track in tracks:
             # print(vars(track))
-            print("TRACK info", track.is_confirmed(), track.track_id,track.original_ltwh)
+            # print("TRACK info", track.is_confirmed(), track[0],track.original_ltwh)
             # if not track.is_confirmed():
             #     continue
             original_id = None
-            for id,player in players.items():
-                if track.original_ltwh is None:
-                    print("track.original_ltwh is None")
-                    continue
-                if tuple(player['bbox']) == tuple(track.original_ltwh):
-                    original_id = id
-                    break
+            original_id = reverse_map.get(track[0], None)
+            # for id,player in players.items():
+            #     if track == []:
+            #         print("track.original_ltwh is None")
+            #         continue
+            #     # print("PLAYER BBOX", player['bbox'])
 
             # if det_idx >= len(player_id_list):
             #     continue  # safety check
-            print("TRACK ID", track.track_id)
+            print("TRACK ID", track)
             print("detidc", original_id)
             if original_id is None:
-                print("Original ID not found for track", track.track_id)
+                print("Original ID not found for track", track[0])
                 continue
             old_player = players[original_id]
-            new_players[track.track_id] = old_player
-            new_players[track.track_id]["track_id"] = track.track_id  # Optional: store new ID
+            new_players[track[0]] = old_player
+            new_players[track[0]]["track_id"] = track[0]  # Optional: store new ID
         print("TRACKS", new_players)
 
         return new_players

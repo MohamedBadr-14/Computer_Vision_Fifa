@@ -171,74 +171,90 @@ class MultiObjectTracker:
         self.trackers = OrderedDict()
         self.next_id = 0
         self.frame_count = 0
+        self.track_teams = {} 
     
     def update(self, detections):
         """
-        Update tracker with new detections for current frame.
-        
+        Update tracker with new detections , and enforce team-specific matching.
+
         Args:
-            detections: List of [x1, y1, x2, y2, confidence, class_id] detections
-        
+            detections: List of [x1, y1, x2, y2, confidence, class_id, det_id, team_id]
+
         Returns:
-            List of [track_id, x1, y1, x2, y2] for active tracks
+            tracks: List of [track_id, x1, y1, x2, y2]
+            mapping: Dict mapping det_id -> track_id
         """
         self.frame_count += 1
-        
-        # Filter detections (assume we only want a specific class, e.g., 'person')
-        # You can modify this to filter by class_id if needed
-        bboxes = [[d[0], d[1], d[2], d[3]] for d in detections if d[4] > 0.5]  # confidence > 0.5
-        
-        # Predict new locations for existing trackers
-        predicted_bboxes = []
-        to_delete = []
-        
-        for track_id, tracker in self.trackers.items():
-            pred_bbox = tracker.predict()
-            
-            # Mark tracks that have been missing too long for deletion
-            if tracker.time_since_update > self.max_disappeared:
-                to_delete.append(track_id)
+
+        # Filter and extract det boxes & ids & teams
+        bboxes, det_ids, det_teams = [], [], []
+        for d in detections:
+            if d[4] > 0.5:
+                bboxes.append([d[0], d[1], d[2], d[3]])
+                det_ids.append(d[6])
+                det_teams.append(d[7])
+
+        # Predict existing trackers
+        predicted, to_del, pred_teams = [], [], []
+        for tid, trk in self.trackers.items():
+            if trk.time_since_update > self.max_disappeared:
+                to_del.append(tid)
             else:
-                predicted_bboxes.append(pred_bbox)
-        
-        # Remove dead tracks
-        for track_id in to_delete:
-            del self.trackers[track_id]
-        
-        # Associate detections to existing tracks
-        if len(predicted_bboxes) > 0 and len(bboxes) > 0:
-            matched, unmatched_dets, unmatched_trks = self._associate_detections_to_tracks(
-                bboxes, predicted_bboxes, self.iou_threshold
-            )
+                predicted.append(trk.predict())
+                pred_teams.append(self.track_teams[tid])
+        for tid in to_del:
+            del self.trackers[tid]
+            del self.track_teams[tid]
+
+        # Associate
+        if predicted and bboxes:
+            # Compute IoU cost
+            iou_mat = np.zeros((len(bboxes), len(predicted)))
+            for i, det in enumerate(bboxes):
+                for j, pr in enumerate(predicted):
+                    # enforce same team
+                    if det_teams[i] != pred_teams[j]:
+                        iou_mat[i, j] = 0
+                    else:
+                        iou_mat[i, j] = self._compute_iou(det, pr)
+            cost = 1 - iou_mat
+            cost[iou_mat == 0] = 1e6
+            row_ind, col_ind = linear_sum_assignment(cost)
+
+            matched, unmatched_d, unmatched_t = [], list(range(len(bboxes))), list(range(len(predicted)))
+            for r, c in zip(row_ind, col_ind):
+                if cost[r, c] < 1e6:
+                    matched.append((r, c))
+                    unmatched_d.remove(r)
+                    unmatched_t.remove(c)
+            unmatched_dets, unmatched_trks = unmatched_d, unmatched_t
         else:
-            matched = []
-            unmatched_dets = list(range(len(bboxes)))
-            unmatched_trks = list(range(len(predicted_bboxes)))
-        
-        # Update matched tracks
+            matched, unmatched_dets, unmatched_trks = [], list(range(len(bboxes))), list(range(len(predicted)))
+
+        # Update matched
+        mapping = {}
         track_ids = list(self.trackers.keys())
-        for m in matched:
-            det_idx, trk_idx = m[0], m[1]
-            track_id = track_ids[trk_idx]
-            self.trackers[track_id].update(bboxes[det_idx])
-        
-        # Create new tracks for unmatched detections
-        for det_idx in unmatched_dets:
-            new_tracker = KalmanTracker(bboxes[det_idx], self.next_id)
-            self.trackers[self.next_id] = new_tracker
+        for det_i, trk_i in matched:
+            tid = track_ids[trk_i]
+            self.trackers[tid].update(bboxes[det_i])
+            mapping[det_ids[det_i]] = tid
+
+        # Create new for unmatched detections
+        for det_i in unmatched_dets:
+            new_id = self.next_id
+            self.trackers[new_id] = KalmanTracker(bboxes[det_i], new_id)
+            self.track_teams[new_id] = det_teams[det_i]
+            mapping[det_ids[det_i]] = new_id
             self.next_id += 1
-        
-        # Return active tracks (only those with sufficient hits and recent updates)
-        results = []
-        for track_id, tracker in self.trackers.items():
-            # Only return tracks that are established and recently updated
-            if (tracker.time_since_update < 1 and 
-                (tracker.hit_streak >= self.min_hits or self.frame_count <= self.min_hits)):
-                
-                bbox = tracker.get_state()
-                results.append([track_id, int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])])
-        
-        return results
+
+        # Prepare output tracks
+        tracks = []
+        for tid, trk in self.trackers.items():
+            if trk.time_since_update < 1 and (trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
+                x1, y1, x2, y2 = trk.get_state()
+                tracks.append([tid, int(x1), int(y1), int(x2), int(y2)])
+
+        return tracks, mapping
     
     def _associate_detections_to_tracks(self, detections, trackers, iou_threshold=0.3):
         """

@@ -86,7 +86,7 @@ class ClassicalML:
                     id_counter += 1
                     cv2.rectangle(new_pic, (x, y +162), (x + w, y + h +162), (0, 255, 0), 2)
                 elif player_assign == 0:
-                    player_tracks[id_counter] = {"bbox": (x, y , x + w, y + h ), "team": 0}
+                    player_tracks[id_counter] = {"bbox": (x, y+162 , x + w, y + h+162 ), "team": 0}
                     id_counter += 1
                     cv2.rectangle(new_pic, (x, y+162), (x + w, y + h+162), (0, 0, 255), 2)
                 elif player_assign == 2:
@@ -96,7 +96,7 @@ class ClassicalML:
                         x=x-5+x_initial
                         y=y-15+y_initial
                         cv2.rectangle(new_pic, (x, y +162), (x + w+5, y + h+162+50), (0, 0, 255), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y, x + w, y + h), "team": 0}
+                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w, y + h+162), "team": 0}
                         id_counter += 1
 
 
@@ -105,7 +105,7 @@ class ClassicalML:
                         x=x-5+x_initial
                         y=y-15+y_initial
                         cv2.rectangle(new_pic, (x, y+162), (x + w+5, y + h+162+50), (0,255,0), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y, x + w , y + h), "team": 1}
+                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w , y + h+162), "team": 1}
                         id_counter += 1
         # cv2.imshow("Detection", new_pic)
         # cv2.waitKey(0)
@@ -122,9 +122,9 @@ def main(images_folder):
     image_paths = sorted(glob.glob(os.path.join(images_folder, "*.jpg")) + glob.glob(os.path.join(images_folder, "*.png")))
     i=0
     for img_path in image_paths:
-        if i <100 :
-            i+=1
-            continue
+        # if i <100 :
+        #     i+=1
+        #     continue
         img = cv2.imread(img_path)
         if img is None:
             print(f"Failed to read {img_path}")

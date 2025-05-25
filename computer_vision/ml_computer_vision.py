@@ -80,10 +80,10 @@ class ML_ComputerVision:
             after_player = time.time()
             print("Player detection time: ", after_player - before_player)
 
-
+            print('frame tracks["playerss"]', frame_tracks["players"])
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
-                frame_tracks['players'] = self.tracker.ml_get_object_tracks(frame_tracks["players"], frame)
+                frame_tracks['players'] = self.tracker.ml_get_object_tracks(frame_tracks["players"])
             #adjust goalkeeper detections
             
 
@@ -92,7 +92,7 @@ class ML_ComputerVision:
             # print("Before outliers: ", frame_tracks["ball"][1]["conf"] if frame_tracks["ball"] else None)
             # if frame_tracks["ball"] and not self.new_attempt: 
             #         frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
-            #             frame_tracks["ball"], 300
+            #             frame_tracks["ball"], 218
             #         )
 
             # interpolate again
@@ -205,7 +205,7 @@ class ML_ComputerVision:
         # print("DONEEEEEE" , time.time() - start_time)
         # print("ALL TRACKS: ", all_tracks)
         # Draw annotations on the video frames
-            print('all_tracks["players"]', all_tracks)
+            # print('all_tracks["players"]', all_tracks)
         output_video_frames = self.tracker.draw_annotations(
             video_frames, all_tracks
         )
