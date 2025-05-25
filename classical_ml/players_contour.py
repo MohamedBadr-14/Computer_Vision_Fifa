@@ -128,7 +128,7 @@ def get_players_contours(img):
     return image_cropped_new, contours_cut, correct_contours 
          
 
-def decide_contours(contour_img):
+def decide_contours(contour_img,frame,x,y):
     # Convert to HSV once
     hsv = cv2.cvtColor(contour_img, cv2.COLOR_BGR2HSV)
     # Print histograms for H, S, and V channels
@@ -198,8 +198,27 @@ def decide_contours(contour_img):
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
     delta = pixels_orange - pixels_yellow
+     # Linearly interpolate the area bounds based on y
+            # Fraction of y between y_min and y_max
+    y_min = 0  # Top of the image (farthest from camera)
+    y_max = frame.shape[0]  # Bottom of the image (closest to camera)
+    orange_count_min = 40  # Smallest area when the ball is farthest
+    yellow_count_min = 30
+    orange_count_max = 200  # Largest area when the ball is closest
+    yellow_count_max = 200
+    y_fraction = (y+162 - y_min) / (y_max - y_min)
+    
+    # Interpolate area bounds
+    orange_threshold = orange_count_min + y_fraction * (orange_count_max - orange_count_min)
+    yellow_threshold = yellow_count_min + y_fraction * (yellow_count_max - yellow_count_min)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.6
+    thickness = 2
+    label = f"Y:{pixels_yellow:.2f}, O:{pixels_orange:.2f} YT:{yellow_threshold:.2f}, OT:{orange_threshold:.2f}"
+    text_size, _ = cv2.getTextSize(label, font, font_scale, thickness)
+    cv2.putText(frame, label, (x+10, y+162), font, font_scale, (0, 0, 0), thickness)
 # 150
-    if pixels_orange > 145 and pixels_yellow > 110:
+    if pixels_orange > orange_threshold-20 and pixels_yellow > yellow_threshold-15:
         # Process yellow contour
         # cv2.imshow('contour_img', contour_img)
         # cv2.waitKey(0)
@@ -248,9 +267,9 @@ def decide_contours(contour_img):
 
         return 2, contour_orange, contour_yellow
 
-    if pixels_yellow > pixels_orange and pixels_yellow>135:
+    if pixels_yellow > pixels_orange and pixels_yellow>yellow_threshold:
         return 1, None, None
-    elif pixels_orange > pixels_yellow and pixels_orange>160:
+    elif pixels_orange > pixels_yellow and pixels_orange>orange_threshold:
         return 0, None, None
 
     return 3, None, None

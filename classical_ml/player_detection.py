@@ -78,7 +78,7 @@ class ClassicalML:
                 # cv2.waitKey(0)
                 
                 x, y, w, h = cv2.boundingRect(contour)
-                player_assign,contour_blue,contour_yellow = decide_contours(contour_pic)
+                player_assign,contour_blue,contour_yellow = decide_contours(contour_pic,frame, x, y)
                 print(player_assign, 'player_assign')
           
                 if player_assign == 1:
@@ -93,19 +93,19 @@ class ClassicalML:
                     x_initial, y_initial, w, h = cv2.boundingRect(contour)
                     if  type(contour_blue) == np.ndarray:
                         x, y, w, h = cv2.boundingRect(contour_blue)
-                        x=x-5+x_initial
+                        x=x-10+x_initial
                         y=y-15+y_initial
-                        cv2.rectangle(new_pic, (x, y +162), (x + w+5, y + h+162+50), (0, 0, 255), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w, y + h+162), "team": 0}
+                        # cv2.rectangle(new_pic, (x, y +162), (x + w+10, y + h+162+50), (0, 0, 255), 2)
+                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w+10, y + h+162+50), "team": 0}
                         id_counter += 1
 
 
                     if type(contour_yellow) == np.ndarray:    
                         x, y, w, h = cv2.boundingRect(contour_yellow)
-                        x=x-5+x_initial
+                        x=x-10+x_initial
                         y=y-15+y_initial
-                        cv2.rectangle(new_pic, (x, y+162), (x + w+5, y + h+162+50), (0,255,0), 2)
-                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w , y + h+162), "team": 1}
+                        # cv2.rectangle(new_pic, (x, y+162), (x + w+5, y + h+162+50), (0,255,0), 2)
+                        player_tracks[id_counter] = {"bbox": (x, y+162, x + w+10 , y + h+162+50), "team": 1}
                         id_counter += 1
         # cv2.imshow("Detection", new_pic)
         # cv2.waitKey(0)
