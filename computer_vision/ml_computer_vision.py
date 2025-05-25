@@ -10,7 +10,27 @@ import time
 from offside_detector import OffsideDetector
 from classical_ml.player_detection import ClassicalML
 from trackers.players_interpolator import SimplePlayerInterpolator
+import json
 
+action_list = {
+    "pass_N": 0,
+    "pass_NE": 1,
+    "pass_E": 2,
+    "pass_SE": 3,
+    "pass_S": 4,
+    "pass_SW": 5,
+    "pass_W": 6,
+    "pass_NW": 7,
+    "dribble_N": 8,
+    "dribble_NE": 9,
+    "dribble_E": 10,
+    "dribble_SE": 11,
+    "dribble_S": 12,
+    "dribble_SW": 13,
+    "dribble_W": 14,
+    "dribble_NW": 15,
+    "shoot": 16
+}
 class ML_ComputerVision:
     def __init__(self):
         
@@ -29,49 +49,52 @@ class ML_ComputerVision:
     
     def read_frames(self,frames_path):
         # Read the frames from the specified path
-        frames = []
+        frames_actions_tuples = []
+        # frames = []
         count = 0
         for filename in sorted(os.listdir(frames_path)):
             if filename.endswith(".jpg") or filename.endswith(".png"):
                 frame_path = os.path.join(frames_path, filename)
+                # extarct filename only without extension
+                name = os.path.splitext(filename)[0]
+                # Extract action part if it exists after the frame number
+                parts = name.split("_")
+                action = None
+                # Check if filename has format like "frame_000592_dribble_E.jpg"
+                if len(parts) > 2:
+                    # Reconstruct the action by joining all parts after the frame number
+                    action = "_".join(parts[2:])
+                
+                action_taken = None
+                if action and action in action_list:
+                    action_taken = action_list[action]
+                else:
+                    action_taken = None
+                # return tuple frame and action_taken
+                    
                 frame = cv2.imread(frame_path)
-                # new_frame = cv2.resize(frame, (640, 640))
-                frames.append(frame)
-                if count == 55:
-                    break
-                count += 1
-        return frames
+                
+                frames_actions_tuples.append((frame, action_taken))
+                
+                # frames.append(frame)
+        # return frames
+        return frames_actions_tuples
         
 
-    def run(self,video_frames,attempts):
-
-        # for i, frame in enumerate(video_frames):
-        #             timestamp = time.time()
-        #             cv2.imwrite(f"D:/fifa-vision/all/frame_{timestamp}_{i}.jpg", frame)
-        if self.attempts is None:
-            self.attempts = attempts
-            self.new_attempt = True
-        else:
-            self.new_attempt = False
+    def run(self,video_frames):
 
         
-        if self.attempts != attempts:
-            # print("New attempt detected, resetting tracker...")
-            self.attempts = attempts
-            self.tracker.reset_tracker()
-            self.new_attempt = True
-        else:
-            self.new_attempt = False
-            # for i, frame in enumerate(video_frames):
-            #         cv2.imwrite(f"D:/fifa-vision/new_attempts/frame_{self.attempts}_{i}.jpg", frame)
+        all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : [],"action": []}
+        our_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : [],"action": []}
 
-        all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
-
-        for test,frame in enumerate(video_frames):
+        for test,(frame,action) in enumerate(video_frames):
+            print("TEST: ", test)
+            print("ACTION: ", action)
+            print("Frame shape: ", frame.shape)
             start_time = time.time()
             height, width, _ = frame.shape
 
-            frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {}}
+            frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {},"action": action}
             before_ball = time.time()
             frame_tracks['ball'] = self.tracker.get_ball_tracks(frame)
             # print("BALL TRACKS: ", frame_tracks['ball'])
@@ -201,18 +224,50 @@ class ML_ComputerVision:
             print("   ")
             
                 # print ("Ball position: ", frame_tracks["ball"][1]["position_transformed"])
-                
+            if action is not None:
+                our_tracks["players"].append(frame_tracks["players"])
+                our_tracks["ball"].append(frame_tracks["ball"])
+                our_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+                our_tracks["goalpost"].append(frame_tracks["goalpost"])
+                our_tracks["action"].append(frame_tracks["action"])
+            
             all_tracks["players"].append(frame_tracks["players"])
             all_tracks["ball"].append(frame_tracks["ball"])
             all_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
             all_tracks["goalpost"].append(frame_tracks["goalpost"])
+            all_tracks["action"].append(frame_tracks["action"])
         # print("DONEEEEEE" , time.time() - start_time)
         # print("ALL TRACKS: ", all_tracks)
         # Draw annotations on the video frames
             # print('all_tracks["players"]', all_tracks)
         all_tracks["players"] = self.players_interpolator.cleanup_all_tracks(all_tracks["players"])
+        # our_tracks["players"] = self.players_interpolator.cleanup_all_tracks(our_tracks["players"])
+            # save all tracks as json file
+        # save all_tracks to json file
+        if not os.path.exists("output_videos"):
+            os.makedirs("output_videos")
+        # save all_tracks to json file
+        def convert_ndarray(obj):
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, dict):
+                return {k: convert_ndarray(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_ndarray(v) for v in obj]
+            else:
+                return obj
+
+        # Convert all_tracks to a JSON-serializable object
+        serializable_data = convert_ndarray(our_tracks)
+
+        # Now write to file
+        with open("output_videos/all_tracks.json", "w") as f:
+            json.dump(serializable_data, f, indent=4)
+            
+        # Using zip with unpacking to separate frames and actions
+        frames_only, _ = zip(*video_frames)    
         output_video_frames = self.tracker.draw_annotations(
-            video_frames, all_tracks
+            frames_only, all_tracks
         )
         # if self.vid_num == 0:
         #     cv2.imwrite(f"output_videos/BADR_{self.vid_num}.png" , video_frames[-1])

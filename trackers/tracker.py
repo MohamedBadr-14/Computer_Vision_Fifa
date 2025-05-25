@@ -37,6 +37,10 @@ class Tracker:
 
     def add_position_to_tracks(self, frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
+            print("OBJECT TYPE", object_type)
+            print("OBJECT TRACKS", object_tracks)
+            if object_type == "action":
+                continue
             for track_id, track_info in object_tracks.items():
                 bbox = track_info["bbox"]
                 if object_type == "ball":

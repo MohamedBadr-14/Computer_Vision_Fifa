@@ -39,22 +39,26 @@ def read_frames(frames_path , max_frames=60):
 if __name__ == "__main__":
     # Example usage
     # frames = read_frames("C:/Users/DELL/Downloads/wetransfer_frames_20250524_181705_2025-05-24_1521/frames_20250524_181705")
+    ml_comp = ML_ComputerVision()
+    frames_action_tuple = ml_comp.read_frames("D:/fifa-vision/offline_attempts/att3_goal")
     # attempts = 1
     # comp.run(video_frames, attempts)
     # frames = read_video("cropped_video.mp4")
     
-    ml_comp = ML_ComputerVision()
+    
     # comp = ComputerVision()
-    path = r'D:\\att3_goal\\att3_goal'
-    # path = r'C:\\Users\\moham\\Desktop\\GP\\Computer_Vision_Fifa\\input_videos\\att3_goal'
-    frames = read_frames(path , max_frames=50)
-    frames = frames[30:40]
-    print(len(frames))
+    # path = r'D:\\att3_goal\\att3_goal'
+    # # path = r'C:\\Users\\moham\\Desktop\\GP\\Computer_Vision_Fifa\\input_videos\\att3_goal'
+    # frames = read_frames(path , max_frames=50)
+    # frames = frames[30:40]
+    # print(len(frames))
+    # frames = read_frames("./all")
+    print(len(frames_action_tuple))
     # Create benchmark tool and run
 
-    print(frames[0].shape)
+    # print(frames_action_tuple[0].shape)
     start = time.time()
-    ft,hb = ml_comp.run(frames, attempts=1)
+    ft,hb = ml_comp.run(frames_action_tuple)
     print("FINISHED ML" , time.time() - start)
     # start = time.time()
     # x = comp.run(frames, attempts=1)

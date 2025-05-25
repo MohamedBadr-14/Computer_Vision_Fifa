@@ -76,6 +76,8 @@ class KeypointsTransformer():
 
     def add_transformed_position_to_tracks(self,frame_tracks):
         for object_type, object_tracks in frame_tracks.items():
+            if object_type == "action":
+                continue
             for track_id, track_info in object_tracks.items():
                 position = track_info['position']
                 position = np.array(position)
