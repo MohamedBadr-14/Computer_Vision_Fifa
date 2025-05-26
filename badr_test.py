@@ -40,7 +40,8 @@ if __name__ == "__main__":
     # Example usage
     # frames = read_frames("C:/Users/DELL/Downloads/wetransfer_frames_20250524_181705_2025-05-24_1521/frames_20250524_181705")
     ml_comp = ML_ComputerVision()
-    frames_action_tuple = ml_comp.read_frames("D:/fifa-vision/offline_attempts/att3_goal")
+    file_name_regex = r"D:\fifa-vision\offline_attempts\Att_6_goal_1\frames"
+    frames_action_tuple = ml_comp.read_frames(file_name_regex)
     # attempts = 1
     # comp.run(video_frames, attempts)
     # frames = read_video("cropped_video.mp4")

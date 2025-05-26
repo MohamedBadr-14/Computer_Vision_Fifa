@@ -81,11 +81,46 @@ class ML_ComputerVision:
         return frames_actions_tuples
         
 
+    def extract_action_tracks(self, all_tracks):
+        """
+        Extract only the tracks with non-None actions from all_tracks.
+        
+        Args:
+            all_tracks (dict): Dictionary containing arrays of tracks for players, ball, etc.
+                            The "action" key contains action identifiers.
+        
+        Returns:
+            dict: Dictionary with the same structure as all_tracks but only containing frames with actions.
+        """
+        action_tracks = {
+            "players": [],
+            "referees": [],
+            "ball": [],
+            "goalkeeper": [],
+            "goalpost": [],
+            "action": []
+        }
+        
+        # Get the indices where actions are not None
+        action_indices = [i for i, action in enumerate(all_tracks["action"]) if action is not None]
+        
+        # Extract tracks at those indices, with safety checks
+        for key in action_tracks.keys():
+            if key in all_tracks:
+                source_array = all_tracks[key]
+                # Filter indices to ensure they're valid for this array
+                valid_indices = [i for i in action_indices if i < len(source_array)]
+                action_tracks[key] = [source_array[i] for i in valid_indices]
+            else:
+                action_tracks[key] = []  # Default to empty if key doesn't exist
+        
+        return action_tracks
+
     def run(self,video_frames):
 
         
         all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : [],"action": []}
-        our_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : [],"action": []}
+        # our_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : [],"action": []}
 
         for test,(frame,action) in enumerate(video_frames):
             print("TEST: ", test)
@@ -93,7 +128,6 @@ class ML_ComputerVision:
             print("Frame shape: ", frame.shape)
             start_time = time.time()
             height, width, _ = frame.shape
-
             frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {},"action": action}
             before_ball = time.time()
             frame_tracks['ball'] = self.tracker.get_ball_tracks(frame)
@@ -224,12 +258,14 @@ class ML_ComputerVision:
             print("   ")
             
                 # print ("Ball position: ", frame_tracks["ball"][1]["position_transformed"])
-            if action is not None:
-                our_tracks["players"].append(frame_tracks["players"])
-                our_tracks["ball"].append(frame_tracks["ball"])
-                our_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
-                our_tracks["goalpost"].append(frame_tracks["goalpost"])
-                our_tracks["action"].append(frame_tracks["action"])
+            # if action is not None:
+            #     our_tracks["players"].append(frame_tracks["players"])
+            #     our_tracks["ball"].append(frame_tracks["ball"])
+            #     our_tracks["goalkeeper"].append(frame_tracks["goalkeeper"])
+            #     our_tracks["goalpost"].append(frame_tracks["goalpost"])
+            #     our_tracks["action"].append(frame_tracks["action"])
+            
+                    # print("Action: ", frame_tracks["action"])
             
             all_tracks["players"].append(frame_tracks["players"])
             all_tracks["ball"].append(frame_tracks["ball"])
@@ -241,8 +277,9 @@ class ML_ComputerVision:
         # Draw annotations on the video frames
             # print('all_tracks["players"]', all_tracks)
         all_tracks["players"] = self.players_interpolator.cleanup_all_tracks(all_tracks["players"])
-        # our_tracks["players"] = self.players_interpolator.cleanup_all_tracks(our_tracks["players"])
+        # our_tracks["players"] = self.players_interpolator.cleanup_all_tracks(our_tracks["players"])     
             # save all tracks as json file
+        action_tracks = self.extract_action_tracks(all_tracks)
         # save all_tracks to json file
         if not os.path.exists("output_videos"):
             os.makedirs("output_videos")
@@ -258,11 +295,15 @@ class ML_ComputerVision:
                 return obj
 
         # Convert all_tracks to a JSON-serializable object
-        serializable_data = convert_ndarray(our_tracks)
+        serializable_data = convert_ndarray(action_tracks)
 
         # Now write to file
         with open("output_videos/all_tracks.json", "w") as f:
             json.dump(serializable_data, f, indent=4)
+        
+        serializable_data_all = convert_ndarray(all_tracks)
+        with open("output_videos/all_tracks_all.json", "w") as f:
+            json.dump(serializable_data_all, f, indent=4)
             
         # Using zip with unpacking to separate frames and actions
         frames_only, _ = zip(*video_frames)    

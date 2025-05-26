@@ -420,6 +420,18 @@ class Tracker:
         
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()
+           
+            
+            cv2.putText(
+                frame,
+                f"Frame: {frame_num}",
+                (50, 50),  # Position (x=50, y=50)
+                cv2.FONT_HERSHEY_SIMPLEX,  # Font
+                1,  # Font scale (adjust as needed)
+                (0, 0, 255),  # Color (red in BGR)
+                2,  # Thickness
+                cv2.LINE_AA  # Line type
+            ) 
 
             player_dict = tracks["players"][frame_num]
             ball_dict = (

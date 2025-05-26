@@ -186,13 +186,13 @@ class SimplePlayerInterpolator:
         print(f"Removing player IDs: {ids_to_remove}")
         for track_id in ids_to_remove:
             if track_id in self.player_histories:
-                del self.player_histories[1]
+                del self.player_histories[track_id]
             if track_id in self.last_seen_frame:
-                del self.last_seen_frame[1]
+                del self.last_seen_frame[track_id]
             if track_id in self.frames_detected:
-                del self.frames_detected[1]
+                del self.frames_detected[track_id]
             if track_id in self.persistent_players:
-                self.persistent_players.remove(1)
+                self.persistent_players.remove(track_id)
             
 
  
