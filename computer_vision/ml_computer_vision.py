@@ -139,7 +139,6 @@ class ML_ComputerVision:
             after_player = time.time()
             # print("Player detection time: ", after_player - before_player)
 
-            # print('frame tracks["playerss"]', frame_tracks["players"])
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
                 frame_tracks['players'] , unmatched_det_ids  = self.tracker.ml_get_object_tracks(frame_tracks["players"])
@@ -154,7 +153,7 @@ class ML_ComputerVision:
             #         frame_tracks["ball"] = self.tracker.replace_outliers_based_on_distance(
             #             frame_tracks["ball"], 218
             #         )
-            self.players_interpolator.remove_ids(unmatched_det_ids)
+            # self.players_interpolator.remove_ids(unmatched_det_ids)
             frame_tracks['players'] = self.players_interpolator.interpolate_player_positions(frame_tracks["players"])
             # interpolate again
             before_interpolate = time.time()
@@ -276,7 +275,8 @@ class ML_ComputerVision:
         # print("ALL TRACKS: ", all_tracks)
         # Draw annotations on the video frames
             # print('all_tracks["players"]', all_tracks)
-        all_tracks["players"] = self.players_interpolator.cleanup_all_tracks(all_tracks["players"])
+        # all_tracks["players"] = self.players_interpolator.cleanup_all_tracks(all_tracks["players"])
+        all_tracks["players"] = self.tracker.cleanup_player_tracks(all_tracks["players"])
         # our_tracks["players"] = self.players_interpolator.cleanup_all_tracks(our_tracks["players"])     
             # save all tracks as json file
         action_tracks = self.extract_action_tracks(all_tracks)

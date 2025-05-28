@@ -24,9 +24,9 @@ action_list = {
 
 
 # Configuration
-source_dir = r'D:\fifa-vision\offline_attempts\Att_6_goal_1\frames'  # Replace with your source directory
+source_dir = r'D:\fifa-vision\offline_attempts\Att_5_goal_3\frames'  # Replace with your source directory
 rename_key = 'm'  # The key to trigger the rename
-frame_count = 266  # Start from frame_1
+frame_count = 212  # Start from frame_1
 file_extension = '.jpg'  # Adjust as needed (e.g., '.png')
 
 print(f"Waiting for key '{rename_key}' to rename files... Use right arrow to increment frame. (Press Esc to exit)")
