@@ -62,10 +62,9 @@ class SimplePlayerInterpolator:
                     last_player_data = self._get_last_player_data(track_id)
                     if last_player_data:
                         # Update only the bbox with interpolated values
-                        last_player_data["bbox"] = interpolated_bbox
                         
                         # Add to result with all original attributes
-                        result[track_id] = last_player_data
+                        result[track_id] = {"bbox": interpolated_bbox, 'team': last_player_data.get("team", 0)}
 
         # Cleanup
         self._cleanup_inactive_players()

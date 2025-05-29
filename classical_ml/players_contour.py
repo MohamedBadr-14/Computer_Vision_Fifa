@@ -203,7 +203,7 @@ def decide_contours(contour_img,frame,x,y):
     y_min = 0  # Top of the image (farthest from camera)
     y_max = frame.shape[0]  # Bottom of the image (closest to camera)
     orange_count_min = 40  # Smallest area when the ball is farthest
-    yellow_count_min = 30
+    yellow_count_min = 20
     orange_count_max = 200  # Largest area when the ball is closest
     yellow_count_max = 200
     y_fraction = (y+162 - y_min) / (y_max - y_min)
