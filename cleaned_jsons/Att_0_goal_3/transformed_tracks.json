@@ -1,0 +1,207 @@
+[
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          35.61,
+          47.92
+        ]
+      },
+      "1": {
+        "team": 0,
+        "position_transformed": [
+          39.42,
+          43.36
+        ]
+      },
+      "2": {
+        "team": 1,
+        "position_transformed": [
+          28.77,
+          39.14
+        ],
+        "has_ball": true
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          32.94,
+          27.7
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          26.8,
+          51.46
+        ]
+      }
+    },
+    "action": 10
+  },
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          36.63,
+          44.05
+        ]
+      },
+      "1": {
+        "team": 0,
+        "position_transformed": [
+          39.12,
+          44.58
+        ]
+      },
+      "2": {
+        "team": 1,
+        "position_transformed": [
+          31.72,
+          39.25
+        ],
+        "has_ball": true
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          35.33,
+          28.97
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          30.25,
+          54.89
+        ]
+      }
+    },
+    "action": 12
+  },
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          35.79,
+          40.29
+        ]
+      },
+      "1": {
+        "team": 0,
+        "position_transformed": [
+          41.22,
+          47.06
+        ]
+      },
+      "2": {
+        "team": 1,
+        "position_transformed": [
+          32.12,
+          42.56
+        ],
+        "has_ball": true
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          37.65,
+          34.22
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          37.03,
+          55.62
+        ]
+      }
+    },
+    "action": 3
+  },
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          39.68,
+          42.79
+        ]
+      },
+      "2": {
+        "team": 1,
+        "position_transformed": [
+          38.21,
+          42.47
+        ]
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          42.49,
+          40.95
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          46.16,
+          54.67
+        ]
+      },
+      "1": {
+        "team": 1,
+        "position_transformed": [
+          44.08,
+          50.72
+        ],
+        "has_ball": true
+      }
+    },
+    "action": 10
+  },
+  {
+    "players": {
+      "1": {
+        "team": 0,
+        "position_transformed": [
+          46.16,
+          53.21
+        ]
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          44.19,
+          43.1
+        ]
+      },
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          42.2,
+          43.67
+        ]
+      },
+      "2": {
+        "team": 1,
+        "position_transformed": [
+          40.71,
+          42.88
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          48.59,
+          54.37
+        ],
+        "has_ball": true
+      }
+    },
+    "action": 16
+  }
+]

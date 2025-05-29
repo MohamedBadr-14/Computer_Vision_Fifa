@@ -1,0 +1,125 @@
+[
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          39.23,
+          30.950000000000003
+        ]
+      },
+      "1": {
+        "team": 1,
+        "position_transformed": [
+          36.55,
+          35.33
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          41.4,
+          50.57
+        ]
+      },
+      "3": {
+        "team": 1,
+        "position_transformed": [
+          35.66,
+          43.7
+        ],
+        "has_ball": true
+      },
+      "4": {
+        "team": 0,
+        "position_transformed": [
+          44.64,
+          42.45
+        ]
+      }
+    },
+    "action": 10
+  },
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          41.47,
+          34.05
+        ]
+      },
+      "1": {
+        "team": 1,
+        "position_transformed": [
+          40.42,
+          35.38
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          42.09,
+          53.85
+        ]
+      },
+      "3": {
+        "team": 1,
+        "position_transformed": [
+          38.3,
+          43.24
+        ],
+        "has_ball": true
+      },
+      "4": {
+        "team": 0,
+        "position_transformed": [
+          42.62,
+          42.3
+        ]
+      }
+    },
+    "action": 11
+  },
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          49.5,
+          40.18
+        ]
+      },
+      "1": {
+        "team": 1,
+        "position_transformed": [
+          49.01,
+          38.93
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          46.12,
+          57.11
+        ]
+      },
+      "3": {
+        "team": 1,
+        "position_transformed": [
+          43.54,
+          48.68
+        ],
+        "has_ball": true
+      },
+      "4": {
+        "team": 0,
+        "position_transformed": [
+          43.32,
+          47.01
+        ]
+      }
+    },
+    "action": 16
+  }
+]

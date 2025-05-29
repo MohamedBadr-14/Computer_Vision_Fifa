@@ -1,0 +1,125 @@
+[
+  {
+    "players": {
+      "0": {
+        "team": 1,
+        "position_transformed": [
+          34.94,
+          39.8
+        ],
+        "has_ball": true
+      },
+      "1": {
+        "team": 0,
+        "position_transformed": [
+          44.42,
+          43.81
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          38.27,
+          51.95
+        ]
+      },
+      "3": {
+        "team": 1,
+        "position_transformed": [
+          38.23,
+          46.49
+        ]
+      },
+      "4": {
+        "team": 0,
+        "position_transformed": [
+          41.58,
+          23.75
+        ]
+      }
+    },
+    "action": 10
+  },
+  {
+    "players": {
+      "0": {
+        "team": 1,
+        "position_transformed": [
+          36.26,
+          39.68
+        ],
+        "has_ball": true
+      },
+      "1": {
+        "team": 0,
+        "position_transformed": [
+          45.37,
+          43.41
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          39.43,
+          52.05
+        ]
+      },
+      "3": {
+        "team": 1,
+        "position_transformed": [
+          39.55,
+          47.28
+        ]
+      },
+      "4": {
+        "team": 0,
+        "position_transformed": [
+          40.58,
+          25.75
+        ]
+      }
+    },
+    "action": 3
+  },
+  {
+    "players": {
+      "1": {
+        "team": 0,
+        "position_transformed": [
+          44.92,
+          40.84
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          44.22,
+          49.18
+        ]
+      },
+      "3": {
+        "team": 1,
+        "position_transformed": [
+          45.75,
+          48.05
+        ],
+        "has_ball": true
+      },
+      "0": {
+        "team": 1,
+        "position_transformed": [
+          41.94,
+          39.64
+        ]
+      },
+      "4": {
+        "team": 0,
+        "position_transformed": [
+          42.42,
+          30.689999999999998
+        ]
+      }
+    },
+    "action": 16
+  }
+]

@@ -1,0 +1,125 @@
+[
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          33.57,
+          36.71
+        ]
+      },
+      "1": {
+        "team": 1,
+        "position_transformed": [
+          31.43,
+          33.75
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          40.67,
+          43.36
+        ]
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          35.41,
+          52.13
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          31.5,
+          46.04
+        ],
+        "has_ball": true
+      }
+    },
+    "action": 9
+  },
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          37.75,
+          40.82
+        ]
+      },
+      "1": {
+        "team": 1,
+        "position_transformed": [
+          37.55,
+          35.45
+        ]
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          37.44,
+          44.61
+        ]
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          38.66,
+          54.53
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          35.45,
+          45.46
+        ],
+        "has_ball": true
+      }
+    },
+    "action": 1
+  },
+  {
+    "players": {
+      "0": {
+        "team": 0,
+        "position_transformed": [
+          46.14,
+          40.48
+        ]
+      },
+      "1": {
+        "team": 1,
+        "position_transformed": [
+          47.01,
+          38.84
+        ],
+        "has_ball": true
+      },
+      "2": {
+        "team": 0,
+        "position_transformed": [
+          39.58,
+          43.4
+        ]
+      },
+      "3": {
+        "team": 0,
+        "position_transformed": [
+          44.26,
+          53.52
+        ]
+      },
+      "4": {
+        "team": 1,
+        "position_transformed": [
+          41.89,
+          44.67
+        ]
+      }
+    },
+    "action": 16
+  }
+]
