@@ -11,7 +11,7 @@ __pycache__/
 *.jpg
 *.mp4
 *.pt
-*.pth
+# *.pth
 *.log
 offside/
 labels/
