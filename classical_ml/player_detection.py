@@ -74,12 +74,14 @@ class ClassicalML:
         for pred, contour, contour_pic in zip(prediction, contours, contours_pic):
         
             if pred == 1:  # Team 1 (Blue)
-                # cv2.imshow("Contour pic", contour_pic)
-                # cv2.waitKey(0)
                 
                 x, y, w, h = cv2.boundingRect(contour)
                 player_assign,contour_blue,contour_yellow = decide_contours(contour_pic,frame, x, y)
               # print(player_assign, 'player_assign')
+                # print(player_assign, 'player_assign')               
+                # cv2.imshow("Contour pic", contour_pic)
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
           
                 if player_assign == 1:
                     player_tracks[id_counter] = {"bbox": (x, y+162, x + w, y + h+162 ), "team": 1}

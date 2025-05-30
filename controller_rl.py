@@ -6,8 +6,8 @@ import os
 import logging
 from datetime import datetime
 from mss import mss
-from ocr_extractor import OCRExtractor
-from computer_vision import ComputerVision
+# from ocr_extractor import OCRExtractor
+# from computer_vision import ComputerVision
 from rl import DQNAgent, get_state_from_positions, calculate_reward,compute_reward
 from pr import pause_process, resume_process
 import gc
@@ -55,8 +55,8 @@ class Controller:
  
         
         # Initialize OCR and computer vision modules
-        self.ocr_extractor = OCRExtractor()
-        self.computer_vision = ComputerVision()
+        # self.ocr_extractor = OCRExtractor()
+        # self.computer_vision = ComputerVision()
         # self.logger.info("OCR and Computer Vision modules initialized")
         self.all_frames = []
         self.gamepad = vg.VDS4Gamepad()
@@ -311,81 +311,81 @@ class Controller:
                 # we have agent_y from 0 to 90 
                 # we have the far post @ 49 and the near post @ 41
                 # self.stop_movement_action(0)
-                if self.agent_y > 49:
-                    print("SHOOTING FROM THE FAR POST")
-                    # shoot from above the far post
-                    # random between 2 directions
-                    if np.random.rand() > 0.5:
-                        print("SHOOTING DAY2A")
-                        self.gamepad.directional_pad(self.buttons['east'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                        self.gamepad.press_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(shoot_duration)
-                        self.gamepad.release_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                    else:
-                        print("SHOOTING B3EEDA")
-                        self.gamepad.directional_pad(self.buttons['southeast'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                        self.gamepad.press_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(shoot_duration)
-                        self.gamepad.release_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                elif self.agent_y < 41:
-                    print("SHOOTING FROM THE NEAR POST")
-                    if np.random.rand() > 0.5:
-                        print("SHOOTING DAY2A")
-                        self.gamepad.directional_pad(self.buttons['east'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                        self.gamepad.press_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(shoot_duration)
-                        self.gamepad.release_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                    else:
-                        print("SHOOTING B3EEDA")
-                        self.gamepad.directional_pad(self.buttons['northeast'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                        self.gamepad.press_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(shoot_duration)
-                        self.gamepad.release_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
+                # if self.agent_y > 49:
+                #     print("SHOOTING FROM THE FAR POST")
+                #     # shoot from above the far post
+                #     # random between 2 directions
+                #     if np.random.rand() > 0.5:
+                #         print("SHOOTING DAY2A")
+                #         self.gamepad.directional_pad(self.buttons['east'])
+                #         self.gamepad.update()
+                #         time.sleep(0.2)
+                #         self.gamepad.press_button(button=self.buttons['circle'])
+                #         self.gamepad.update()
+                #         time.sleep(shoot_duration)
+                #         self.gamepad.release_button(button=self.buttons['circle'])
+                #         self.gamepad.update()
+                #         time.sleep(0.2)
+                #     else:
+                #         print("SHOOTING B3EEDA")
+                #         self.gamepad.directional_pad(self.buttons['southeast'])
+                #         self.gamepad.update()
+                #         time.sleep(0.2)
+                #         self.gamepad.press_button(button=self.buttons['circle'])
+                #         self.gamepad.update()
+                #         time.sleep(shoot_duration)
+                #         self.gamepad.release_button(button=self.buttons['circle'])
+                #         self.gamepad.update()
+                #         time.sleep(0.2)
+                # elif self.agent_y < 41:
+                print("SHOOTING FROM THE NEAR POST")
+                if np.random.rand() > 0.5:
+                    print("SHOOTING DAY2A")
+                    self.gamepad.directional_pad(self.buttons['east'])
+                    self.gamepad.update()
+                    time.sleep(0.2)
+                    self.gamepad.press_button(button=self.buttons['circle'])
+                    self.gamepad.update()
+                    time.sleep(shoot_duration)
+                    self.gamepad.release_button(button=self.buttons['circle'])
+                    self.gamepad.update()
+                    time.sleep(0.2)
                 else:
-                    print("SHOOTING FROM THE MIDDLE")
-                    if np.random.rand() > 0.5:
-                        
-                        print("SHOOTING B3EEDA")
-                        self.gamepad.directional_pad(self.buttons['southeast'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                        self.gamepad.press_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(shoot_duration)
-                        self.gamepad.release_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                    else:
-                        print("SHOOTING DAY2A")
-                        self.gamepad.directional_pad(self.buttons['northeast'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
-                        self.gamepad.press_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(shoot_duration)
-                        self.gamepad.release_button(button=self.buttons['circle'])
-                        self.gamepad.update()
-                        time.sleep(0.2)
+                    print("SHOOTING B3EEDA")
+                    self.gamepad.directional_pad(self.buttons['northeast'])
+                    self.gamepad.update()
+                    time.sleep(0.2)
+                    self.gamepad.press_button(button=self.buttons['circle'])
+                    self.gamepad.update()
+                    time.sleep(shoot_duration)
+                    self.gamepad.release_button(button=self.buttons['circle'])
+                    self.gamepad.update()
+                    time.sleep(0.2)
+            # else:
+            #     print("SHOOTING FROM THE MIDDLE")
+            #     if np.random.rand() > 0.5:
+                    
+            #         print("SHOOTING B3EEDA")
+            #         self.gamepad.directional_pad(self.buttons['southeast'])
+            #         self.gamepad.update()
+            #         time.sleep(0.2)
+            #         self.gamepad.press_button(button=self.buttons['circle'])
+            #         self.gamepad.update()
+            #         time.sleep(shoot_duration)
+            #         self.gamepad.release_button(button=self.buttons['circle'])
+            #         self.gamepad.update()
+            #         time.sleep(0.2)
+            #     else:
+            #         print("SHOOTING DAY2A")
+            #         self.gamepad.directional_pad(self.buttons['northeast'])
+            #         self.gamepad.update()
+            #         time.sleep(0.2)
+            #         self.gamepad.press_button(button=self.buttons['circle'])
+            #         self.gamepad.update()
+            #         time.sleep(shoot_duration)
+            #         self.gamepad.release_button(button=self.buttons['circle'])
+            #         self.gamepad.update()
+            #         time.sleep(0.2)
             case _:
                 x = 1
                 
@@ -447,7 +447,8 @@ class Controller:
                 self.all_frames.append(frame)
                 
                 # Extract OCR results for logging
-                ocr_results = self.ocr_extractor.extract_points_and_attempts(frame,self.counter - 1)
+                # ocr_results = self.ocr_extractor.extract_points_and_attempts(frame,self.counter - 1)
+                ocr_results = {}
                 print(ocr_results)
 
                 if self.prev_action is not None:
@@ -806,7 +807,7 @@ class Controller:
                     self.rl_agent.save(model_save_path)
                     self.stop_current_thread()
                     
-                    c# Create a timestamped directory for frame storage
+                    # Create a timestamped directory for frame storage
                     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     frames_dir = os.path.join(os.getcwd(), f"frames_{run_timestamp}")
                     os.makedirs(frames_dir, exist_ok=True)

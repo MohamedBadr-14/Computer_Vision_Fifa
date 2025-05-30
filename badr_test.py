@@ -2,6 +2,7 @@ from computer_vision import ML_ComputerVision , ComputerVision
 import cv2
 import time
 import os
+from rl import DQNAgent, get_state_from_positions, calculate_reward
 
 # frames = comp.read_frames("./badr/all")
 # frames = [cv2.imread("off.png")]
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     # Example usage
     # frames = read_frames("C:/Users/DELL/Downloads/wetransfer_frames_20250524_181705_2025-05-24_1521/frames_20250524_181705")
     ml_comp = ML_ComputerVision()
-    file_name_regex = r"D:\fifa-vision\offline_attempts\Att_0_goal_5\frames"
+    file_name_regex = r"D:\Computer_Vision_Fifa\dataset finall\TODO\mid_12\test foudz"
     frames_action_tuple = ml_comp.read_frames(file_name_regex)
     # attempts = 1
     # comp.run(video_frames, attempts)
@@ -59,8 +60,11 @@ if __name__ == "__main__":
 
     # print(frames_action_tuple[0].shape)
     start = time.time()
-    ft,hb = ml_comp.run(frames_action_tuple)
+    ft,hb,action_tracks = ml_comp.run(frames_action_tuple)
     print("FINISHED ML" , time.time() - start)
+    print("Action Tracks:", action_tracks)
+    # [10, 10, 1, 11, 16
+    
     # start = time.time()
     # x = comp.run(frames, attempts=1)
     # print("FINISHED CV" , time.time() - start)

@@ -276,46 +276,51 @@ class ML_ComputerVision:
         # Draw annotations on the video frames
             # print('all_tracks["players"]', all_tracks)
         # all_tracks["players"] = self.players_interpolator.cleanup_all_tracks(all_tracks["players"])
-        all_tracks["players"] = self.tracker.cleanup_player_tracks(all_tracks["players"])
+        # all_tracks["players"] = self.tracker.cleanup_player_tracks(all_tracks["players"])
         # our_tracks["players"] = self.players_interpolator.cleanup_all_tracks(our_tracks["players"])     
             # save all tracks as json file
-        action_tracks = self.extract_action_tracks(all_tracks)
+        # action_tracks = self.extract_action_tracks(all_tracks)
         # save all_tracks to json file
-        if not os.path.exists("output_videos"):
-            os.makedirs("output_videos")
-        # save all_tracks to json file
-        def convert_ndarray(obj):
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            elif isinstance(obj, dict):
-                return {k: convert_ndarray(v) for k, v in obj.items()}
-            elif isinstance(obj, list):
-                return [convert_ndarray(v) for v in obj]
-            else:
-                return obj
+        # if not os.path.exists("output_videos"):
+        #     os.makedirs("output_videos")
+        # # save all_tracks to json file
+        # def convert_ndarray(obj):
+        #     if isinstance(obj, np.ndarray):
+        #         return obj.tolist()
+        #     elif isinstance(obj, dict):
+        #         return {k: convert_ndarray(v) for k, v in obj.items()}
+        #     elif isinstance(obj, list):
+        #         return [convert_ndarray(v) for v in obj]
+        #     else:
+        #         return obj
 
         # Convert all_tracks to a JSON-serializable object
-        serializable_data = convert_ndarray(action_tracks)
+        # serializable_data = convert_ndarray(action_tracks)
 
         # Now write to file
-        with open("output_videos/all_tracks.json", "w") as f:
-            json.dump(serializable_data, f, indent=4)
+        # with open("output_videos/all_tracks.json", "w") as f:
+        #     json.dump(serializable_data, f, indent=4)
         
-        serializable_data_all = convert_ndarray(all_tracks)
-        with open("output_videos/all_tracks_all.json", "w") as f:
-            json.dump(serializable_data_all, f, indent=4)
+        # serializable_data_all = convert_ndarray(all_tracks)
+        # with open("output_videos/all_tracks_all.json", "w") as f:
+        #     json.dump(serializable_data_all, f, indent=4)
             
-        # Using zip with unpacking to separate frames and actions
+        # # Using zip with unpacking to separate frames and actions
         frames_only, _ = zip(*video_frames)    
         output_video_frames = self.tracker.draw_annotations(
             frames_only, all_tracks
         )
+        cv2.imwrite(f"output_videos/ML_{self.vid_num}.jpg", output_video_frames[-1])
+        self.vid_num += 1
+        # cv2.imshow("Output Video", output_video_frames[-1])
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         # if self.vid_num == 0:
         #     cv2.imwrite(f"output_videos/BADR_{self.vid_num}.png" , video_frames[-1])
         # cv2.imwrite(f"output_videos/ML_{self.vid_num}.png", output_video_frames[-1])
         # cv2.imwrite(f"output_videos/ML_org_{self.vid_num}.jpg",video_frames[-1])
         # self.vid_num += 1
-        save_video(output_video_frames, "output_videos/ML_final.mp4")
+        # save_video(output_video_frames, "controller/actions/ML_final.mp4")
 
         # # # Save video
         # save_video(output_video_frames, "output_videos/FINAL_CV_ISA.mp4")
@@ -327,5 +332,5 @@ class ML_ComputerVision:
         # farthest player in team 2 without has_ball = true
 
 
-
-        return frame_tracks, hasBall
+        action_tracks = 0
+        return frame_tracks, hasBall, action_tracks
