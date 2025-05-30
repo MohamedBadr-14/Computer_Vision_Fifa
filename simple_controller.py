@@ -61,14 +61,16 @@ def main():
                 img = capture_screen()
                 cont.pause_game()
                 
-                frame_tracks , _ , _ = ml_comp.run([(img, 0)])
+                frame_tracks , has_ball , _ = ml_comp.run([(img, 0)])
+                ml_comp.reset()
                 print("Frame tracks:")
-                state = get_state_from_positions(frame_tracks)
-                action , prob = predict_action(state,model,scaler)
-                time.sleep(0.1)
-                print(f"Predicted action: {action} with ")
+                if  has_ball:
+                    state = get_state_from_positions(frame_tracks)
+                    action , prob = predict_action(state,model,scaler)
+                    time.sleep(0.1)
+                    print(f"Predicted action: {action} with ")
                 cont.resume_game()
-                cont.make_action(action)
+                if has_ball: cont.make_action(action)
                 print(f"Action taken: {action} with ")
                 
                 

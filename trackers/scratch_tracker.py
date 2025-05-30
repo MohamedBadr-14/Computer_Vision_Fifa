@@ -375,6 +375,15 @@ class MultiObjectTracker:
             return 0.0
         
         return intersection / union
+    
+    def reset(self):
+        """
+        Reset the tracker state.
+        """
+        self.trackers.clear()
+        self.next_id = 0
+        self.frame_count = 0
+        self.track_teams.clear()
 
 
 def demo_tracker():

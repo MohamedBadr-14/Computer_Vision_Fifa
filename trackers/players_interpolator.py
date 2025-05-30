@@ -192,6 +192,16 @@ class SimplePlayerInterpolator:
                 del self.frames_detected[track_id]
             if track_id in self.persistent_players:
                 self.persistent_players.remove(track_id)
+                
+    def reset(self):
+        """Reset the interpolator state"""
+        self.player_histories.clear()
+        self.current_frame = 0
+        self.last_seen_frame.clear()
+        self.players_to_remove.clear()
+        self.persistent_players.clear()
+        self.frames_detected.clear()
+        self.results_history.clear()
             
 
  

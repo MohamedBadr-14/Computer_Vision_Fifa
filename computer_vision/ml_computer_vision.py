@@ -334,3 +334,15 @@ class ML_ComputerVision:
 
         action_tracks = 0
         return frame_tracks, hasBall, action_tracks
+    
+    def reset(self):
+        """
+        Reset the internal state of the ML_ComputerVision instance.
+        This is useful for starting a new video or attempt.
+        """
+        self.tracker.reset_tracker()
+        self.attempts = None
+        self.new_attempt = False
+        self.players_interpolator.reset()
+        # self.offside_detector.reset()  # If applicable
+        self.vid_num = 0
