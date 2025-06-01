@@ -154,7 +154,7 @@ class ML_ComputerVision:
             #             frame_tracks["ball"], 218
             #         )
             # self.players_interpolator.remove_ids(unmatched_det_ids)
-            frame_tracks['players'] = self.players_interpolator.interpolate_player_positions(frame_tracks["players"])
+            frame_tracks['players'] = self.players_interpolator.interpolate_players(frame_tracks["players"])
             # interpolate again
             before_interpolate = time.time()
             if frame_tracks["ball"]:
@@ -275,9 +275,9 @@ class ML_ComputerVision:
         # print("ALL TRACKS: ", all_tracks)
         # Draw annotations on the video frames
             # print('all_tracks["players"]', all_tracks)
-        # all_tracks["players"] = self.players_interpolator.cleanup_all_tracks(all_tracks["players"])
+        # all_tracks["players"] = self.players_interpolator.maintain_tracks(all_tracks["players"])
         # all_tracks["players"] = self.tracker.cleanup_player_tracks(all_tracks["players"])
-        # our_tracks["players"] = self.players_interpolator.cleanup_all_tracks(our_tracks["players"])     
+        # our_tracks["players"] = self.players_interpolator.maintain_tracks(our_tracks["players"])     
             # save all tracks as json file
         # action_tracks = self.extract_action_tracks(all_tracks)
         # save all_tracks to json file

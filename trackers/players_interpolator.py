@@ -4,96 +4,76 @@ import pandas as pd
 
 
 class SimplePlayerInterpolator:
-    def __init__(self, max_missing_frames=10, persistence_threshold=5):
-        self.max_missing_frames = max_missing_frames
-        self.persistence_threshold = persistence_threshold  # New parameter
-        self.player_histories = defaultdict(deque)
-        self.current_frame = 0
-        self.last_seen_frame = defaultdict(int)
-        self.players_to_remove = set()
-        self.persistent_players = set()  # New set to track persistent players
-        self.frames_detected = defaultdict(
-            int
-        )  # Track how many frames each player appeared in
-        self.results_history = {}  # Dictionary to store previous results by frame number
+    def __init__(self, maxMissingFrames=10, persistenceThresh=5):
+        self.maxMissingFrames = maxMissingFrames
+        self.persistenceThresh = persistenceThresh
+        self.playersHistory = defaultdict(deque)
+        self.currFrame = 0
+        self.lastSeenFrame = defaultdict(int)
+        self.playerIdsToRemove = set()
+        self.playerIdsToKeep = set()
+        self.detectedFrames = defaultdict(int)
+        self.resultsHistory = {}
 
-
-    def interpolate_player_positions(self, players_tracks):
+    def interpolate_players(self, players_tracks):
         """Interpolate player positions and maintain all player attributes"""
-        self.current_frame += 1
+        self.currFrame += 1
         result = {}
 
-        # Update histories for detected players
         for track_id, player in players_tracks.items():
             bbox = player.get("bbox", None)
             if bbox and len(bbox) == 4:
-                # Store the full player data (including team, etc.)
-                self.player_histories[track_id].append((self.current_frame, bbox))
-                self.last_seen_frame[track_id] = self.current_frame
-                self.frames_detected[track_id] += 1  # Increment detection count
+                self.playersHistory[track_id].append((self.currFrame, bbox))
+                self.lastSeenFrame[track_id] = self.currFrame
+                self.detectedFrames[track_id] += 1
 
-                # Check if player has become persistent
-                if self.frames_detected[track_id] >= self.persistence_threshold:
-                    self.persistent_players.add(track_id)
+                if self.detectedFrames[track_id] >= self.persistenceThresh:
+                    self.playerIdsToKeep.add(track_id)
 
-                # Add complete player data to result
                 result[track_id] = player
-        self.results_history[self.current_frame] = result.copy()
+        self.resultsHistory[self.currFrame] = result.copy()
 
-        # Interpolate for missing players - check all known tracks, not just ones in current frame
-        for track_id in list(self.player_histories.keys()):
-            # Skip players already in result
-            print(f"Checking track_id: {track_id}")
-            # print(f"Frames detected for {track_id}: {self.frames_detected[track_id]}")
-            if track_id in result or self.frames_detected[track_id] <= 1:
+        for track_id in list(self.playersHistory.keys()):
+            if track_id in result or self.detectedFrames[track_id] <= 1:
                 continue
-                
-            # Check if this track_id was last seen recently enough to interpolate
-            frames_missing = self.current_frame - self.last_seen_frame[track_id]
-            if frames_missing <= self.max_missing_frames:
+
+            frames_missing = self.currFrame - self.lastSeenFrame[track_id]
+            if frames_missing <= self.maxMissingFrames:
                 interpolated_bbox = self._interpolate_single_player(track_id)
                 if interpolated_bbox is not None:
-                    self.player_histories[track_id].append(
-                        (self.current_frame, interpolated_bbox)
+                    self.playersHistory[track_id].append(
+                        (self.currFrame, interpolated_bbox)
                     )
-                    
-                    # Get the last known data for this player from history
-                    # We need to find the last full player data to preserve team info
+
                     last_player_data = self._get_last_player_data(track_id)
                     if last_player_data:
-                        # Update only the bbox with interpolated values
-                        
-                        # Add to result with all original attributes
-                        result[track_id] = {"bbox": interpolated_bbox, 'team': last_player_data.get("team", 0)}
+                        result[track_id] = {
+                            "bbox": interpolated_bbox,
+                            "team": last_player_data.get("team", 0),
+                        }
 
-        # Cleanup
-        self._cleanup_inactive_players()
+        self._remove_inactive_players()
         return result
 
     def _get_last_player_data(self, track_id):
         """Get the last known full player data for a track_id"""
-        # Start with default bbox
         player_data = {"bbox": None, "team": 0}
-        
-        # Loop through previous results to find last complete data
-        frame = self.current_frame - 1
+
+        frame = self.currFrame - 1
         while frame > 0:
-            # You'll need to store previous results somewhere
-            # This is a placeholder - implement according to your storage
             prev_result = self._get_previous_result(frame)
             if prev_result and track_id in prev_result:
                 return prev_result[track_id].copy()
             frame -= 1
-            
+
         return player_data
 
     def _get_previous_result(self, frame):
         """Get the result from a previous frame"""
-        return self.results_history.get(frame, None)
+        return self.resultsHistory.get(frame, None)
 
     def _interpolate_single_player(self, track_id):
-        # Same as before
-        history = self.player_histories[track_id]
+        history = self.playersHistory[track_id]
         if len(history) < 2:
             return None
 
@@ -104,7 +84,7 @@ class SimplePlayerInterpolator:
             frames.append(frame_num)
             bboxes.append(bbox)
 
-        frames.append(self.current_frame)
+        frames.append(self.currFrame)
         bboxes.append([np.nan, np.nan, np.nan, np.nan])
 
         df = pd.DataFrame(
@@ -119,33 +99,32 @@ class SimplePlayerInterpolator:
 
         df_interpolated = df.interpolate(method="linear")
 
-        if self.current_frame in df_interpolated.index:
-            interpolated_row = df_interpolated.loc[self.current_frame]
+        if self.currFrame in df_interpolated.index:
+            interpolated_row = df_interpolated.loc[self.currFrame]
             if not interpolated_row.isna().any():
                 return interpolated_row.tolist()
         return None
 
-    def _cleanup_inactive_players(self):
+    def _remove_inactive_players(self):
         players_to_remove = [
             track_id
-            for track_id in self.player_histories.keys()
+            for track_id in self.playersHistory.keys()
             if (
-                self.current_frame - self.last_seen_frame[track_id]
-                > self.max_missing_frames
-                and track_id not in self.persistent_players
-            )  # Don't remove persistent players
+                self.currFrame - self.lastSeenFrame[track_id] > self.maxMissingFrames
+                and track_id not in self.playerIdsToKeep
+            )
         ]
-        self.players_to_remove.update(players_to_remove)
+        self.playerIdsToRemove.update(players_to_remove)
         for track_id in players_to_remove:
-            del self.player_histories[track_id]
-            del self.last_seen_frame[track_id]
-            if track_id in self.frames_detected:
-                del self.frames_detected[track_id]
+            del self.playersHistory[track_id]
+            del self.lastSeenFrame[track_id]
+            if track_id in self.detectedFrames:
+                del self.detectedFrames[track_id]
 
-    def cleanup_all_tracks(self, all_players_tracks):
+    def maintain_tracks(self, all_players_tracks):
         """
-        Remove players from players_tracks that are in self.players_to_remove set,
-        except those that are persistent players
+        Only used in case of running the interpolator on a complete video as player history is not maintained.
+        This method removes players that are not in the playerIdsToKeep set.
 
         Args:
             players_tracks: List of player dictionaries, one dictionary per frame
@@ -154,29 +133,26 @@ class SimplePlayerInterpolator:
         Returns:
             The modified players_tracks with removed players
         """
-        if not self.players_to_remove:
-            return all_players_tracks  # Nothing to remove
+        if not self.playerIdsToRemove:
+            return all_players_tracks
 
-        # Exclude persistent players from removal
-        players_to_actually_remove = self.players_to_remove - self.persistent_players
+        players_to_actually_remove = self.playerIdsToRemove - self.playerIdsToKeep
 
         if not players_to_actually_remove:
-            return all_players_tracks  # No non-persistent players to remove
+            return all_players_tracks
 
-        # For each frame's player dictionary in the sequence
         for frame_players in all_players_tracks:
-            # Remove the players that are in the removal set
             for player_id in list(frame_players.keys()):
                 if player_id in players_to_actually_remove:
                     del frame_players[player_id]
 
-        # Clear the set after processing
-        self.players_to_remove.clear()
+        self.playerIdsToRemove.clear()
 
         return all_players_tracks
-    
+
     def remove_ids(self, ids_to_remove):
         """
+        This function is used when a player id is dropped by the tracker
         Remove specific player IDs from the histories and results.
 
         Args:
@@ -184,25 +160,21 @@ class SimplePlayerInterpolator:
         """
         print(f"Removing player IDs: {ids_to_remove}")
         for track_id in ids_to_remove:
-            if track_id in self.player_histories:
-                del self.player_histories[track_id]
-            if track_id in self.last_seen_frame:
-                del self.last_seen_frame[track_id]
-            if track_id in self.frames_detected:
-                del self.frames_detected[track_id]
-            if track_id in self.persistent_players:
-                self.persistent_players.remove(track_id)
-                
+            if track_id in self.playersHistory:
+                del self.playersHistory[track_id]
+            if track_id in self.lastSeenFrame:
+                del self.lastSeenFrame[track_id]
+            if track_id in self.detectedFrames:
+                del self.detectedFrames[track_id]
+            if track_id in self.playerIdsToKeep:
+                self.playerIdsToKeep.remove(track_id)
+
     def reset(self):
         """Reset the interpolator state"""
-        self.player_histories.clear()
-        self.current_frame = 0
-        self.last_seen_frame.clear()
-        self.players_to_remove.clear()
-        self.persistent_players.clear()
-        self.frames_detected.clear()
-        self.results_history.clear()
-            
-
- 
-                
+        self.playersHistory.clear()
+        self.currFrame = 0
+        self.lastSeenFrame.clear()
+        self.playerIdsToRemove.clear()
+        self.playerIdsToKeep.clear()
+        self.detectedFrames.clear()
+        self.resultsHistory.clear()
