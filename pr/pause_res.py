@@ -31,9 +31,7 @@ def pause_process(process_name = "FIFA22.exe"):
     # Find the process by name
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == process_name:
-            pid = proc.info['pid']
-            # print(f"Found {process_name} with PID: {pid}")
-            
+            pid = proc.info['pid']            
             # Create a snapshot of all threads
             h_snapshot = ctypes.windll.kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0)
             if h_snapshot == -1:
@@ -122,7 +120,3 @@ def resume_process(process_name = "FIFA22.exe"):
             # Close the snapshot handle
             ctypes.windll.kernel32.CloseHandle(h_snapshot)
             return
-        
-if __name__ == "__main__":
-    # Example usage
-    resume_process()
