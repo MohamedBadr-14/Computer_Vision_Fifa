@@ -14,7 +14,7 @@ class KeypointsTransformer():
         [43.5,52.31]      # ARC_DOWN
         ], dtype=np.float32)
         self.keypoint_detector = YOLO('./models/keypoints.pt')
-        # self.keypoint_detector.to('cuda') 
+        self.keypoint_detector.to('cuda') 
         
         self.last_valid_keypoints = np.array([
         [1991, 1013],  #PEN_DOT #BADR 

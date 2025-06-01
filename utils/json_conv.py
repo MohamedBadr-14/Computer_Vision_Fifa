@@ -23,7 +23,6 @@ def transform_data(input_data):
             'action': None
         }
         
-        # Process players
         players_frame = input_data['players'][i]
         for player_id, player_data in players_frame.items():
             scene['players'][player_id] = {
@@ -37,7 +36,6 @@ def transform_data(input_data):
             if 'position' in player_data:
                 scene['players'][player_id]['position'] = tuple(player_data['position'])
         
-        # Process ball
         if i < len(input_data['ball']):
             ball_frame = input_data['ball'][i]
             for ball_id, ball_data in ball_frame.items():
@@ -50,9 +48,7 @@ def transform_data(input_data):
                 if 'position' in ball_data:
                     scene['ball'][ball_id]['position'] = tuple(ball_data['position'])
         
-        # Process goalkeeper (empty in input, but keeping structure)
         
-        # Process goalpost
         if i < len(input_data['goalpost']):
             goalpost_frame = input_data['goalpost'][i]
             for post_id, post_data in goalpost_frame.items():
@@ -61,7 +57,6 @@ def transform_data(input_data):
                     'position': np.array(post_data['position'], dtype=np.float32)
                 }
         
-        # Process action
         if i < len(input_data['action']):
             action_frame = input_data['action'][i]
             scene['action'] = action_frame
@@ -69,17 +64,13 @@ def transform_data(input_data):
     
     return scenes_arr
 
-# Load the input JSON
 with open('all_tracks.json') as f:
     input_data = json.load(f)
 
-# Transform the data
 scenes_arr = transform_data(input_data)
 
-# Print the result (or save to file)
 print(scenes_arr)
 
-# save the transformed data to a new JSON file
 with open('transformed_tracks.json', 'w') as f:
     json.dump(scenes_arr, f, indent=4, cls=NumpyEncoder)
     
