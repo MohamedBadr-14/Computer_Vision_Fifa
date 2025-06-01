@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import re
 from easyocr import Reader
-import pytesseract
 from PIL import Image
 import re
 
