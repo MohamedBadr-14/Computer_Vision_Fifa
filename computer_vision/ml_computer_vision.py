@@ -43,7 +43,6 @@ class ML_ComputerVision:
         self.classical_ml = ClassicalML()
         self.players_interpolator = SimplePlayerInterpolator()
         # self.offside_detector = OffsideDetector(gpu=True)
-        # self.offside_detector.warmup()
         self.vid_num = 0
         
     
@@ -344,5 +343,4 @@ class ML_ComputerVision:
         self.attempts = None
         self.new_attempt = False
         self.players_interpolator.reset()
-        # self.offside_detector.reset()  # If applicable
         # self.vid_num = 0

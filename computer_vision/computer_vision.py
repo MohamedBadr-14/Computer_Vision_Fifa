@@ -19,7 +19,6 @@ class ComputerVision:
         self.view_transformer = KeypointsTransformer()
         self.attempts = None
         self.offside_detector = OffsideDetector(gpu=True)
-        self.offside_detector.warmup()
         self.new_attempt = False
     
     def read_frames(self,frames_path):
