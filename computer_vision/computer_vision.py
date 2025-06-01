@@ -236,12 +236,3 @@ class ComputerVision:
         
 
         return frame_tracks, hasBall
-
-
-
-    # def voting_algo_frames (self,all_tracks):
-    #     # all tracks is a dictionary of lists of dictionaries
-    #     # all_tracks = {"players": [], "referees": [], "ball": [] , "goalkeeper": [] , "goalpost" : []}
-    #     # i want to return single dictionary of players, referees, ball, goalkeeper, goalpost
-    #     # the problem if i take the last frame only is that it might not be the most accurate i want to make like voting algo and take average
-

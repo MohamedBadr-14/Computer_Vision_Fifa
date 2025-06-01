@@ -1124,27 +1124,7 @@ class DQNAgent:
     
     def act(self, state):
         # if np.random.rand() <= self.epsilon:
-        # if True:
-        #     print("\033[1;33;40m" +  # Yellow text on black background (instead of red on white)
-        #     "════════════════════════\n" +
-        #     "   RANDOM CHOICE   \n" +
-        #     "════════════════════════" +
-        #     "\033[0m")
-        #     if np.random.rand() < 0.15:
-                
-
-        #         return 16  # Shoot action
-        #     else:
-        #         # 80% chance to choose other actions (0-15) uniformly
-        #         # pass only from 0 to 7 inclusive
-        #         # random from 0 to 4 except 2
-        #         return random.choice([3,4])
-        #         # return random.choice([0, 1, 3,4])  # Actions 0-3 (pass)
-        #         # return random.randrange(4)  # Actions 0-7 (pass)
-        #         # return random.randrange(16)  # Actions 0-15 (pass or dribble)
         # #     # return random.randrange(self.action_size)
-
-
         # drop score and attemps from the state before passing it to the model
         state = np.delete(state, [feature_dict['score'], feature_dict['attemps']])  
         state = torch.FloatTensor(state).unsqueeze(0)
