@@ -16,19 +16,15 @@ class ClassicalML:
         with open('./models/svm_hog_model.pkl', 'rb') as f:
             self.hog_svm = pickle.load(f)    
 
-
-
     def extract_hog_features(self,img):
 
-        img = cv2.resize(img, (128, 256))  # Resize to fixed size
+        img = cv2.resize(img, (128, 256))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # plt.imshow(gray, cmap='gray')
         # plt.title("Gray Image")
         # plt.axis('off')
         # plt.show()
-        # Extract HOG features
-        features = hog(gray, orientations=9, pixels_per_cell=(8, 8),
-                    cells_per_block=(2, 2), block_norm='L2-Hys', visualize=False)
+        features = hog(gray, orientations=9, pixels_per_cell=(8, 8),cells_per_block=(2, 2), block_norm='L2-Hys', visualize=False)
       # print(features,'midoooo')
         return features
     
@@ -48,27 +44,25 @@ class ClassicalML:
         # print('contours',contours)
         # print('contours_pic',contours_pic)
         before_hog = time.time()
-        # print('contours_pic',contours_pic)
         if len(contours_pic) == 0:
-          # print("No contours found in the image.")
+            # print("No contours found in the image.")
             return player_tracks
         for ids,contour in enumerate(contours_pic):
        
             feature_vector = self.extract_hog_features(contour)
-         
             if feature_vector is not None:
                     features.append(feature_vector)
 
         after_hog = time.time()
-      # print("HOG TIME " , after_hog - before_hog)
-      # print('CONTOURS PIC', len(contours_pic))
+        # print("HOG TIME " , after_hog - before_hog)
+        # print('CONTOURS PIC', len(contours_pic))
         features = np.array(features)
         before_prediction = time.time()
-      # print(features,features.shape,'mido')
+        # print(features,features.shape,'mido')
         prediction = self.hog_svm.predict(features) 
         after_prediction = time.time()
-      # print("PREDICTION TIME " , after_prediction - before_prediction)
-      # print('predictions',prediction)
+        # print("PREDICTION TIME " , after_prediction - before_prediction)
+        # print('predictions',prediction)
         new_pic = frame.copy()
         
         for pred, contour, contour_pic in zip(prediction, contours, contours_pic):
