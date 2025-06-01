@@ -15,6 +15,7 @@ import traceback
 import vgamepad as vg
 import threading
 from computer_vision import ML_ComputerVision
+import json
 
 file_name="MODEL_21_5.pth"
 
@@ -48,6 +49,7 @@ class Controller:
         self.all_frames = []
         self.gamepad = vg.VDS4Gamepad()
         time.sleep(1) 
+        self.ended_with_goal_scenes_with_actions = []
         
         self.pause_frames_skip = 5    
         self.between_attacks_skip = 5  
@@ -479,7 +481,8 @@ class Controller:
                                     self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False)
                                 # self.rl_agent.remember(prev_state, self.prev_action, reward, cur_state, done=False) OUDSAA
                             self.rl_agent.prev_state = cur_state #OUDA
-
+                        scene_toRL['action'] = action_taken
+                        self.ended_with_goal_scenes_with_actions.append(scene_toRL)
                         # if len(self.rl_agent.memory) % 64 == 0 or (len(self.rl_agent.memory) > 1000 and len(self.rl_agent.memory) % 16 == 0):
                         #     self.rl_agent.replay(64) 
                         print("PRESS L TO TAKE ACTION")
@@ -518,7 +521,6 @@ class Controller:
                 
                 self.frames_to_send.append(frame)
                                 
-                # Handle game restart condition
                 if self.last_attempt == '0' and ocr_results['attempts'] is None:
 
                     self.stop_current_thread()
@@ -553,6 +555,14 @@ class Controller:
                     self.computer_vision.tracker.reset_tracker()
                     self.prev_action = None
                     self.hb_counter = 0
+                    # if len(self.ended_with_goal_scenes_with_actions) > 0:
+                    #     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    #     output_dir = os.path.join(os.getcwd(), f"goal_scenes_{run_timestamp}.json")
+                    #     with open(output_dir, 'w') as f:
+                    #         json.dump(self.ended_with_goal_scenes_with_actions, f, indent=2)
+                    # self.ended_with_goal_scenes_with_actions.clear()
+                    self.frames_to_send.clear()
+                    
                     continue
 
                 if self.last_attempt is None:
@@ -590,6 +600,12 @@ class Controller:
                         self.action_shoot= False
                         self.prev_action = None
                         self.hb_counter = 0
+                        # if len(self.ended_with_goal_scenes_with_actions) > 0:
+                        #     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        #     output_dir = os.path.join(os.getcwd(), f"goal_scenes_{run_timestamp}.json")
+                        #     with open(output_dir, 'w') as f:
+                        #         json.dump(self.ended_with_goal_scenes_with_actions, f, indent=2)
+                        # self.ended_with_goal_scenes_with_actions.clear()
                         continue
 
 
