@@ -7,9 +7,7 @@ goal1/
 #ignore pychache
 __pycache__/
 #ignore jupyter notebook checkpoints
-*.png
-*.jpg
-*.mp4
+
 *.pt
 # *.pth
 *.log

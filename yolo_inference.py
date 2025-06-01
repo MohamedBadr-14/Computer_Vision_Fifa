@@ -6,7 +6,6 @@ import os
 model = YOLO('models/keypoints.pt')
 
 def read_frames(frames_path):
-        # Read the frames from the specified path
         frames = []
         count = 0
         for filename in sorted(os.listdir(frames_path)):
@@ -20,7 +19,5 @@ def read_frames(frames_path):
                 count += 1
         return frames
 
-# Perform prediction
-frames = read_frames('./badr/screenshots/')
-frames = frames[0:10]
+frames = read_frames('./frames')
 results = model(frames , save=True )

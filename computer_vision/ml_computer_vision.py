@@ -10,6 +10,7 @@ import time
 from offside_detector import OffsideDetector
 from classical_ml.player_detection import ClassicalML
 from trackers.players_interpolator import SimplePlayerInterpolator
+from trackers.tracker_AI import PlayerTrackCleanerAI
 import json
 
 action_list = {
@@ -42,6 +43,7 @@ class ML_ComputerVision:
         self.new_attempt = False
         self.classical_ml = ClassicalML()
         self.players_interpolator = SimplePlayerInterpolator()
+        self.player_track_cleaner_AI = PlayerTrackCleanerAI()
         # self.offside_detector = OffsideDetector(gpu=True)
         self.vid_num = 0
         
@@ -275,7 +277,7 @@ class ML_ComputerVision:
         # Draw annotations on the video frames
             # print('all_tracks["players"]', all_tracks)
         # all_tracks["players"] = self.players_interpolator.maintain_tracks(all_tracks["players"])
-        # all_tracks["players"] = self.tracker.cleanup_player_tracks(all_tracks["players"])
+        all_tracks["players"] = self.player_track_cleaner_AI.cleanup_player_tracks(all_tracks["players"])
         # our_tracks["players"] = self.players_interpolator.maintain_tracks(our_tracks["players"])     
             # save all tracks as json file
         # action_tracks = self.extract_action_tracks(all_tracks)
