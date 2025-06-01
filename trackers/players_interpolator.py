@@ -44,7 +44,7 @@ class SimplePlayerInterpolator:
         for track_id in list(self.player_histories.keys()):
             # Skip players already in result
             print(f"Checking track_id: {track_id}")
-            print(f"Frames detected for {track_id}: {self.frames_detected[track_id]}")
+            # print(f"Frames detected for {track_id}: {self.frames_detected[track_id]}")
             if track_id in result or self.frames_detected[track_id] <= 1:
                 continue
                 

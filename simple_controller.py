@@ -46,10 +46,20 @@ def main():
                 print("Pause signal received. Pausing game.")
                 cont.resume_game()
                 time.sleep(0.1)
-            if keyboard.is_pressed('k'):
+            if keyboard.is_pressed('z'):
                 print("Pause signal received. Pausing game.")
                 cont.pause_game()
                 time.sleep(0.1)
+                
+            if keyboard.is_pressed('k'):
+                print("key pressed")
+                cont.stop_any()
+                img = capture_screen()
+                cont.pause_game()
+                time.sleep(0.5)
+                cont.resume_game()
+                time.sleep(0.1)
+                cont.make_action(16)
                 
 
             # Capture on 'p'
@@ -57,21 +67,23 @@ def main():
                 # Debounce so you don't trigger dozens of times per second
                 # time.sleep(0.1)
                 print("key pressed")
-                
+                cont.stop_any()
                 img = capture_screen()
                 cont.pause_game()
                 
                 frame_tracks , has_ball , _ = ml_comp.run([(img, 0)])
                 ml_comp.reset()
                 print("Frame tracks:")
-                if  has_ball:
+                if has_ball:
                     state = get_state_from_positions(frame_tracks)
                     action , prob = predict_action(state,model,scaler)
                     time.sleep(0.1)
                     print(f"Predicted action: {action} with ")
                 cont.resume_game()
-                if has_ball: cont.make_action(action)
-                print(f"Action taken: {action} with ")
+                time.sleep(0.1)
+                if has_ball: 
+                    cont.make_action(action)
+                    print(f"Action taken: {action} with ")
                 
                 
                 

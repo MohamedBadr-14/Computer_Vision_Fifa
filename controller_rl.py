@@ -82,12 +82,14 @@ class Controller:
         
         self.buttons = {
             'options': vg.DS4_BUTTONS.DS4_BUTTON_OPTIONS,
-            'cross': vg.DS4_BUTTONS.DS4_BUTTON_CROSS,
+            'cross': vg.DS4_BUTTONS.DS4_BUTTON_TRIANGLE,
             'circle': vg.DS4_BUTTONS.DS4_BUTTON_CIRCLE,
+            'resume': vg.DS4_BUTTONS.DS4_BUTTON_CROSS,
             'north': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_NORTH,
             'south': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_SOUTH,
             'east': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_EAST,
             'west': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_WEST,
+            'nodir': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_NONE,
             'northeast': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_NORTHEAST,
             'southeast': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_SOUTHEAST,
             'southwest': vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_SOUTHWEST,
@@ -134,10 +136,10 @@ class Controller:
         Resume the game by simulating ENTER key press and reset relevant counters.
         """
         # self.logger.info("Resuming game")
-        self.gamepad.press_button(button=self.buttons['cross'])  # Press X button
+        self.gamepad.press_button(button=self.buttons['resume'])  # Press X button
         self.gamepad.update()
         time.sleep(0.1)
-        self.gamepad.release_button(button=self.buttons['cross'])  # Release X button
+        self.gamepad.release_button(button=self.buttons['resume'])  # Release X button
         self.gamepad.update()
         if is_action:
             self.skip_counter = 0
@@ -184,7 +186,12 @@ class Controller:
             if self.thread.is_alive():
                 print("Warning: Thread did not terminate in time")
             self.thread = None
-    def make_action(self, action, pass_duration=0.25, dribble_duration=0.5, shoot_duration=0.225):
+            
+    def stop_any(self):
+        self.gamepad.directional_pad(self.buttons['nodir'])  # Reset directional pad
+        self.gamepad.update()  # Update gamepad state
+        time.sleep(0.1)  # Allow time for the action to register
+    def make_action(self, action, pass_duration=0.25, dribble_duration=0.5, shoot_duration=0.18):
         """
         Execute the specified game action.
         This method is to be implemented based on the specific game controls.
@@ -215,7 +222,7 @@ class Controller:
         # action_description = action_descriptions.get(action, f"Unknown action: {action}")
         # self.logger.info(f"Making action [{action}]: {action_description}")
         # Stop any previous movement action
-        self.stop_current_thread()
+        # self.stop_current_thread()
         print(f"Making action [{action}]: {action_descriptions.get(action, f'Unknown action: {action}')}")
         # self.stop_movement_action(0)
         match action:
@@ -388,6 +395,8 @@ class Controller:
             #         time.sleep(0.2)
             case _:
                 x = 1
+                
+        
                 
         # self.logger.debug(f"Action {action} completed")
 

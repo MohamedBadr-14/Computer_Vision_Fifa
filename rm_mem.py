@@ -163,6 +163,9 @@ def predict_action(state, model , scaler,model_path='state_action_model.pth'):
     
     print(f"Predicted action: {action_id} with probability {action_prob:.4f}")
     print(f"Second best action: {second_best} with probability {second_prob:.4f}")
+    if action_id not in range(0,7) or action_id != 16:
+        if second_best in range(0,7) or second_best == 16:
+            action_id = second_best
     
     return action_id, probabilities.numpy()
 

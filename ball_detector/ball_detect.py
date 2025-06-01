@@ -27,7 +27,7 @@ class BallDetect:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
         # Extract HOG features
-        features = hog(gray, orientations=9, pixels_per_cell=(8, 8),
+        features = hog(gray, orientations=9, pixels_per_cell=(4, 4),
                     cells_per_block=(2, 2), block_norm='L2-Hys', visualize=False)
         return features
     

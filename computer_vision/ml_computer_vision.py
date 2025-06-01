@@ -345,4 +345,4 @@ class ML_ComputerVision:
         self.new_attempt = False
         self.players_interpolator.reset()
         # self.offside_detector.reset()  # If applicable
-        self.vid_num = 0
+        # self.vid_num = 0
