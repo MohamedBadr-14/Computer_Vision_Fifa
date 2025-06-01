@@ -49,8 +49,8 @@ feature_dict = {
 
 FIELD_WIDTH = 60
 FIELD_HEIGHT = 90  # haytghyar
-BOX_WIDTH = 7.5  # Assuming a fixed width for the boxes
-BOX_HEIGHT = 20  # Assuming a fixed height for the boxes
+BOX_WIDTH = 7.5  
+BOX_HEIGHT = 20  
 GOAL_POSITION = (105, 34)  # lama yerga3
 NUM_ACTIONS = 17 
 
@@ -811,9 +811,7 @@ logger.addHandler(file_handler)
 logger.propagate = False
 
 def calculate_reward(prev_state, new_state, action):
-    """
-    Normalized reward function that keeps values in a reasonable range (-8 to +15)
-    """
+
     reward = 0
     reward_components = {}
 
