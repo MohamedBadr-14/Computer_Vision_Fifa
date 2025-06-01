@@ -20,84 +20,29 @@ from sklearn.preprocessing import StandardScaler
 
 
 def process_json_objects(json_file_path):
-    try:
-        # Read the JSON file
-        with open(json_file_path, 'r') as file:
-            data = json.load(file)
-        
-        # Ensure data is a list
-        if not isinstance(data, list):
-            raise ValueError("JSON file must contain a list of objects")
-            
-        # Process each object and collect results
-        actions = []
-        results = []
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
     
-        for index, item in enumerate(data):
-            try:
-                result = get_state_from_positions(item)
-                actions.append(item['action'])
-                results.append(result)
-                print(f"Processed item {index+1}/{len(data)}")
-            except Exception as e:
-                print(f"Error processing item {index+1}: {e}")
     
-        return results, actions
-        
-    except FileNotFoundError:
-        print(f"File not found: {json_file_path}")
-        return [], []
-    except json.JSONDecodeError:
-        print(f"Invalid JSON format in file: {json_file_path}")
-        return [], []
-    except Exception as e:
-        print(f"Error: {e}")
-        return [], []
+    actions = []
+    results = []
 
-def process_folder(folder_path):
-    """
-    Process all JSON files in a folder
-    
-    Args:
-        folder_path: Path to folder containing JSON files
-    
-    Returns:
-        all_results: List of lists of processed data
-        all_actions: List of lists of actions
-    """
-    all_results = []
-    all_actions = []
-    
-    # List all JSON files in the folder
-    json_files = [f for f in os.listdir(folder_path) if f.endswith('.json')]
-    
-    if not json_files:
-        print(f"No JSON files found in {folder_path}")
-        return all_results, all_actions
-    
-    # Process each JSON file
-    for json_file in json_files:
-        file_path = os.path.join(folder_path, json_file)
-        print(f"Processing {file_path}...")
-        
-        # Process the file
-        results, actions = process_json_objects(file_path)
-        
-        if results:
-            print(f"Successfully processed {len(results)} items from {json_file}")
-            all_results.extend(results)
-            all_actions.extend(actions)
-        else:
-            print(f"No results obtained from {json_file}")
-    
-    return all_results, all_actions
+    for index, item in enumerate(data):
+        result = get_state_from_positions(item)
+        actions.append(item['action'])
+        results.append(result)
+        print(f"Processed item {index+1}/{len(data)}")
 
-folder_path = "attempts_jsons"
+
+    return results, actions
+        
+
+
+
 
 # Process all JSON files in the folder
-all_processed_data, all_actions = process_folder(folder_path)
-states = all_processed_data    # <–– replace with your list/array of state vectors
-actions = all_actions   # <–– replace with your list of integer labels
+states, actions = process_json_objects('dba.json')
+
 # x_train,X_test,Y_train,Y_test=train_test_split(states, actions, test_size=0.2, random_state=42)
 
 
@@ -112,19 +57,15 @@ actions = all_actions   # <–– replace with your list of integer labels
 class StateActionDataset(Dataset):
     def __init__(self, states, actions):
         self.scaler = StandardScaler()
-        # Fit scaler on all states, then transform
         self.X = self.scaler.fit_transform(states)
-        # Torch tensor of labels
         self.y = torch.tensor(actions, dtype=torch.long)
 
     def __len__(self):
         return len(self.y)
 
     def __getitem__(self, idx):
-        # Return feature vector and label
         return torch.tensor(self.X[idx], dtype=torch.float32), self.y[idx]
 
-# --- 3) Simple MLP classifier ---
 class SimpleMLP(nn.Module):
     def __init__(self, input_size, hidden_sizes, num_classes, dropout=0.3):
         super().__init__()
@@ -140,61 +81,37 @@ class SimpleMLP(nn.Module):
         return self.net(x)
     
 def predict_action(state, model_path='state_action_model.pth'):
-    """
-    Load the model and predict an action for the given state
-    
-    Args:
-        state: The state vector to predict from
-        model_path: Path to the saved model
-        
-    Returns:
-        action_id: The predicted action ID
-        probabilities: The probability distribution over all actions
-    """
-    # Load the saved model
     checkpoint = torch.load(model_path ,weights_only=False)
     
-    # Extract model configuration
     input_size = checkpoint['config']['input_size']
     hidden_sizes = checkpoint['config']['hidden_sizes']
     num_classes = checkpoint['config']['num_classes']
     
-    # Recreate the model
     model = SimpleMLP(input_size, hidden_sizes, num_classes)
     model.load_state_dict(checkpoint['model_state_dict'])
-    model.eval()  # Set to evaluation mode
+    model.eval()
     
-    # Get the scaler
     scaler = checkpoint['scaler']
     
-    # Ensure state is numpy array and correct shape
     if not isinstance(state, np.ndarray):
         state = np.array(state)
     
     if state.ndim == 1:
-        # Single state, reshape to 2D
         state = state.reshape(1, -1)
     
-    # Scale the state
     scaled_state = scaler.transform(state)
-    
-    # Convert to tensor
     state_tensor = torch.tensor(scaled_state, dtype=torch.float32)
     
-    # Make prediction
     with torch.no_grad():
         output = model(state_tensor)
         probabilities = torch.softmax(output, dim=1)
         
-        # Get the top action and probability
         top_p, top_class = torch.max(probabilities, dim=1)
         
-        # Get second best action
         sorted_prob, sorted_indices = torch.sort(probabilities, dim=1, descending=True)
         second_best = sorted_indices[0, 1].item()
         second_prob = sorted_prob[0, 1].item()
         
-    # Convert to Python types
     action_id = top_class.item()
     action_prob = top_p.item()
     
@@ -205,30 +122,26 @@ def predict_action(state, model_path='state_action_model.pth'):
     
 
 def main():
-    # --- 4) Hyperparameters & device ---
-    # i want to chamge actions number to be from 0 to len(set(actions))-1
+
    
     
     
     
-    device = torch.device('cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     batch_size = 32
     lr = 1e-3
     num_epochs = 500
-    hidden_sizes = [500, 400,300,200,100, 17]  # Hidden layers sizes
+    hidden_sizes = [500, 400,300,200,100, 17] 
 
-    # --- 5) Build dataset & loader ---``
     dataset = StateActionDataset(states, actions)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    # --- 6) Model, loss, optimizer ---
     input_size = dataset.X.shape[1]
-    num_classes = 17 # Number of unique actions
+    num_classes = 17
     model = SimpleMLP(input_size, hidden_sizes, num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # --- 7) Training loop ---
     for epoch in range(1, num_epochs + 1):
         model.train()
         total_loss = 0.0
@@ -240,7 +153,6 @@ def main():
 
             optimizer.zero_grad()
             out = model(X_batch)
-            # print(out.shape, y_batch.shape)
             loss = criterion(out, y_batch)
             loss.backward()
             optimizer.step()
@@ -254,7 +166,6 @@ def main():
         acc = 100 * correct / total
         print(f"Epoch {epoch:02d}/{num_epochs} — Loss: {avg_loss:.4f} — Acc: {acc:.2f}%")
 
-    # --- 8) Save model + scaler ---
     torch.save({
         'model_state_dict': model.state_dict(),
         'scaler': dataset.scaler,
@@ -264,7 +175,6 @@ def main():
             'num_classes': num_classes
         }
     }, 'state_action_model.pth')
-    print("Done! Model and scaler saved to 'state_action_model.pth'")
 
 if __name__ == "__main__":
     # main()
