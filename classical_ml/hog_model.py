@@ -4,7 +4,7 @@ import os
 from skimage.feature import hog
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, precision_score, recall_score, f1_score
 import pickle
 
 class_0_path = "D:/Computer_Vision_Fifa/dataset/false"
@@ -54,9 +54,29 @@ svm = SVC(kernel='linear', random_state=42)
 svm.fit(X_train, y_train)
 
 y_pred = svm.predict(X_test)
+# Calculate accuracy
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Accuracy: {accuracy * 100:.2f}%")
 
+# Calculate precision, recall, and F1 score
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+
+print(f"\nPrecision: {precision:.4f}")
+print(f"Recall: {recall:.4f}")
+print(f"F1 Score: {f1:.4f}")
+
+# Display confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+print("\nConfusion Matrix:")
+print(cm)
+
+# Display detailed classification report
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# Save the model
 with open('svm_hog_model.pkl', 'wb') as f:
     pickle.dump(svm, f)
 
