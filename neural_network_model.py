@@ -40,8 +40,6 @@ def process_json_objects(json_file_path):
 
 
 
-# Process all JSON files in the folder
-states, actions = process_json_objects('dba.json')
 
 # x_train,X_test,Y_train,Y_test=train_test_split(states, actions, test_size=0.2, random_state=42)
 
@@ -53,7 +51,6 @@ states, actions = process_json_objects('dba.json')
 # actions = [action_map[action] for action in actions]  # Remap actions to 0..N-1
 # print(f"Remapped actions to {len(unique_actions)} unique classes: {unique_actions}")
     
-# --- 2) Dataset that scales once at init ---
 class StateActionDataset(Dataset):
     def __init__(self, states, actions):
         self.scaler = StandardScaler()
@@ -80,7 +77,7 @@ class SimpleMLP(nn.Module):
     def forward(self, x):
         return self.net(x)
     
-def predict_action(state, model_path='state_action_model.pth'):
+def predict_action(state, model_path='models/state_action_model.pth'):
     checkpoint = torch.load(model_path ,weights_only=False)
     
     input_size = checkpoint['config']['input_size']
@@ -121,11 +118,10 @@ def predict_action(state, model_path='state_action_model.pth'):
     return action_id, probabilities.numpy()
     
 
-def main():
+if __name__ == "__main__":
 
    
-    
-    
+    states, actions = process_json_objects('dba.json')    
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     batch_size = 32
@@ -176,15 +172,7 @@ def main():
         }
     }, 'state_action_model.pth')
 
-if __name__ == "__main__":
-    # main()
-    true_count=0
-    for  x,action in zip(states,states):         
 
-        # Predict action
-        action_id, probs = predict_action(x)
-        print(f"True action: {action}, Predicted action: {action_id}")
-     
 
 
 

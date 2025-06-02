@@ -81,269 +81,8 @@ boxes = {
     3: "bottom_box",
 }
 
-boxes_mido = {
-    1: {"name": "top_left_box", "top_left_pos": (35, 55)},
-    2: {"name": "middle_left_box", "top_left_pos": (35, 35)},
-    3: {"name": "bottom_left_box", "top_left_pos": (35, 15)},
-    4: {"name": "top_right_box", "top_left_pos": (42.5, 55)},
-    5: {"name": "middle_right_box", "top_left_pos": (42.5, 35)},
-    6: {"name": "bottom_right_box", "top_left_pos": (42.5, 15)},
-}
-
-boxes_danger = {
-    "top_left_box": 0,
-    "middle_left_box": 0.5,
-    "bottom_left_box": 0,
-    "top_right_box": 0.8,
-    "middle_right_box": 1,
-    "bottom_right_box": 0.8,
-}
-
-
-def get_box_danger(box):
-    """
-    Returns the danger level of a given box.
-
-    :param box: The box to evaluate.
-    :return: Danger level (0, 1, or 2).
-    """
-    if box in boxes_danger:
-        return boxes_danger[box]
-    else:
-        return 0  # Default to 0 if box is not recognized
-
-
-def get_box_danger_from_position(position):
-    """
-    Returns the danger level of a box based on the position.
-
-    :param position: The position to evaluate.
-    :return: Danger level (0, 1, or 2).
-    """
-    for box_id, box in boxes_mido.items():
-        if (
-            box["top_left_pos"][0] <= position[0] <= box["top_left_pos"][0] + BOX_WIDTH
-            and box["top_left_pos"][1]
-            <= position[1]
-            <= box["top_left_pos"][1] + BOX_HEIGHT
-        ):
-            return boxes_danger[box["name"]]
-    return 0  # Default to 0 if no box matches
-
-
-def get_danger_transition(prev_box, new_box):
-    """
-    Returns the danger transition level between two boxes.
-
-    :param prev_box: The previous box.
-    :param new_box: The new box.
-    :return: Danger transition level (0, 1, or 2).
-    """
-    if prev_box in boxes_danger and new_box in boxes_danger:
-        return boxes_danger[new_box] - boxes_danger[prev_box]
-    else:
-        return 0  # Default to 0 if either box is not recognized
-
-
-def get_num_of_opponents_in_player_zone(opponents, player_x, player_y):
-    """
-    Counts the number of opponents in the player's zone.
-
-    :param
-    teammates: List of teammate positions.
-    :param opponents: List of opponent positions.
-    :param player_x: Player's x-coordinate.
-    :param player_y: Player's y-coordinate.
-    :return: Number of opponents in the player's zone.
-    """
-    player_zone = [
-        (player_x - 5, player_y + 5),  # Top-left corner
-        (player_x + 5, player_y - 5),  # Bottom-right corner
-    ]
-
-    count = 0
-    for opp_x, opp_y in opponents:
-        if (
-            player_zone[0][0] <= opp_x <= player_zone[1][0]
-            and player_zone[0][1] >= opp_y >= player_zone[1][1]
-        ):
-            count += 1
-
-    return count
-
-
-def get_num_of_teammates_in_player_zone(teammates, player_x, player_y):
-    """
-    Counts the number of teammates in the player's zone.
-
-    :param teammates: List of teammate positions.
-    :param player_x: Player's x-coordinate.
-    :param player_y: Player's y-coordinate.
-    :return: Number of teammates in the player's zone.
-    """
-    player_zone = [
-        (player_x - 5, player_y + 5),  # Top-left corner
-        (player_x + 5, player_y - 5),  # Bottom-right corner
-    ]
-
-    count = 0
-    for mate_x, mate_y in teammates:
-        if (
-            player_zone[0][0] <= mate_x <= player_zone[1][0]
-            and player_zone[0][1] >= mate_y >= player_zone[1][1]
-        ):
-            count += 1
-
-    return count
-
-
-def compute_reward(state, next_state,action ):
-    reward = 0.0
-    print("\n--- Compute Reward Debug ---")
-    print(f"State: {state}")
-    print(f"Action: {action} ({action_list[action]})")
-    print(f"Next State: {next_state}")
-
-    # Basic event-based rewards
-    if next_state[feature_dict["score"]] - state[feature_dict["score"]] > 700:
-        reward += 1.0
-        print("Goal scored! Reward: +1.0")
-    elif next_state[feature_dict["score"]] - state[feature_dict["score"]] > 0:
-        reward += 0.3
-        print("Shot on target! Reward: +0.3")
-    elif action_list[action] != "shoot" and next_state[feature_dict["team_has_ball"]]:
-        reward += 0.05
-        print("Team still has the ball. Reward: +0.05")
-    elif not next_state[feature_dict["team_has_ball"]] or (
-        (next_state[feature_dict["score"]] == state[feature_dict["score"]])
-        and next_state[feature_dict["attemps"]] != state[feature_dict["attemps"]]
-    ):
-        reward -= 0.4
-        print("Turnover occurred. Penalty: -0.4")
-
-    # Progress toward goal
-    if next_state[feature_dict["team_has_ball"]]:
-        distance_reward = (state[feature_dict["dist_goal"]] - next_state[feature_dict["dist_goal"]]) * 0.05
-        reward += distance_reward
-        print(f"Progress toward goal. Distance reward: {distance_reward:.2f}")
-
-    # Encourage faster decisions
-    reward -= 0.01
-    print("Time penalty applied. Penalty: -0.01")
-
-    # Spatial danger transition reward
-    prev_danger = state[feature_dict["danger"]]
-    if next_state[feature_dict["team_has_ball"]]:
-        new_danger = next_state[feature_dict["danger"]]
-        danger_delta = new_danger - prev_danger
-        reward += danger_delta * 0.2
-        print(
-            f"Danger transition. Danger delta: {danger_delta:.2f}, Reward: {danger_delta * 0.2:.2f}"
-        )
-
-    # Action-based encouragement based on danger
-    if "shoot" in action_list[action]:
-        if prev_danger >= 0.8:
-            reward += 0.3
-            print("Shooting in high-danger zone. Reward: +0.3")
-        else:
-            reward -= 0.2
-            print("Shooting in low-danger zone. Penalty: -0.2")
-    else:
-        new_danger = next_state[feature_dict["danger"]]
-        if new_danger < 0.8:
-            reward += 0.2
-            print("Safe progression in low-danger zone. Reward: +0.2")
-        else:
-            reward += 0.05
-            print("Progression in high-danger zone. Reward: +0.05")
-
-    # Zone congestion and support
-    num_teammates = next_state[feature_dict["num_of_teammates_in_player_zone"]]
-    num_opponents = next_state[feature_dict["num_of_opponents_in_player_zone"]]
-
-    penalty = 0.2 * (num_opponents)
-    reward -= penalty
-    print(f"Zone congestion. Opponents: {num_opponents}, Penalty: -{penalty:.2f}")
-
-    reward += 0.1 * num_teammates
-    print(
-        f"Teammates in zone. Teammates: {num_teammates}, Reward: +{0.1 * num_teammates:.2f}"
-    )
-
-    # Count available pass directions
-    pass_option_count = (
-        next_state[feature_dict["pass_N_flag"]]
-        + next_state[feature_dict["pass_NE_flag"]]
-        + next_state[feature_dict["pass_E_flag"]]
-        + next_state[feature_dict["pass_SE_flag"]]
-        + next_state[feature_dict["pass_S_flag"]]
-        + next_state[feature_dict["pass_SW_flag"]]
-        + next_state[feature_dict["pass_W_flag"]]
-        + next_state[feature_dict["pass_NW_flag"]]
-       
-    )
-    reward += 0.05 * pass_option_count
-    print(
-        f"Pass options available. Count: {pass_option_count}, Reward: +{0.05 * pass_option_count:.2f}"
-    )
-
-    if not next_state[feature_dict["no_opponent_in_front"]]:
-        if pass_option_count > 0:
-            bonus = 0.1 * pass_option_count * (1 + new_danger)
-            reward += bonus
-            print(f"Opponent in front but pass options available. Bonus: +{bonus:.2f}")
-        else:
-            penalty = 0.2 * (1 + new_danger)
-            reward -= penalty
-            print(f"No pass options and under pressure. Penalty: -{penalty:.2f}")
-
-    if state[feature_dict["no_opponent_in_front"]]:
-        if "dribble" in action_list[action] and "E" in action_list[action]:
-            reward += 0.3
-            print("Aggressive play with no opponent in front. Reward: +0.3")
-        elif "pass" in action_list[action]:
-            reward -= 0.1
-            print("Unnecessary pass with no opponent in front. Penalty: -0.1")
-
-    if "pass" in action_list[action]:
-        pass_directions = {
-            "N": next_state[feature_dict["pass_N_flag"]],
-            "NE": next_state[feature_dict["pass_NE_flag"]],
-            "E": next_state[feature_dict["pass_E_flag"]],
-            "SE": next_state[feature_dict["pass_SE_flag"]],
-            "S": next_state[feature_dict["pass_S_flag"]],
-            "SW": next_state[feature_dict["pass_SW_flag"]],
-            "W": next_state[feature_dict["pass_W_flag"]],
-            "NW": next_state[feature_dict["pass_NW_flag"]],
-            
-      
-        }
-
-        pass_direction = action_list[action].split("_")[1]
-        if pass_directions.get(pass_direction, 0) > 0:
-            reward += 0.1
-            print(f"Valid pass direction ({pass_direction}). Reward: +0.1")
-        else:
-            reward -= 0.1
-            print(f"Invalid pass direction ({pass_direction}). Penalty: -0.1")
-
-    print(f"Total Reward: {reward:.2f}")
-    return reward
-
-
-
-
-
 def count_points_in_rectangle(teammates,opponents, rect_top_left, rect_bottom_right):
-    """
-    Counts how many points are inside a given rectangle.
 
-    :param points: List of tuples representing points [(x1, y1), (x2, y2), ...].
-    :param rect_top_left: Tuple (x, y) representing the top-left corner of the rectangle.
-    :param rect_bottom_right: Tuple (x, y) representing the bottom-right corner of the rectangle.
-    :return: Integer count of points inside the rectangle.
-    """
     counter_all = 0
     count = 0
     for x, y in teammates:
@@ -357,14 +96,7 @@ def count_points_in_rectangle(teammates,opponents, rect_top_left, rect_bottom_ri
     return count/counter_all if counter_all!=0 else 0
 
 def count_agent_in_rectangle(agent_x, agent_y):
-    """
-    Counts how many points are inside a given rectangle.
-
-    :param points: List of tuples representing points [(x1, y1), (x2, y2), ...].
-    :param rect_top_left: Tuple (x, y) representing the top-left corner of the rectangle.
-    :param rect_bottom_right: Tuple (x, y) representing the bottom-right corner of the rectangle.
-    :return: Integer count of points inside the rectangle.
-    """
+    
     top_rect=[(agent_x,65),(FIELD_WIDTH,51)]
     middle_rect=[(agent_x,51),(FIELD_WIDTH,39)]
     bottom_rect=[(agent_x,39),(FIELD_WIDTH,25)]    
@@ -390,33 +122,26 @@ class SoccerFeatureExtractor:
         return math.degrees(math.atan2(dy, dx))
     
 
-    ################################################################### features
 
     @staticmethod
-
-
     def get_opponent_and_pass_data(agent_x, agent_y, teammates, opponents):
         
-        # Initialize closest opponent variables
         closest_opp_dist = 75
         closest_opp_angle = 0.0
         no_opponent_in_front = True
         last_opp_x=0
         
-        # Initialize 8-direction tracking (will only store opponents)
         directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
         dir_data = {d: {'dist': 75, 'pos': None} for d in directions}
         
-        # Temporary storage for teammate positions and distances
         team_data = {d: {'dist': 75, 'pos': None} for d in directions}
-        pass_directions = {d: 0 for d in directions}  # 1 if teammate is closest, 0 otherwise
-
-        # Process teammates first (store temporarily)
+        pass_directions = {d: 0 for d in directions}
         for mate_x, mate_y in teammates:
             dx =mate_x-agent_x
             dy =mate_y-agent_y  
             dist = math.hypot(dx, dy)
             angle = math.degrees(math.atan2(dy, dx))
+            
             # plt.figure(figsize=(8, 6))
             # plt.plot([agent_x, mate_x], [agent_y, mate_y], 'b-', label=f"Distance: {dist:.2f}, Angle: {angle:.2f}°")
             # plt.scatter([agent_x, mate_x], [agent_y, mate_y], color=['red', 'green'], s=100, label=['Agent', 'Mate'])
@@ -446,18 +171,15 @@ class SoccerFeatureExtractor:
                 direction = 'SE'
             
             
-            # Update team data if this is the closest teammate in this direction
             if dist < team_data[direction]['dist']:
                 team_data[direction] = {'dist': dist, 'pos': (mate_x, mate_y)}
 
-        # Process opponents (store in dir_data)
         if opponents:
             min_dist = 75
             closest_opp = None
             all_opp_behind = True
             
             for opp_x, opp_y in opponents:
-                # Check if opponent is in front
                 if opp_x>last_opp_x:
                     last_opp_x=opp_x
 
@@ -471,12 +193,11 @@ class SoccerFeatureExtractor:
                 # print(opp_x, opp_y, agent_x, agent_y, dist)
             
                 
-                # Track closest opponent overall
                 if dist < min_dist:
                     min_dist = dist
                     closest_opp = (opp_x, opp_y)
                 
-                # Classify direction
+                
                 dx = opp_x - agent_x
                 dy = opp_y - agent_y
                 angle = math.degrees(math.atan2(dy, dx))
@@ -498,11 +219,9 @@ class SoccerFeatureExtractor:
                 elif -67.5 <= angle < -22.5:
                     direction = 'SE'
                 
-                # Update opponent data if this is the closest opponent in this direction
                 if dist < dir_data[direction]['dist']:
                     dir_data[direction] = {'dist': dist, 'pos': (opp_x, opp_y)}
             
-            # Set opponent metrics
             closest_opp_dist = min_dist 
             # closest_opp_angle = math.degrees(math.atan2(
             #     agent_y-closest_opp[1] , agent_x-closest_opp[0])) 
@@ -512,11 +231,7 @@ class SoccerFeatureExtractor:
     
      
             no_opponent_in_front = all_opp_behind
-            
-        
-        # Determine pass directions by comparing team_data and dir_data
 
-        ### checck here for offside rule ba3dennnnnnnnnn mesh ma3mola
 
         for direction in directions:
             angle=90
@@ -544,19 +259,10 @@ class SoccerFeatureExtractor:
             # plt.axis('equal')  # Equal scaling for x and y
             # plt.show()
             
-
-
-
-
-         
-       
-
             
-            # If there's a teammate and either no opponent or teammate is closer
             if team_dist != 75  and (mate_x<last_opp_x or (no_opponent_in_front and mate_x<agent_x ))and angle>10:
                 pass_directions[direction] = 1
         
-        # Prepare return values (dir_data always contains opponent positions)
         return (
             closest_opp_dist, 
             closest_opp_angle, 
@@ -573,11 +279,9 @@ class SoccerFeatureExtractor:
 
     @staticmethod
     def extract_features(teammates, opponents,attemps, score,goalpost,goalkeeper,agent_x = 0, agent_y = 0):
-        # Normalized features
         top_rect=[(agent_x,65),(FIELD_WIDTH,51)]
         middle_rect=[(agent_x,51),(FIELD_WIDTH,39)]
         bottom_rect=[(agent_x,39),(FIELD_WIDTH,25)]     
-    # lama nozbot el points
 
         # max_dist = math.sqrt(FIELD_WIDTH**2 + FIELD_HEIGHT**2)
         goaldetected=False
@@ -595,10 +299,10 @@ class SoccerFeatureExtractor:
         bottom_box=count_points_in_rectangle(teammates,opponents,bottom_rect[0],bottom_rect[1])
         middle_box=count_points_in_rectangle(teammates,opponents,middle_rect[0],middle_rect[1])
         agent_box=count_agent_in_rectangle(agent_x, agent_y)
-        team_has_ball = True if agent_x > 0 else False
-        num_of_opponents_in_player_zone = get_num_of_opponents_in_player_zone(opponents, agent_x, agent_y)
-        num_of_teammates_in_player_zone = get_num_of_teammates_in_player_zone(teammates, agent_x, agent_y)
-        danger = get_box_danger_from_position((agent_x, agent_y))
+        # team_has_ball = True if agent_x > 0 else False
+        # num_of_opponents_in_player_zone = get_num_of_opponents_in_player_zone(opponents, agent_x, agent_y)
+        # num_of_teammates_in_player_zone = get_num_of_teammates_in_player_zone(teammates, agent_x, agent_y)
+        # danger = get_box_danger_from_position((agent_x, agent_y))
         return np.array([
             (dist_goal/75),
             (angle_goal/180),
@@ -638,10 +342,6 @@ class SoccerFeatureExtractor:
         ], dtype=np.float32)
 
 
-
-
-######################################################################################################
-
 def plot_pitch_mido(teammates, opponets, me):
     plt.figure(figsize=(10, 6))
     plt.xlim(0, 50)
@@ -651,8 +351,8 @@ def plot_pitch_mido(teammates, opponets, me):
     plt.ylabel("Height")
     for box_id, box_info in boxes.items():
         top_left = box_info["top_left_pos"]
-        width = BOX_WIDTH  # Assuming a fixed width for the boxes
-        height = BOX_HEIGHT  # Assuming a fixed height for the boxes
+        width = BOX_WIDTH 
+        height = BOX_HEIGHT
         plt.gca().add_patch(
             plt.Rectangle(
                 top_left,
@@ -667,7 +367,7 @@ def plot_pitch_mido(teammates, opponets, me):
                     "bottom_right_box": "purple",
                 }.get(
                     box_info["name"], "gray"
-                ),  # Default to gray if name not found
+                ),  
                 alpha=0.5,
                 label=box_info["name"],
             )
@@ -789,133 +489,57 @@ def get_state_from_positions(scene):
         teammates, opponents,attemps, score,goalpost,goalkeeper,player_pos[0],player_pos[1]
     )
 
-import logging
-
-# Set up logger
-logger = logging.getLogger("RewardCalculator")
-logger.setLevel(logging.INFO)
-
-# Create a file handler and set level
-file_handler = logging.FileHandler("reward_log.log")
-file_handler.setLevel(logging.INFO)
-
-# Create formatter
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
-
-# Add only the file handler to logger
-logger.addHandler(file_handler)
-
-# Remove any existing handlers (important if the logger might have been configured elsewhere)
-# and prevent logs from propagating to the root logger
-logger.propagate = False
-
 def calculate_reward(prev_state, new_state, action):
 
     reward = 0
-    reward_components = {}
 
-    logger.info("\n========== REWARD CALCULATION ==========")
-    logger.info(f"ACTION TAKEN: {action} ({action_list.get(action, 'Unknown')})")
-    logger.info("\n--- STATE COMPARISON ---")
-    logger.info(f"PREV STATE: {prev_state}")
-    logger.info(f"NEW STATE: {new_state}")
     
-    # Check for None or invalid states
-    if prev_state is None or new_state is None or action is None:
-        logger.warning("Missing state or action data, returning zero reward")
-        return 0
-    
-    # Goal scored (maximum reward of +15) - Check this first as it's the primary objective
     prev_score = prev_state[feature_dict['score']]
     new_score = new_state[feature_dict['score']]
     score_change = new_score - prev_score
     
-    if score_change > 500:  # Goal scored
-        reward = 15  # Override all other rewards
-        reward_components['goal_scored'] = 15
-        logger.info(f"\n[GOAL SCORED!]")
-        logger.info(f"  Score increased by: {score_change}")
-        logger.info(f"  Reward: +15.00")
-        logger.info(f"\nFINAL REWARD: +15.00 (Goal scored overrides all other rewards)")
+    if score_change > 500:
+        reward = 15 
         return 15
-    elif score_change > 0:  # Shot on target
-        # Reward based on distance - shooting from closer is better
-        agent_x = prev_state[feature_dict['agent_x']] * 60  # Unnormalize position
-        if agent_x > 45 and action==16:  # Close to goal shot
+    elif score_change > 0:  
+        agent_x = prev_state[feature_dict['agent_x']] * 60  
+        if agent_x > 45 and action==16: 
             shot_reward = 5
-            reward_components['close_shot_on_target'] = shot_reward
-            logger.info(f"\n[CLOSE SHOT ON TARGET]")
-            logger.info(f"  Position: {agent_x:.2f}")
-            logger.info(f"  Reward: +5.00")
             return 5
-        elif agent_x > 35 and action==16:  # Medium distance shot
+        elif agent_x > 35 and action==16:
             shot_reward = 3
-            reward_components['medium_shot_on_target'] = shot_reward
-            logger.info(f"\n[MEDIUM SHOT ON TARGET]")
-            logger.info(f"  Position: {agent_x:.2f}")
-            logger.info(f"  Reward: -0.50")
             return -0.5
-        else:  # Long distance shot
+        else: 
 
             if action==16:
                 shot_reward = 0.5
-                reward_components['long_shot_on_target'] = shot_reward
-                logger.info(f"\n[LONG SHOT ON TARGET]")
-                logger.info(f"  Position: {agent_x:.2f}")
-                logger.info(f"  Reward: -3.00")
                 return -3
 
-    # Check for turnover - significant negative reward
     if (new_score == prev_score) and new_state[feature_dict['attemps']] != prev_state[feature_dict['attemps']]:
-        if action == 16:  # Shooting action
-            # Adjust penalty based on position - less penalty for shooting from good positions
-            agent_x = prev_state[feature_dict['agent_x']] * 60  # Unnormalize
-            if agent_x > 45:  # Good shooting position but missed
+        if action == 16:
+            agent_x = prev_state[feature_dict['agent_x']] * 60 
+            if agent_x > 45: 
                 turnover_reward = -1
-                reward_components['close_shot_missed'] = turnover_reward
-                logger.info(f"\n[TURNOVER - CLOSE SHOT MISSED]")
-                logger.info(f"  Position: {agent_x:.2f}")
-                logger.info(f"  Reward: -1.00")
                 return -1
-            elif agent_x > 35:  # Decent shooting position
+            elif agent_x > 35:  
                 turnover_reward = -2
-                reward_components['medium_shot_missed'] = turnover_reward
-                logger.info(f"\n[TURNOVER - MEDIUM SHOT MISSED]")
-                logger.info(f"  Position: {agent_x:.2f}")
-                logger.info(f"  Reward: -2.00")
                 return -2
-            else:  # Poor shooting position
+            else:  
                 turnover_reward = -3
-                reward_components['poor_shot_choice'] = turnover_reward
-                logger.info(f"\n[TURNOVER - POOR SHOT CHOICE]")
-                logger.info(f"  Position: {agent_x:.2f}")
-                logger.info(f"  Reward: -3.00")
                 return -3
         else:
-            # Different penalties based on action type
-            if 0 <= action <= 7:  # Pass actions
-                turnover_reward = -2  # Less penalty for passing than dribbling
-                reward_components['pass_intercepted'] = turnover_reward
-                logger.info(f"\n[TURNOVER - PASS INTERCEPTED]")
-                logger.info(f"  Action: {action_list.get(action, 'Unknown')}")
-                logger.info(f"  Reward: -2.00")
+            if 0 <= action <= 7:  
+                turnover_reward = -2  
                 return -2
-            else:  # Dribble actions
+            else:  
                 turnover_reward = -5
-                reward_components['dribble_lost'] = turnover_reward
-                logger.info(f"\n[TURNOVER - LOST DURING DRIBBLE]")
-                logger.info(f"  Action: {action_list.get(action, 'Unknown')}")
-                logger.info(f"  Reward: -5.00")
                 return -5
     
-    # Distance to goal improvement (normalize from -2 to +2)
     if prev_state[feature_dict['dist_goal']] != 0 and new_state[feature_dict['dist_goal']] != 0:
-        # Scale based on field size, assuming max dist ~FIELD_WIDTH
-        prev_dist = prev_state[feature_dict['dist_goal']] * 75  # Unnormalize
-        new_dist = new_state[feature_dict['dist_goal']] * 75    # Unnormalize
+        prev_dist = prev_state[feature_dict['dist_goal']] * 75  
+        new_dist = new_state[feature_dict['dist_goal']] * 75  
         dist_change = prev_dist - new_dist
-        normalized_dist_change = max(min(dist_change, 2), -3)  # Clamp between -5 and 2
+        normalized_dist_change = max(min(dist_change, 2), -3)
         if normalized_dist_change > 1:
             delta_x = new_state[feature_dict['agent_x']] - prev_state[feature_dict['agent_x']] 
             if delta_x > 0:
@@ -924,82 +548,40 @@ def calculate_reward(prev_state, new_state, action):
                 normalized_dist_change = normalized_dist_change - 1
 
         reward += normalized_dist_change
-        reward_components['distance_to_goal'] = normalized_dist_change
-        logger.info(f"\n[DISTANCE TO GOAL]")
-        logger.info(f"  Previous distance: {prev_dist:.2f} meters")
-        logger.info(f"  New distance: {new_dist:.2f} meters")
-        logger.info(f"  Raw change: {dist_change:.2f} meters")
-        logger.info(f"  Normalized reward: {normalized_dist_change:.2f}")
-        logger.info(f"  Distance improved: {'YES' if dist_change > 0 else 'NO'}")
-    
-    # Facing goal (normalized to +1/-0.5)
+
     prev_angle = abs(prev_state[feature_dict['angle_goal']])
     new_angle = abs(new_state[feature_dict['angle_goal']])
     angle_change = prev_angle - new_angle
-    
-    logger.info(f"\n[FACING GOAL]")
-    logger.info(f"  Previous angle (abs): {prev_angle:.2f}")
-    logger.info(f"  New angle (abs): {new_angle:.2f}")
-    logger.info(f"  Angle change: {angle_change:.2f}")
+
     
     if angle_change > 0:
         angle_reward = 1
         reward += 1
-        logger.info(f"  Angle improved: YES")
-        logger.info(f"  Reward: +1.00")
     else:
         angle_reward = -0.5
         reward -= 0.5
-        logger.info(f"  Angle improved: NO")
-        logger.info(f"  Reward: -0.50")
-    
-    reward_components['angle_to_goal'] = angle_reward
-    
-    # Clear path vs opponent in front (normalized to +3/-0.1)
+
     if new_state[feature_dict['no_opponent_in_front']] and prev_state[feature_dict['no_opponent_in_front']] == 0:
         path_reward = 1.5
         reward += 1.5
-        logger.info(f"\n[CLEAR PATH]")
-        logger.info(f"  Clear path ahead: YES (improved)")
-        logger.info(f"  Reward: +1.50")
     elif new_state[feature_dict['no_opponent_in_front']]:
         path_reward = 0.5
         reward += 0.5
-        logger.info(f"\n[CLEAR PATH]")
-        logger.info(f"  Clear path ahead: YES (maintained)")
-        logger.info(f"  Reward: +0.50")
     else:
         path_reward = -0.1
         reward -= 0.1
-        logger.info(f"\n[CLEAR PATH]")
-        logger.info(f"  Clear path ahead: NO")
-        logger.info(f"  Reward: -0.10")
-    
-    reward_components['clear_path'] = path_reward
-    
-    # Time penalty (small negative reward for each step in same attack)
-    logger.info(f"\n[TIME PENALTY]")
+
     if prev_state[feature_dict['attemps']] == new_state[feature_dict['attemps']]:
         time_penalty = -0.2
         reward -= 0.2
-        logger.info(f"  Same attack attempt: YES")
-        logger.info(f"  Penalty: -0.20")
     else:
         time_penalty = 0
-        logger.info(f"  Same attack attempt: NO")
-        logger.info(f"  Penalty: 0.00")
     
-    reward_components['time_penalty'] = time_penalty
-    
-    # Pass reward/penalty based on pass direction flags
-    if 0 <= action <= 7:  # If action was a pass
+    if 0 <= action <= 7:
         direction_idx = action + feature_dict['pass_N_flag']
-        
-        logger.info(f"\n[PASS DECISION]")
-        logger.info(f"  Direction: {action_list[action]}")
 
 
-        # direction index if 0 and 1 same direction 
+
         isGoodPass = False
         if direction_idx == 13 or direction_idx == 14:
             if prev_state[feature_dict['pass_N_flag']] == 1 or prev_state[feature_dict['pass_NE_flag']] == 1:
@@ -1009,27 +591,16 @@ def calculate_reward(prev_state, new_state, action):
                 isGoodPass = True
         
         if not isGoodPass:
-            pass_reward = -1  # Bad pass decision
+            pass_reward = -1 
             reward -= 1
-            reward_components['bad_pass'] = pass_reward
-            logger.info(f"  No teammate available in that direction return -1")
-            logger.info(f"  Penalty: -1.00")
             return -1
         else:
-            pass_reward = 2  # Good pass
+            pass_reward = 2
             reward += 2
-            reward_components['good_pass'] = pass_reward
-            logger.info(f"  Teammate available in that direction")
-            logger.info(f"  Reward: +2.00")
     
-    # Congestion change reward
     prev_cong_num = int(prev_state[feature_dict['agent_box']] * 3)
     new_cong_num = int(new_state[feature_dict['agent_box']] * 3)
-    
-    logger.info(f"\n[TACTICAL POSITIONING]")
-    logger.info(f"  Previous box: {prev_cong_num} ({boxes.get(prev_cong_num, 'None')})")
-    logger.info(f"  New box: {new_cong_num} ({boxes.get(new_cong_num, 'None')})")
-    
+
     congestion_reward = 0
     
     if new_cong_num == 0:
@@ -1062,36 +633,15 @@ def calculate_reward(prev_state, new_state, action):
             except KeyError as e:
                 logger.error(f"KeyError in congestion calculation: {e}")
                 congestion_status = f"Error: {e}"
-    
-    logger.info(f"  Status: {congestion_status}")
-    logger.info(f"  Reward: {congestion_reward:.2f}")
-    reward_components['congestion'] = congestion_reward
-    
-    # Summary of all reward components
-    logger.info("\n========== REWARD SUMMARY ==========")
-    for component, value in reward_components.items():
-        logger.info(f"  {component.replace('_', ' ').title()}: {value:.2f}")
-    logger.info(f"\nFINAL REWARD: {reward:.2f}")
-    logger.info("=====================================\n")
-    
     return reward
-#DQn classs
 
 class DQNAgent:
     def __init__(self, load_path=None):
-        """
-        Initialize DQN Agent.
-        
-        Args:
-            state_size (int): Size of the state space
-            action_size (int): Number of possible actions
-            load_path (str, optional): Path to load pre-trained model. If None, creates new model.
-        """
         self.state_size = len(feature_dict) -2
         self.action_size = len(action_list)
         self.memory = deque(maxlen=10000)
         self.gamma = 0.95
-        self.epsilon = 1.0 if load_path is None else 0.01  # Start with low epsilon if loading
+        self.epsilon = 1.0 if load_path is None else 0.01
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
         self.learning_rate = 0.001
@@ -1125,16 +675,10 @@ class DQNAgent:
     def act(self, state):
         # if np.random.rand() <= self.epsilon:
         # #     # return random.randrange(self.action_size)
-        # drop score and attemps from the state before passing it to the model
         state = np.delete(state, [feature_dict['score'], feature_dict['attemps']])  
         state = torch.FloatTensor(state).unsqueeze(0)
         act_values = self.model(state)
-        #print the probability for each action
-        print("\033[1;32;40m" +  # Yellow text on black background (instead of red on white)
-            "════════════════════════\n" +
-            "   TRAINED CHOICE   \n" +
-            "════════════════════════" +
-            "\033[0m")
+
         print(act_values)
 
         return torch.argmax(act_values).item()
@@ -1144,7 +688,6 @@ class DQNAgent:
             return
         
         minibatch = random.sample(self.memory, batch_size)
-        # drop score and attemps from the state before passing it to the model
         minibatch = [(np.delete(t[0], [feature_dict['score'], feature_dict['attemps']]), t[1], t[2], np.delete(t[3], [feature_dict['score'], feature_dict['attemps']]), t[4]) for t in minibatch]
 
         states = torch.FloatTensor(np.array([t[0] for t in minibatch]))
@@ -1166,8 +709,6 @@ class DQNAgent:
             self.epsilon *= self.epsilon_decay
     
     def save(self, filename, log_filename="model_log.txt"):
-        """Save the model and training parameters, and log them to a text file."""
-        # Save the model and training parameters
         torch.save({
             'model_state_dict': self.model.state_dict(),
             'target_model_state_dict': self.target_model.state_dict(),
@@ -1176,7 +717,7 @@ class DQNAgent:
             'epsilon': self.epsilon
         }, filename)
 
-        # Log parameters to a text file
+
         with open(log_filename, "w") as log_file:
             log_file.write("Model Weights:\n")
             for name, param in self.model.named_parameters():
@@ -1192,7 +733,6 @@ class DQNAgent:
 
             log_file.write(f"\nEpsilon: {self.epsilon}\n")
     def load(self, filename):
-        """Load the model and training parameters."""
         checkpoint = torch.load(filename)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.target_model.load_state_dict(checkpoint['target_model_state_dict'])
@@ -1202,37 +742,18 @@ class DQNAgent:
         # self.epsilon = 0.9
     
     def get_action(self, scene):
-        """
-        Get the best action for a given game scene.
-        
-        Args:
-            scene (dict): Game scene containing player positions, ball possession, etc.
-        
-        Returns:
-            str: The chosen action from the action_list dictionary
-        """
-        # Convert scene to state
         state = get_state_from_positions(scene)
         
-        # Get action using the trained model
-        self.model.eval()  # Set model to evaluation mode
+        self.model.eval()
         with torch.no_grad():
-            # drop score and attemps from the state before passing it to the model
             state = np.delete(state, [feature_dict['score'], feature_dict['attemps']])
             state_tensor = torch.FloatTensor(state).unsqueeze(0)
             action_values = self.model(state_tensor)
             action_idx = torch.argmax(action_values).item()
         
-        # Return the corresponding action string
         return action_list[action_idx]
     
     def delete_specific_memory(self, index):
-        """
-        Delete a specific memory entry from the replay memory.
-        
-        Args:
-            index (int): Index of the memory entry to delete.
-        """
         if 0 <= index < len(self.memory):
             del self.memory[index]
         else:

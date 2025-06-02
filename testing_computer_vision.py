@@ -61,7 +61,7 @@ if __name__ == "__main__":
     start = time.time()
     ft,hb,action_tracks = ml_comp.run(frames_action_tuple)
     print("FINISHED ML" , time.time() - start)
-    print("Action Tracks:", action_tracks)
+    # print("Action Tracks:", action_tracks)
     # [10, 10, 1, 11, 16
     
     # start = time.time()

@@ -4,9 +4,16 @@ from PIL import Image
 import keyboard
 from computer_vision import ML_ComputerVision 
 import time
-from rm_mem import *
+from neural_network_model import *
 import cv2
 from controller_rl import Controller
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+from sklearn.preprocessing import StandardScaler
+
 
 def capture_screen() -> Image.Image:
     """Capture the full primary monitor and return a PIL Image."""
@@ -22,7 +29,7 @@ def capture_screen() -> Image.Image:
 def main():
     ml_comp = ML_ComputerVision()
     cont = Controller()
-    checkpoint = torch.load('state_action_model.pth' ,weights_only=False)
+    checkpoint = torch.load('models/state_action_model.pth' ,weights_only=False)
     
     # Extract model configuration
     input_size = checkpoint['config']['input_size']

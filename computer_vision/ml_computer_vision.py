@@ -125,8 +125,8 @@ class ML_ComputerVision:
 
         for test,(frame,action) in enumerate(video_frames):
             print("TEST: ", test)
-            print("ACTION: ", action)
-            print("Frame shape: ", frame.shape)
+            # print("ACTION: ", action)
+            # print("Frame shape: ", frame.shape)
             start_time = time.time()
             height, width, _ = frame.shape
             frame_tracks = {"players": {}, "referees": {}, "ball": {}, "goalkeeper": {} , "goalpost" : {},"action": action}
@@ -143,7 +143,7 @@ class ML_ComputerVision:
             if frame_tracks['players']:
                 self.tracker.remove_out_of_pitch_detections(frame_tracks["players"], height)
                 frame_tracks['players'] , unmatched_det_ids  = self.tracker.ml_get_object_tracks(frame_tracks["players"])
-                print("UNMATCHED IDS: ", unmatched_det_ids)
+                # print("UNMATCHED IDS: ", unmatched_det_ids)
             #adjust goalkeeper detections
             
 
@@ -196,7 +196,7 @@ class ML_ComputerVision:
             
             # frame_tracks = self.tracker.adjust_goalkeeper_detection(frame_tracks)
             after_transform = time.time()
-            print("Transform time: ", after_transform - before_transform)
+            # print("Transform time: ", after_transform - before_transform)
             
             # handle penalty detections
             
@@ -214,7 +214,7 @@ class ML_ComputerVision:
             
             
             after_penalty = time.time()
-            print("Penalty detection time: ", after_penalty - before_penalty)
+            # print("Penalty detection time: ", after_penalty - before_penalty)
 
             before_assign = time.time()
             # Assign Ball to Player
@@ -253,7 +253,7 @@ class ML_ComputerVision:
                         #     return None, None
                         
             after_assign = time.time()
-            print("Assign time: ", after_assign - before_assign)
+            # print("Assign time: ", after_assign - before_assign)
             print("-----------------------------------------------")
             print("   ")
             

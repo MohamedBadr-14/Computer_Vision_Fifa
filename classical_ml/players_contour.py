@@ -12,7 +12,7 @@ import itertools
 
 def get_players_contours(img):
     height, width = img.shape[:2]
-    print('image shape', img.shape)
+    # print('image shape', img.shape)
     # Crop 15% of the height from the top
     crop_height = int(height * 0.15)
     cropped_img = img[crop_height:, :, :].copy()  # Crop directly, avoid modifying top

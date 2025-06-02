@@ -16,7 +16,6 @@ class SimplePlayerInterpolator:
         self.resultsHistory = {}
 
     def interpolate_players(self, players_tracks):
-        """Interpolate player positions and maintain all player attributes"""
         self.currFrame += 1
         result = {}
 
@@ -56,7 +55,6 @@ class SimplePlayerInterpolator:
         return result
 
     def _get_last_player_data(self, track_id):
-        """Get the last known full player data for a track_id"""
         player_data = {"bbox": None, "team": 0}
 
         frame = self.currFrame - 1
@@ -69,7 +67,6 @@ class SimplePlayerInterpolator:
         return player_data
 
     def _get_previous_result(self, frame):
-        """Get the result from a previous frame"""
         return self.resultsHistory.get(frame, None)
 
     def _interpolate_single_player(self, track_id):
@@ -122,17 +119,6 @@ class SimplePlayerInterpolator:
                 del self.detectedFrames[track_id]
 
     def maintain_tracks(self, all_players_tracks):
-        """
-        Only used in case of running the interpolator on a complete video as player history is not maintained.
-        This method removes players that are not in the playerIdsToKeep set.
-
-        Args:
-            players_tracks: List of player dictionaries, one dictionary per frame
-                        Each dictionary has player IDs as keys and player data as values
-
-        Returns:
-            The modified players_tracks with removed players
-        """
         if not self.playerIdsToRemove:
             return all_players_tracks
 
@@ -151,13 +137,6 @@ class SimplePlayerInterpolator:
         return all_players_tracks
 
     def remove_ids(self, ids_to_remove):
-        """
-        This function is used when a player id is dropped by the tracker
-        Remove specific player IDs from the histories and results.
-
-        Args:
-            ids_to_remove: Set of player IDs to remove
-        """
         print(f"Removing player IDs: {ids_to_remove}")
         for track_id in ids_to_remove:
             if track_id in self.playersHistory:
@@ -170,7 +149,6 @@ class SimplePlayerInterpolator:
                 self.playerIdsToKeep.remove(track_id)
 
     def reset(self):
-        """Reset the interpolator state"""
         self.playersHistory.clear()
         self.currFrame = 0
         self.lastSeenFrame.clear()
